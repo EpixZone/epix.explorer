@@ -1,0 +1,22 @@
+{
+    "chain_name": "epix",
+    "api": [
+        "https://api.testnet.epix.zone/"
+    ],
+    "rpc": [
+        "https://rpc.testnet.epix.zone/"
+    ],
+    "snapshot_provider": "",
+    "sdk_version": "0.45.6",
+    "coin_type": "60",
+    "min_tx_fee": "800",
+    "addr_prefix": "epix",
+    "logo": "/logos/epix.png",
+    "assets": [
+        {
+            "base": "aepix",
+            "symbol": "EPIX",
+            "exponent": "18"
+        }
+    ]
+}

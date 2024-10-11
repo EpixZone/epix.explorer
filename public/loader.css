@@ -15,8 +15,8 @@
   block-size: 55px;
   border-radius: 50%;
   inline-size: 55px;
-  inset-block-start: calc(40% + 35px);
-  inset-inline-start: calc(50% - 27.5px);
+  inset-block-start: calc(41.5% + 35px);
+  inset-inline-start: calc(50.4% - 27.5px);
 }
 
 .pre-loading .effect-1,
