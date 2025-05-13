@@ -16,7 +16,20 @@
         {
             "base": "aepix",
             "symbol": "EPIX",
-            "exponent": "18"
+            "exponent": "18",
+            "coingecko_id": "unknown"
         }
-    ]
+    ],
+    "keplr_features": [
+        "eth-address-gen",
+        "eth-key-sign",
+        "ibc-transfer",
+        "ibc-go"
+    ],
+    "keplr_price_step": {
+        "low": 0.01,
+        "average": 0.025,
+        "high": 0.04
+    },
+    "chain_id": "epix_1917-1"
 }
