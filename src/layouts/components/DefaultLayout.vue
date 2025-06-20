@@ -16,6 +16,7 @@ import NavBarI18n from './NavBarI18n.vue';
 import NavBarWallet from './NavBarWallet.vue';
 import type { NavGroup, NavLink, NavSectionTitle, VerticalNavItems } from '../types';
 import dayjs from 'dayjs';
+import AdBanner from '@/components/ad/AdBanner.vue';
 
 const dashboard = useDashboard();
 dashboard.initial();
@@ -69,6 +70,10 @@ const behind = computed(() => {
 });
 
 dayjs()
+
+const show_ad = computed(() => {
+  return location.hostname.indexOf('ping.pub') > -1
+})
 
 </script>
 
@@ -179,10 +184,10 @@ dayjs()
             Wallet Helper
           </div>
         </RouterLink>
-        <div class="px-4 text-sm pt-2 text-gray-400 pb-2 uppercase">
+        <div v-if="showDiscord" class="px-4 text-sm pt-2 text-gray-400 pb-2 uppercase">
           {{ $t('module.sponsors') }}
         </div>
-        <Sponsors />
+        <Sponsors v-if="showDiscord" />
         <div class="px-4 text-sm pt-2 text-gray-400 pb-2 uppercase">{{ $t('module.links') }}</div>
         <a href="https://twitter.com/ping_pub" target="_blank"
           class="py-2 px-4 flex items-center cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-[#373f59]">
@@ -239,7 +244,10 @@ dayjs()
         </div>
         <RouterView v-slot="{ Component }">
           <Transition mode="out-in">
-            <Component :is="Component" />
+            <div>
+              <AdBanner v-if="show_ad" />
+              <Component :is="Component" />
+            </div>
           </Transition>
         </RouterView>
       </div>
