@@ -336,7 +336,7 @@ export const useDashboard = defineStore('dashboard', {
       }
     },
     async loadingFromLocal() {
-      if (window.location.hostname.search("testnet") > -1) {
+      if (window.location.hostname.search("testnet") > -1 || window.location.hostname === "localhost") {
         this.networkType = NetworkType.Testnet
       }
       const source: Record<string, LocalConfig> =
