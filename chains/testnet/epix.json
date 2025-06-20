@@ -7,7 +7,7 @@
         "https://rpc.testnet.epix.zone/"
     ],
     "snapshot_provider": "",
-    "sdk_version": "0.45.6",
+    "sdk_version": "0.50.8",
     "coin_type": "60",
     "min_tx_fee": "800",
     "addr_prefix": "epix",
@@ -16,7 +16,20 @@
         {
             "base": "aepix",
             "symbol": "EPIX",
-            "exponent": "18"
+            "exponent": "18",
+            "coingecko_id": "unknown"
         }
-    ]
+    ],
+    "keplr_features": [
+        "eth-address-gen",
+        "eth-key-sign",
+        "ibc-transfer",
+        "ibc-go"
+    ],
+    "keplr_price_step": {
+        "low": 0.01,
+        "average": 0.025,
+        "high": 0.04
+    },
+    "chain_id": "epix_1917-1"
 }
