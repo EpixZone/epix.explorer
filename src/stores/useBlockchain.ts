@@ -6,9 +6,6 @@ import {
   EndpointType,
 } from './useDashboard';
 import type {
-  NavGroup,
-  NavLink,
-  NavSectionTitle,
   VerticalNavItems,
 } from '@/layouts/types';
 import { useRouter } from 'vue-router';
@@ -78,30 +75,22 @@ export const useBlockchain = defineStore('blockchain', {
         } else {
           document.body.style.setProperty('--p', '237.65 100% 70%');
         }
-        currNavItem = [
-          {
-            title: this.current?.prettyName || this.chainName || '',
-            icon: { image: this.current.logo, size: '22' },
-            i18n: false,
-            badgeContent: this.isConsumerChain ? 'Consumer' : undefined,
-            badgeClass: 'bg-error',
-            children: routes
-              .filter((x) => x.meta.i18n) // defined menu name
-              .filter(
-                (x) =>
-                  !this.current?.features ||
-                  this.current.features.includes(String(x.meta.i18n))
-              ) // filter none-custom module
-              .map((x) => ({
-                title: `module.${x.meta.i18n}`,
-                to: { path: x.path.replace(':chain', this.chainName) },
-                icon: { icon: 'mdi-chevron-right', size: '22' },
-                i18n: true,
-                order: Number(x.meta.order || 100),
-              }))
-              .sort((a, b) => a.order - b.order),
-          },
-        ];
+        // Return menu items directly without the chain wrapper to avoid duplicate branding
+        currNavItem = routes
+          .filter((x) => x.meta.i18n) // defined menu name
+          .filter(
+            (x) =>
+              !this.current?.features ||
+              this.current.features.includes(String(x.meta.i18n))
+          ) // filter none-custom module
+          .map((x) => ({
+            title: `module.${x.meta.i18n}`,
+            to: { path: x.path.replace(':chain', this.chainName) },
+            icon: { icon: 'mdi-chevron-right', size: '22' },
+            i18n: true,
+            order: Number(x.meta.order || 100),
+          }))
+          .sort((a, b) => a.order - b.order);
       }
       // compute favorite menu
       const favNavItems: VerticalNavItems = [];

@@ -1,0 +1,35 @@
+{
+    "chain_name": "epix",
+    "api": [
+        "https://api.epix.zone/"
+    ],
+    "rpc": [
+        "https://rpc.epix.zone/"
+    ],
+    "snapshot_provider": "",
+    "sdk_version": "0.50.8",
+    "coin_type": "60",
+    "min_tx_fee": "800",
+    "addr_prefix": "epix",
+    "logo": "logos/epix.png",
+    "assets": [
+        {
+            "base": "aepix",
+            "symbol": "EPIX",
+            "exponent": "18",
+            "coingecko_id": "unknown"
+        }
+    ],
+    "keplr_features": [
+        "eth-address-gen",
+        "eth-key-sign",
+        "ibc-transfer",
+        "ibc-go"
+    ],
+    "keplr_price_step": {
+        "low": 0.01,
+        "average": 0.025,
+        "high": 0.04
+    },
+    "chain_id": "epix_4242-1"
+}

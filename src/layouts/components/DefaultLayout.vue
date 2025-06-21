@@ -45,7 +45,7 @@ const changeOpen = (index: Number) => {
     sidebarOpen.value = !sidebarOpen.value;
   }
 };
-const showDiscord = window.location.host.search('ping.pub') > -1;
+const showDiscord = window.location.host.search('epix.zone') > -1;
 
 function isNavGroup(nav: VerticalNavItems | any): nav is NavGroup {
   return (<NavGroup>nav).children !== undefined;
@@ -189,21 +189,21 @@ const show_ad = computed(() => {
         </div>
         <Sponsors v-if="showDiscord" />
         <div class="px-4 text-sm pt-2 text-gray-400 pb-2 uppercase">{{ $t('module.links') }}</div>
-        <a href="https://twitter.com/ping_pub" target="_blank"
+        <a href="https://twitter.com/zone_epix" target="_blank"
           class="py-2 px-4 flex items-center cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-[#373f59]">
           <Icon icon="mdi:twitter" class="text-xl mr-2" />
           <div class="text-base capitalize flex-1 text-gray-600 dark:text-gray-200">
             Twitter
           </div>
         </a>
-        <a v-if="showDiscord" href="https://discord.com/invite/CmjYVSr6GW" target="_blank"
+        <a v-if="showDiscord" href="https://docs.epix.zone/epix-docs" target="_blank"
           class="py-2 px-4 flex items-center rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#373f59]">
-          <Icon icon="mdi:discord" class="text-xl mr-2" />
+          <Icon icon="mdi:book" class="text-xl mr-2" />
           <div class="text-base capitalize flex-1 text-gray-600 dark:text-gray-200">
-            Discord
+            Docs
           </div>
         </a>
-        <a href="https://github.com/ping-pub/explorer/discussions" target="_blank"
+        <a href="https://github.com/EpixZone/epix.explorer/discussions" target="_blank"
           class="py-2 px-4 flex items-center rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-[#373f59]">
           <Icon icon="mdi:frequently-asked-questions" class="text-xl mr-2" />
           <div class="text-base capitalize flex-1 text-gray-600 dark:text-gray-200">

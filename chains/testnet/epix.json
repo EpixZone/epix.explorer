@@ -11,7 +11,7 @@
     "coin_type": "60",
     "min_tx_fee": "800",
     "addr_prefix": "epix",
-    "logo": "/logos/epix.png",
+    "logo": "logos/epix.png",
     "assets": [
         {
             "base": "aepix",

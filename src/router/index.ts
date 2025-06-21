@@ -12,13 +12,13 @@ const router = createRouter({
 
 //update current blockchain
 router.beforeEach((to) => {
-    const { chain } = to.params
-    if(chain){
-      const blockchain= useBlockchain()
-      if(chain !== blockchain.chainName) {
-        blockchain.setCurrent(chain.toString())
-      }
-    } 
+  const { chain } = to.params
+  if (chain) {
+    const blockchain = useBlockchain()
+    if (chain !== blockchain.chainName) {
+      blockchain.setCurrent(chain.toString())
+    }
+  }
 })
 
 // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards

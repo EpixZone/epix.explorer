@@ -5,9 +5,9 @@ const route = useRoute()
 
 const aa = computed(() => {
   const hostname = location.hostname
-  if (hostname === 'testnet.ping.pub') {
+  if (hostname === 'testnet.epix.zone') {
     return '2396360'
-  } else if (hostname === 'ping.pub') {
+  } else if (hostname === 'epix.zone') {
     return '2395639'
   } else {
     return '2396360'

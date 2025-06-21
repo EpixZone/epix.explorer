@@ -18,4 +18,4 @@ jobs:
     - name: Git Checkout Latest
       uses: actions/checkout@v3
     - name: Check Chain Configs
-      uses: ping-pub/ping-dashboard-config-checker@v1.0
+      uses: EpixZone/epix-dashboard-config-checker@v1.0

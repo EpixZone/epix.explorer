@@ -185,7 +185,16 @@ export function fromLocal(lc: LocalConfig): ChainConfig {
     }
   }
   conf.features = lc.features
-  conf.logo = lc.logo.startsWith('http') ? lc.logo : `https://explorer.epix.zone/${lc.logo}`;
+  // Handle logo path resolution for local development
+  if (lc.logo.startsWith('http')) {
+    conf.logo = lc.logo;
+  } else if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
+    // For local development, use relative path from public directory
+    conf.logo = `/${lc.logo}`;
+  } else {
+    // For production, use the full URL
+    conf.logo = `https://explorer.epix.zone/${lc.logo}`;
+  }
   conf.keplrFeatures = lc.keplr_features;
   conf.keplrPriceStep = lc.keplr_price_step;
   conf.themeColor = lc.theme_color;

@@ -6,12 +6,21 @@ import {
   type ChainConfig,
 } from '@/stores/useDashboard';
 import ChainSummary from '@/components/ChainSummary.vue';
-import AdBanner from '@/components/ad/AdBanner.vue';
 
 import { computed, onMounted, ref } from 'vue';
 import { useBlockchain } from '@/stores';
+import { useRouter } from 'vue-router';
 
 const dashboard = useDashboard();
+const router = useRouter();
+
+// Automatically redirect to Epix dashboard
+onMounted(async () => {
+  // Wait for dashboard to load
+  await dashboard.initial();
+  // Redirect to Epix dashboard
+  router.push('/epix');
+});
 
 const keywords = ref('');
 const chains = computed(() => {
@@ -19,7 +28,7 @@ const chains = computed(() => {
     const lowercaseKeywords = keywords.value.toLowerCase();
 
     return Object.values(dashboard.chains).filter(
-      (x: ChainConfig) => x.chainName.toLowerCase().indexOf(lowercaseKeywords) > -1 
+      (x: ChainConfig) => x.chainName.toLowerCase().indexOf(lowercaseKeywords) > -1
       || x.prettyName.toLowerCase().indexOf(lowercaseKeywords) > -1
     );
   } else {
