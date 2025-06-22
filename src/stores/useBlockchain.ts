@@ -35,6 +35,7 @@ export const useBlockchain = defineStore('blockchain', {
         provider: string;
       },
       connErr: '',
+      rpc: null as any,
     };
   },
   getters: {

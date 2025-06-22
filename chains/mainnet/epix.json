@@ -1,10 +1,10 @@
 {
     "chain_name": "epix",
     "api": [
-        "https://api.epix.zone/"
+        "https://api.epix.zone"
     ],
     "rpc": [
-        "https://rpc.epix.zone/"
+        "https://rpc.epix.zone"
     ],
     "snapshot_provider": "",
     "sdk_version": "0.50.8",
