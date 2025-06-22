@@ -33,21 +33,21 @@ const list = computed(() => {
 
             <div class="grid xl:!grid-cols-6 md:!grid-cols-4 grid-cols-1 gap-3">
             <RouterLink v-for="item in list"
-                class="flex flex-col justify-between rounded p-4 shadow bg-base-100"
+                class="flex flex-col justify-between rounded-lg p-4 shadow-modern modern-card hover-lift transition-all duration-200"
                 :to="`/${chain}/block/${item.block.header.height}`">
                 <div class="flex justify-between">
-                    <h3 class="text-md font-bold sm:!text-lg">
+                    <h3 class="text-md font-bold sm:!text-lg text-gray-900 dark:text-white">
                         {{ item.block.header.height }}
                     </h3>
-                    <span class="rounded text-xs whitespace-nowrap font-medium text-green-600">
+                    <span class="rounded text-xs whitespace-nowrap font-medium text-green-600 dark:text-green-400">
                         {{ format.toDay(item.block?.header?.time, 'from') }}
                     </span>
                 </div>
                 <div class="flex justify-between tooltip" data-tip="Block Proposor">
-                    <div class="mt-2 hidden text-sm sm:!block truncate">
+                    <div class="mt-2 hidden text-sm sm:!block truncate text-gray-600 dark:text-gray-400">
                         <span>{{ format.validator(item.block?.header?.proposer_address) }}</span>
                     </div>
-                    <span class="text-right mt-1 whitespace-nowrap"> {{ item.block?.data?.txs.length }} txs </span>
+                    <span class="text-right mt-1 whitespace-nowrap text-gray-600 dark:text-gray-400"> {{ item.block?.data?.txs.length }} txs </span>
                 </div>
             </RouterLink>
             </div>

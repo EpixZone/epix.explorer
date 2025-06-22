@@ -113,7 +113,7 @@ onMounted(() => {
             <input type="text" v-model="address" class="mt-4 mb-4 w-full border border-gray-300 rounded-md p-2"
                 :class="{'input-error' : !validAddress}"
                 :disabled="notReady" placeholder="Enter your address" />
-            <button class="btn btn-primary w-full bg-primary text-white" :disabled="notReady" @click="claim()">Get
+            <button class="modern-button w-full px-4 py-2 text-white" :disabled="notReady" @click="claim()">Get
                 Tokens</button>
         </div>
 

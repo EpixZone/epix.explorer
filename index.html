@@ -1,13 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark" data-theme="dark">
 
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="/epix.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Epix Dashboard - Epix Blockchain Explorer And Web Wallet</title>
   <meta name="description" content="Epix Dashboard is a block explorer/web wallet for the Epix blockchain" />
   <link rel="stylesheet" type="text/css" href="/loader.css" />
+  <style>
+    /* Set initial theme variables for loading screen */
+    :root {
+      --initial-loader-bg: #0a0a0a;
+      --initial-loader-color: #8A4BDB;
+    }
+
+    /* Ensure body has dark background immediately */
+    body {
+      background-color: #0a0a0a;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Apply theme based on localStorage if available */
+    html.light {
+      --initial-loader-bg: #ffffff;
+      --initial-loader-color: #8A4BDB;
+    }
+
+    html.light body {
+      background-color: #ffffff;
+    }
+  </style>
+  <script>
+    // Apply theme immediately based on localStorage or default to dark
+    (function () {
+      const theme = localStorage.getItem('theme') || 'dark';
+      const html = document.documentElement;
+
+      if (theme === 'light') {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        html.setAttribute('data-theme', 'light');
+      } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        html.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 </head>
 
 <body>

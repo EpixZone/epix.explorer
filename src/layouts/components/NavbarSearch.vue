@@ -62,56 +62,55 @@ function confirm() {
 <template>
   <div>
     <button
-      class="btn btn-ghost btn-circle btn-sm mx-1"
+      class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover-lift"
       @click="openSearchModal"
     >
       <Icon
         icon="mdi:magnify"
-        class="text-2xl text-gray-500 dark:text-gray-400"
+        class="text-xl text-gray-600 dark:text-gray-400 hover:text-epix-primary transition-colors duration-200"
       />
     </button>
 
     <!-- modal -->
     <div
       v-if="searchModalShow"
-      class="cursor-pointer modal !pointer-events-auto !opacity-100 !visible"
+      class="cursor-pointer modal !pointer-events-auto !opacity-100 !visible bg-black/50 backdrop-blur-sm"
       @click="closeSearchModal"
     >
       <div
-        class="relative modal-box cursor-default"
+        class="relative modern-card max-w-lg w-full mx-4 cursor-default"
         @click="(event) => preventClick(event)"
       >
         <!-- header -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div
-            class="text-lg font-bold flex flex-col md:!flex-row justify-between items-baseline"
+            class="text-xl font-bold flex flex-col md:!flex-row justify-between items-baseline"
           >
-            <span class="mr-2">Search</span>
-            <span class="capitalize text-sm md:!text-base"
+            <span class="mr-2 text-gray-900 dark:text-white">Search</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400 font-normal"
               >Height/Transaction/Account Address</span
             >
           </div>
-          <label
-            htmlFor="modal-pool-modal"
-            class="cursor-pointer"
+          <button
+            class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200"
             @click="closeSearchModal"
           >
             <Icon
-              icon="zondicons:close-outline"
-              class="text-2xl text-gray-500 dark:text-gray-400"
+              icon="mdi:close"
+              class="text-xl text-gray-500 dark:text-gray-400"
             />
-          </label>
+          </button>
         </div>
         <!-- body -->
-        <div class="mt-4">
+        <div class="p-6">
           <div class="">
             <input
-              class="input flex-1 w-full !input-bordered"
+              class="modern-input w-full px-4 py-3 text-base"
               v-model="searchQuery"
-              placeholder="Height/Transaction/Account Address"
+              placeholder="Enter height, transaction hash, or account address"
             />
             <div
-              class="mt-2 text-right text-sm text-error"
+              class="mt-3 text-right text-sm text-red-500 font-medium"
               v-show="errorMessage"
             >
               {{ errorMessage }}
@@ -119,9 +118,9 @@ function confirm() {
           </div>
         </div>
         <!-- foot -->
-        <div class="mt-6">
-          <button class="w-full btn btn-primary" @click="confirm">
-            Confirm
+        <div class="p-6 pt-0">
+          <button class="modern-button w-full px-6 py-3" @click="confirm">
+            Search
           </button>
         </div>
       </div>

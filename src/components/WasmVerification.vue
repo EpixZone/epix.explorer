@@ -183,7 +183,7 @@ function callFunction(title: string, method: string, arg: Argument) {
 
 </script>
 <template>
-    <div class="bg-base-100 px-4 pt-3 pb-4 rounded mb-4 shadow">
+    <div class="modern-card px-4 pt-3 pb-4 mb-4 shadow-modern">
         <div role="tablist" class="tabs tabs-boxed">
           <a role="tab" class="tab tooltip tooltip-right tooltip-success" data-tip="Powered By WELLDONE Studio">
             <div class="w-8 rounded">
@@ -236,7 +236,7 @@ function callFunction(title: string, method: string, arg: Argument) {
             <div v-if="Object.keys(verification).length == 0" >
                Haven't found verification
             </div>
-            <button class="btn btn-primary mt-5" @click="verify" v-show="tab === 'verification'" :disabled="verification.error !== undefined">verify</button>
+            <button class="modern-button mt-5 px-4 py-2" @click="verify" v-show="tab === 'verification'" :disabled="verification.error !== undefined">verify</button>
         </div>
 
         <!-- alert-info -->

@@ -86,20 +86,20 @@ function suggest() {
 </script>
 
 <template>
-    <div class="bg-base-100 p-4 rounded text-center">
+    <div class="modern-card p-4 text-center shadow-modern">
         <AdBanner id="keplr-banner-ad" unit="banner" width="970px" height="90px" />
-        <div class="flex">
-            <select v-model="selected" class="select select-bordered mx-5" @change="initParamsForKeplr">
+        <div class="flex gap-4 justify-center items-center">
+            <select v-model="selected" class="modern-input px-3 py-2" @change="initParamsForKeplr">
                 <option v-for="c in dashboard.chains" :value="c">
                     {{ c.chainName }}
                 </option>
             </select>
-            <button class="btn !bg-yes !border-yes text-white px-10" @click="suggest">Add {{ selected.chainName }} TO Keplr Wallet</button>
+            <button class="modern-button px-10 py-2" @click="suggest">Add {{ selected.chainName }} TO Keplr Wallet</button>
         </div>
-        <div class="text-main mt-5">
-            <textarea v-model="conf" class="textarea textarea-bordered w-full" rows="15"></textarea>
+        <div class="text-gray-900 dark:text-white mt-5">
+            <textarea v-model="conf" class="modern-input w-full p-3" rows="15"></textarea>
         </div>
-        <div class="mt-4 mb-4">
+        <div class="mt-4 mb-4 text-gray-600 dark:text-gray-400">
             If the chain is not offically support on Keplr, you can submit these parameters to enable Keplr.
         </div>
     </div>

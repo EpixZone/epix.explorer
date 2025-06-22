@@ -37,25 +37,25 @@ function pageload(p: number) {
 </script>
 <template>
   <div>
-    <div class="bg-base-100 px-4 pt-3 pb-4 rounded shadow">
-      <div class="flex flex-wrap gap-4  items-center">
-        <h2 class="card-title py-4">{{ $t('ibc.title') }}</h2>
-        <div class="tabs tabs-boxed">
-          <a class="tab" :class="{ 'tab-active': tab === 'registry' }" @click="tab = 'registry'">{{ $t('ibc.registry') }}</a>
-          <a class="tab" :class="{ 'tab-active': tab === 'favorite' }" @click="tab = 'favorite'">{{ $t('module.favorite') }}</a>
+    <div class="modern-card shadow-modern px-6 pt-4 pb-5">
+      <div class="flex flex-wrap gap-4 items-center">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white py-4">{{ $t('ibc.title') }}</h2>
+        <div class="tabs tabs-boxed bg-gray-100 dark:bg-gray-800">
+          <a class="tab text-gray-600 dark:text-gray-400" :class="{ 'tab-active bg-epix-primary text-white': tab === 'registry' }" @click="tab = 'registry'">{{ $t('ibc.registry') }}</a>
+          <a class="tab text-gray-600 dark:text-gray-400" :class="{ 'tab-active bg-epix-primary text-white': tab === 'favorite' }" @click="tab = 'favorite'">{{ $t('module.favorite') }}</a>
         </div>
       </div>
       <div>
-        <div v-show="tab === 'registry'" class="flex flex-wrap gap-1 p-4 ">
-          <span v-for="s in ibcStore.commonIBCs" class="btn btn-xs btn-link mr-1" @click="ibcStore.fetchConnection(s.path)">{{ s.from }}
+        <div v-show="tab === 'registry'" class="flex flex-wrap gap-2 p-4">
+          <span v-for="s in ibcStore.commonIBCs" class="modern-button-secondary text-xs px-3 py-1 mr-1 cursor-pointer" @click="ibcStore.fetchConnection(s.path)">{{ s.from }}
             &#x21cc; {{ s.to }}</span>
         </div>
-        <div v-show="tab === 'favorite'" class="flex flex-wrap gap-1 p-4 ">
-          <div class="join border border-primary">
-            <button class="join-item px-2">{{ $t('ibc.connection_id') }}:</button>
-            <input v-model="ibcStore.connectionId" type=number class="input input-bordered w-40 join-item" min="0"
+        <div v-show="tab === 'favorite'" class="flex flex-wrap gap-2 p-4">
+          <div class="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <span class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 font-medium">{{ $t('ibc.connection_id') }}:</span>
+            <input v-model="ibcStore.connectionId" type="number" class="modern-input w-40 border-0 bg-transparent" min="0"
               :max="pageResponse.total || 0" :placeholder="`0~${pageResponse.total}`" />
-            <button class="join-item btn  btn-primary" @click="ibcStore.showConnection()">{{ $t('ibc.btn_apply') }}</button>
+            <button class="modern-button px-4 py-2 m-2" @click="ibcStore.showConnection()">{{ $t('ibc.btn_apply') }}</button>
           </div>
         </div>
       </div>

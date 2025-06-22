@@ -45,14 +45,14 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
 
 </script>
 <template>
-  <div class="bg-white dark:bg-[#28334e] rounded text-sm">
+  <div class="bg-white dark:bg-epix-gray rounded-lg text-sm border border-gray-200 dark:border-gray-700">
     <table class="table-compact w-full table-fixed hidden lg:!table">
       <tbody>
-        <tr v-for="(item, index) in proposals?.proposals" :key="index">
+        <tr v-for="(item, index) in proposals?.proposals" :key="index" class="hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200">
           <td class="px-4 w-20">
             <label
               for="proposal-detail-modal"
-              class="text-main text-base hover:text-indigo-400 cursor-pointer"
+              class="text-gray-900 dark:text-white text-base hover:text-epix-primary cursor-pointer transition-colors duration-200"
               @click="proposalInfo = item"
             >
               #{{ item?.proposal_id }}</label
@@ -62,15 +62,15 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
             <div>
               <RouterLink
                 :to="`/${chain.chainName}/gov/${item?.proposal_id}`"
-                class="text-main text-base mb-1 block hover:text-indigo-400 truncate"
+                class="text-gray-900 dark:text-white text-base mb-1 block hover:text-epix-primary truncate transition-colors duration-200"
               >
                 {{ item?.content?.title || item?.title || metaItem(item?.metadata)?.title }}
               </RouterLink>
               <div
                 v-if="item.content"
-                class="bg-[#f6f2ff] text-[#9c6cff] dark:bg-gray-600 dark:text-gray-300 inline-block rounded-full px-2 py-[1px] text-xs mb-1"
+                class="bg-epix-primary/10 text-epix-primary dark:bg-epix-primary/20 dark:text-epix-accent inline-block rounded-full px-2 py-[1px] text-xs mb-1"
               >
-                {{ showType(item.content['@type']) }} 
+                {{ showType(item.content['@type']) }}
               </div>
             </div>
           </td>
@@ -118,7 +118,7 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
             <div class="">
               <label
                 for="vote"
-                class="btn btn-xs btn-primary rounded-sm"
+                class="btn btn-xs modern-button rounded-sm"
                 @click="
                   dialog.open('vote', {
                     proposal_id: item?.proposal_id,
@@ -141,10 +141,10 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
       <div
         v-for="(item, index) in proposals?.proposals"
         :key="index"
-        class="px-4 py-4"
+        class="px-4 py-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
       >
         <div
-          class="text-main text-base mb-1 flex justify-between hover:text-indigo-400"
+          class="text-gray-900 dark:text-white text-base mb-1 flex justify-between hover:text-epix-primary transition-colors duration-200"
         >
           <RouterLink
             :to="`/${chain.chainName}/gov/${item?.proposal_id}`"
@@ -153,7 +153,7 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
           >
           <label
             for="proposal-detail-modal"
-            class="text-main text-base hover:text-indigo-400 cursor-pointer"
+            class="text-gray-900 dark:text-white text-base hover:text-epix-primary cursor-pointer transition-colors duration-200"
             @click="proposalInfo = item"
           >
             #{{ item?.proposal_id }}</label
@@ -164,7 +164,7 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
           <div class="col-span-2">
             <div
               v-if="item.content"
-              class="bg-[#f6f2ff] text-[#9c6cff] dark:bg-gray-600 dark:text-gray-300 inline-block rounded-full px-2 py-[1px] text-xs mb-1"
+              class="bg-epix-primary/10 text-epix-primary dark:bg-epix-primary/20 dark:text-epix-accent inline-block rounded-full px-2 py-[1px] text-xs mb-1"
             >
               {{ showType(item.content['@type']) }}
             </div>
@@ -212,7 +212,7 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
             </div>
             <label
               for="vote"
-              class="btn btn-xs btn-primary rounded-sm"
+              class="btn btn-xs modern-button rounded-sm"
               @click="
                 dialog.open('vote', {
                   proposal_id: item?.proposal_id,

@@ -12,6 +12,18 @@
     "min_tx_fee": "800",
     "addr_prefix": "epix",
     "logo": "logos/epix.png",
+    "features": [
+        "dashboard",
+        "governance",
+        "staking",
+        "blocks",
+        "uptime",
+        "consensus",
+        "account",
+        "state-sync",
+        "tx",
+        "ibc"
+    ],
     "assets": [
         {
             "base": "aepix",

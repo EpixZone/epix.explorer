@@ -22,38 +22,34 @@ const isPositive = controlledComputed(
 </script>
 
 <template>
-  <div class="bg-base-100 shadow rounded p-4">
-    <div class="flex items-center justify-center">
+  <div class="modern-card p-6 hover-lift group">
+    <div class="flex items-center justify-between mb-4">
       <div
         v-if="props.icon"
-        class="relative w-9 h-9 rounded overflow-hidden flex items-center justify-center"
+        class="relative w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center bg-epix-primary"
       >
-        <Icon :class="[`text-${props?.color}`]" :icon="props.icon" size="32" />
-        <div
-          class="absolute top-0 left-0 bottom-0 right-0 opacity-20"
-          :class="[`bg-${props?.color}`]"
-        ></div>
+        <Icon :icon="props.icon" size="24" class="text-white" />
       </div>
 
       <div
         v-if="props.change"
-        :class="isPositive ? 'text-success' : 'text-error'"
-        class="flex items-center text-sm font-semibold"
+        :class="isPositive ? 'text-green-500 bg-green-50 dark:bg-green-900/20' : 'text-red-500 bg-red-50 dark:bg-red-900/20'"
+        class="flex items-center text-sm font-semibold px-3 py-1 rounded-full"
       >
+        <Icon :icon="isPositive ? 'mdi-trending-up' : 'mdi-trending-down'" class="mr-1" />
         <span>{{ isPositive ? `+${props.change}` : props.change }}%</span>
-        <Icon :icon="isPositive ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
       </div>
     </div>
 
-    <div class="">
-      <h6 class="text-lg text-center font-semibold mt-2 mb-1">
+    <div class="space-y-2">
+      <h6 class="text-2xl font-bold text-gray-900 dark:text-white group-hover:gradient-text transition-all duration-300">
         {{ props.stats || '-'}}
       </h6>
-      <p class="text-sm text-center">
+      <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">
         {{ props.title }}
       </p>
 
-      <div v-if="props.subtitle" size="x-small" class="font-semibold">
+      <div v-if="props.subtitle" class="text-xs text-gray-500 dark:text-gray-500 font-medium">
         <span class="truncate">{{ props.subtitle }}</span>
       </div>
     </div>

@@ -192,22 +192,22 @@ const tab = ref('detail')
                 <RouterLink :to="`../${info.code_id}/contracts`"><span class="btn btn-xs text-xs mr-2"> Back </span>
                 </RouterLink>
 
-                <label for="wasm_migrate_contract" class="btn btn-primary btn-xs text-xs mr-2"
+                <label for="wasm_migrate_contract" class="modern-button !text-xs px-3 py-1 mr-2"
                     @click="dialog.open('wasm_migrate_contract', { contract: contractAddress })">
                     {{ $t('cosmwasm.btn_migrate') }}
                 </label>
 
-                <label for="wasm_update_admin" class="btn btn-primary btn-xs text-xs mr-2"
+                <label for="wasm_update_admin" class="modern-button !text-xs px-3 py-1 mr-2"
                     @click="dialog.open('wasm_update_admin', { contract: contractAddress })">
                     {{ $t('cosmwasm.btn_update_admin') }}
                 </label>
 
-                <label for="wasm_clear_admin" class="btn btn-primary btn-xs text-xs mr-2"
+                <label for="wasm_clear_admin" class="modern-button !text-xs px-3 py-1 mr-2"
                     @click="dialog.open('wasm_clear_admin', { contract: contractAddress })">
                     {{ $t('cosmwasm.btn_clear_admin') }}
                 </label>
 
-                <label for="wasm_execute_contract" class="btn btn-primary btn-xs text-xs mr-2"
+                <label for="wasm_execute_contract" class="modern-button !text-xs px-3 py-1 mr-2"
                     @click="dialog.open('wasm_execute_contract', { contract: contractAddress })">
                     {{ $t('cosmwasm.btn_execute') }}
                 </label>
@@ -257,13 +257,13 @@ const tab = ref('detail')
                 <div class="px-3">
                     <div>
                         <div>
-                            <span v-for="q in queries" class="btn btn-xs mx-1" @click="selectQuery(q)">{{ q }}</span>
+                            <span v-for="q in queries" class="modern-button !text-xs px-3 py-1 mx-1" @click="selectQuery(q)">{{ q }}</span>
                         </div>
                         <textarea v-model="query" placeholder="Query String, {}" label="Query String"
                             class="my-2 textarea textarea-bordered w-full" />
 
                         <div class="mt-4 mb-4 text-center">
-                            <button class="btn btn-primary btn-sm px-4 text-white" @click="queryContract()">
+                            <button class="modern-button px-4 py-2 text-white" @click="queryContract()">
                                 {{ $t('cosmwasm.btn_query') }}
                             </button>
                         </div>
@@ -281,13 +281,13 @@ const tab = ref('detail')
                 <div class="px-3">
                     <div>
                         <div>
-                            <span v-for="q in queries" class="btn btn-xs mx-1" @click="selectQuery(q)">{{ q }}</span>
+                            <span v-for="q in queries" class="modern-button !text-xs px-3 py-1 mx-1" @click="selectQuery(q)">{{ q }}</span>
                         </div>
                         <textarea v-model="query" placeholder="Query String, {}" label="Query String"
                             class="my-2 textarea textarea-bordered w-full" />
 
                         <div class="mt-4 mb-4 text-center">
-                            <button class="btn btn-primary btn-sm px-4 text-white" @click="queryContract()">
+                            <button class="modern-button px-4 py-2 text-white" @click="queryContract()">
                                 {{ $t('cosmwasm.btn_execute') }}
                             </button>
                         </div>

@@ -69,34 +69,40 @@ onBeforeRouteUpdate(async (to, from, next) => {
         <div class="my-5">{{ $t('block.estimated_time') }}: <span class="text-xl font-bold">{{ format.toLocaleDate(estimateDate) }}</span>
         </div>
         <div class="pt-10 flex justify-center">
-          <table class="table w-max rounded-lg bg-base-100">
+          <table class="w-max rounded-lg modern-card shadow-modern">
+            <thead>
+              <tr>
+                <th class="text-left py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Property</th>
+                <th class="text-right py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Value</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr class="hover cursor-pointer" @click="edit = !edit">
-                <td>{{ $t('block.countdown_for_block') }}:</td>
-                <td class="text-right"><span class="md:!ml-40">{{ target }}</span></td>
+              <tr class="hover:bg-gray-50 dark:hover:bg-epix-gray-light cursor-pointer transition-colors duration-200" @click="edit = !edit">
+                <td class="py-2 px-4 text-gray-900 dark:text-white">{{ $t('block.countdown_for_block') }}:</td>
+                <td class="text-right py-2 px-4 text-gray-900 dark:text-white"><span class="md:!ml-40">{{ target }}</span></td>
               </tr>
               <tr v-if="edit">
-                <td colspan="2" class="text-center">
-                  <h3 class="text-lg font-bold">{{ $t('block.countdown_for_block_input') }}</h3>
+                <td colspan="2" class="text-center py-4 px-4">
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('block.countdown_for_block_input') }}</h3>
                   <p class="py-4">
-                  <div class="join">
-                    <input class="input input-bordered join-item" v-model="newHeight" type="number" />
-                    <button class="btn btn-primary join-item" @click="updateTarget()">{{ $t('block.btn_update') }}</button>
+                  <div class="flex gap-2 justify-center">
+                    <input class="modern-input px-3 py-2" v-model="newHeight" type="number" />
+                    <button class="modern-button px-4 py-2" @click="updateTarget()">{{ $t('block.btn_update') }}</button>
                   </div>
                   </p>
                 </td>
               </tr>
-              <tr>
-                <td>{{ $t('block.current_height') }}:</td>
-                <td class="text-right">#{{ store.latest?.block?.header.height }}</td>
+              <tr class="hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200">
+                <td class="py-2 px-4 text-gray-900 dark:text-white">{{ $t('block.current_height') }}:</td>
+                <td class="text-right py-2 px-4 text-gray-900 dark:text-white">#{{ store.latest?.block?.header.height }}</td>
               </tr>
-              <tr>
-                <td>{{ $t('block.remaining_blocks') }}:</td>
-                <td class="text-right">{{ remainingBlocks }}</td>
+              <tr class="hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200">
+                <td class="py-2 px-4 text-gray-900 dark:text-white">{{ $t('block.remaining_blocks') }}:</td>
+                <td class="text-right py-2 px-4 text-gray-900 dark:text-white">{{ remainingBlocks }}</td>
               </tr>
-              <tr>
-                <td>{{ $t('block.average_block_time') }}:</td>
-                <td class="text-right">{{ (store.blocktime / 1000).toFixed(1) }}s</td>
+              <tr class="hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200">
+                <td class="py-2 px-4 text-gray-900 dark:text-white">{{ $t('block.average_block_time') }}:</td>
+                <td class="text-right py-2 px-4 text-gray-900 dark:text-white">{{ (store.blocktime / 1000).toFixed(1) }}s</td>
               </tr>
             </tbody>
           </table>
@@ -105,17 +111,17 @@ onBeforeRouteUpdate(async (to, from, next) => {
       </div>
     </div>
     <div v-else>
-      <div class="bg-base-100 px-4 pt-3 pb-4 rounded mb-4 shadow">
-        <h2 class="card-title flex flex-row justify-between">
+      <div class="modern-card px-4 pt-3 pb-4 mb-4 shadow-modern">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex flex-row justify-between">
           <p class="">#{{ current.block?.header?.height }}</p>
           <div class="flex" v-if="props.height">
             <RouterLink :to="`/${store.blockchain.chainName}/block/${height - 1}`"
-              class="btn btn-primary btn-sm p-1 text-2xl mr-2">
-              <Icon icon="mdi-arrow-left" class="w-full h-full" />
+              class="modern-button p-2 text-xl mr-2">
+              <Icon icon="mdi-arrow-left" class="w-6 h-6" />
             </RouterLink>
             <RouterLink :to="`/${store.blockchain.chainName}/block/${height + 1}`"
-              class="btn btn-primary btn-sm p-1 text-2xl">
-              <Icon icon="mdi-arrow-right" class="w-full h-full" />
+              class="modern-button p-2 text-xl">
+              <Icon icon="mdi-arrow-right" class="w-6 h-6" />
             </RouterLink>
           </div>
         </h2>
@@ -124,18 +130,18 @@ onBeforeRouteUpdate(async (to, from, next) => {
         </div>
       </div>
 
-      <div class="bg-base-100 px-4 pt-3 pb-4 rounded mb-4 shadow">
-        <h2 class="card-title flex flex-row justify-between">{{ $t('block.block_header') }}</h2>
+      <div class="modern-card px-4 pt-3 pb-4 mb-4 shadow-modern">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex flex-row justify-between">{{ $t('block.block_header') }}</h2>
         <DynamicComponent :value="current.block?.header" />
       </div>
 
-      <div class="bg-base-100 px-4 pt-3 pb-4 rounded mb-4 shadow">
-        <h2 class="card-title flex flex-row justify-between">{{ $t('account.transactions') }}</h2>
+      <div class="modern-card px-4 pt-3 pb-4 mb-4 shadow-modern">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex flex-row justify-between">{{ $t('account.transactions') }}</h2>
         <TxsElement :value="current.block?.data?.txs" />
       </div>
 
-      <div class="bg-base-100 px-4 pt-3 pb-4 rounded shadow">
-        <h2 class="card-title flex flex-row justify-between">{{ $t('block.last_commit') }}</h2>
+      <div class="modern-card px-4 pt-3 pb-4 shadow-modern">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex flex-row justify-between">{{ $t('block.last_commit') }}</h2>
         <DynamicComponent :value="current.block?.last_commit" />
       </div>
   </div>

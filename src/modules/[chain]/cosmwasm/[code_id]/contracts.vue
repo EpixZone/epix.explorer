@@ -73,12 +73,12 @@ function showInfo(address: string) {
                 <label
                   @click="showInfo(v)"
                   for="modal-contract-detail"
-                  class="btn btn-primary btn-xs text-xs mr-2"
+                  class="modern-button !text-xs px-3 py-1 mr-2"
                   >{{ $t('cosmwasm.btn_contract') }}</label
                 >
                 <RouterLink
                   :to="`transactions?contract=${v}`"
-                  class="btn btn-primary btn-xs text-xs"
+                  class="modern-button !text-xs px-3 py-1"
                 >
                 {{ $t('cosmwasm.btn_details') }}
                 </RouterLink>
@@ -94,7 +94,7 @@ function showInfo(address: string) {
           />
           <label
             for="wasm_instantiate_contract"
-            class="btn btn-primary my-5"
+            class="modern-button my-5 px-4 py-2"
             @click="
               dialog.open('wasm_instantiate_contract', {
                 codeId: props.code_id,

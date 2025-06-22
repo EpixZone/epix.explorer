@@ -118,27 +118,27 @@ const chartConfig = computed(() => {
 </script>
 
 <template>
-    <div class="bg-base-100 rounded shadow p-4">
-        <div class="text-lg text-main font-semibold mb-1">Commission Rate</div>
-        <div class="text-sm text-gray-500 dark:text-gray-400">
+    <div class="modern-card p-6 hover-lift">
+        <div class="text-xl font-bold text-gray-900 dark:text-white mb-2">Commission Rate</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400 mb-6">
             {{ `Updated at ${format.toDay(props.commission?.update_time, 'short')}` }}
         </div>
-        <div class="w-80 m-auto">
+        <div class="w-80 m-auto mb-6">
             <ApexCharts type="donut" :options="chartConfig" :series="series" />
         </div>
         <div>
-            <div class="flex items-center justify-center flex-wrap gap-x-3">
+            <div class="flex items-center justify-center flex-wrap gap-x-4 gap-y-2">
                 <div class="flex items-center gap-x-2">
-                    <div class="bg-success w-[6px] h-[6px] rounded-full"></div>
-                    <span class="text-caption">Rate:{{ rate.toFixed(0) }}%</span>
+                    <div class="bg-epix-primary w-3 h-3 rounded-full"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rate: {{ rate.toFixed(0) }}%</span>
                 </div>
                 <div class="flex items-center gap-x-2">
-                    <div class="bg-success w-[6px] h-[6px] rounded-full opacity-60"></div>
-                    <span class="text-caption">24h: ±{{ change }}%</span>
+                    <div class="bg-epix-primary w-3 h-3 rounded-full opacity-60"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">24h: ±{{ change }}%</span>
                 </div>
                 <div class="flex items-center gap-x-2">
-                    <div class="bg-secondary w-[6px] h-[6px] rounded-full"></div>
-                    <span class="text-caption">Max:{{ max }}%</span>
+                    <div class="bg-epix-secondary w-3 h-3 rounded-full"></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Max: {{ max }}%</span>
                 </div>
             </div>
         </div>

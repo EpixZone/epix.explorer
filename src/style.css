@@ -4,7 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html,body {
+html,
+body {
   height: 100%;
 }
 
@@ -24,13 +25,218 @@ body {
   --text-main: #333;
   --text-secondary: #4b525d;
   --bg-active: #fbfbfc;
+  --epix-primary: #8A4BDB;
+  --epix-secondary: #5954CD;
+  --epix-accent: #69E9F5;
+  --epix-teal: #31BDC6;
 }
 
 html.dark,
 html[data-theme='dark'] {
-  --text-main: #f7f7f7;
-  --text-secondary: #6f6e84;
-  --bg-active: #242b40;
+  --text-main: #ffffff;
+  --text-secondary: #a1a1aa;
+  --bg-active: #1a1a1a;
+  --epix-primary: #8A4BDB;
+  --epix-secondary: #5954CD;
+  --epix-accent: #69E9F5;
+  --epix-teal: #31BDC6;
+}
+
+/* Modern utility classes */
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-effect {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--epix-primary), var(--epix-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.modern-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.dark .modern-card {
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modern-button {
+  background: #6366F1;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: 0.025em;
+  transition: background-color 0.2s ease;
+  box-shadow: none;
+}
+
+.modern-button:hover {
+  background: #4F46E5;
+}
+
+.modern-button:active {
+  background: #3730A3;
+}
+
+.modern-button:disabled {
+  background: #6B7280;
+  cursor: not-allowed;
+}
+
+/* Secondary button variant */
+.modern-button-secondary {
+  background: #64748B;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: 0.025em;
+  transition: background-color 0.2s ease;
+  box-shadow: none;
+}
+
+.modern-button-secondary:hover {
+  background: #475569;
+}
+
+.modern-button-secondary:active {
+  background: #334155;
+}
+
+/* Override external dialog button styles */
+ping-tx-dialog .btn-primary,
+ping-tx-dialog .btn.btn-primary {
+  background: #6366F1 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  letter-spacing: 0.025em !important;
+  transition: background-color 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+ping-tx-dialog .btn-primary:hover,
+ping-tx-dialog .btn.btn-primary:hover {
+  background: #4F46E5 !important;
+}
+
+/* Override DaisyUI button styles for consistency */
+.btn {
+  background: #6366F1;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: 0.025em;
+  transition: background-color 0.2s ease;
+  box-shadow: none;
+  text-transform: none;
+  min-height: auto;
+  height: auto;
+}
+
+.btn:hover {
+  background: #4F46E5;
+}
+
+.btn:active {
+  background: #3730A3;
+}
+
+.btn-link {
+  background: transparent;
+  color: #6366F1;
+  text-decoration: none;
+  border: 1px solid #6366F1;
+}
+
+.btn-link:hover {
+  background: #6366F1;
+  color: white;
+}
+
+.btn-xs {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-circle {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modern-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.modern-input:focus {
+  border-color: var(--epix-primary);
+  box-shadow: 0 0 0 3px rgba(138, 75, 219, 0.1);
+  outline: none;
+}
+
+.dark .modern-input {
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.dark .modern-input:focus {
+  border-color: var(--epix-primary);
+  box-shadow: 0 0 0 3px rgba(138, 75, 219, 0.2);
+}
+
+.shadow-modern {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .shadow-modern {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 .table th:first-child {
@@ -51,4 +257,30 @@ html[data-theme='dark'] {
 .slide-up-leave-to {
   opacity: 0;
   transform: translateY(-calc(15%));
+}
+
+/* Hyperlink styles - use teal color for better visibility */
+a:not(.btn):not(.modern-button):not(.modern-button-secondary):not([class*="hover:bg-"]):not([class*="rounded-"]) {
+  color: var(--epix-teal);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:not(.btn):not(.modern-button):not(.modern-button-secondary):not([class*="hover:bg-"]):not([class*="rounded-"]):hover {
+  color: var(--epix-accent);
+  text-decoration: underline;
+}
+
+/* Specific styles for content links */
+.content-link,
+a[href^="http"]:not(.btn):not(.modern-button):not([class*="hover:bg-"]):not([class*="rounded-"]) {
+  color: var(--epix-teal);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.content-link:hover,
+a[href^="http"]:not(.btn):not(.modern-button):not([class*="hover:bg-"]):not([class*="rounded-"]):hover {
+  color: var(--epix-accent);
+  text-decoration: underline;
 }

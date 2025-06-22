@@ -39,10 +39,10 @@ onMounted(() => {
 <template>
     <div class="tooltip tooltip-bottom delay-1000">
         <button
-            class="btn btn-ghost btn-circle btn-sm mx-1"
+            class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover-lift"
             @click="changeMode()"
         >
-            <Icon :icon="themeMap?.[theme]" class="text-2xl text-gray-500 dark:text-gray-400" />
+            <Icon :icon="themeMap?.[theme]" class="text-xl text-gray-600 dark:text-gray-400 hover:text-epix-primary transition-colors duration-200" />
         </button>
     </div>
 </template>

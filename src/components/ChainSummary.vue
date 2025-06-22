@@ -27,20 +27,20 @@ const addFavor = (e: Event) => {
 <template>
   <RouterLink
     :to="`/${name}`"
-    class="bg-base-100 hover:bg-gray-100 dark:hover:bg-[#373f59] rounded shadow flex items-center px-3 py-3 cursor-pointer"
+    class="modern-card hover-lift group flex items-center px-5 py-4 cursor-pointer transition-all duration-300"
   >
-    <div class="w-8 h-8 rounded-full overflow-hidden">
-      <img :src="conf.logo" />
+    <div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-epix-primary transition-all duration-300">
+      <img :src="conf.logo" alt="Chain logo" class="w-full h-full object-cover" />
     </div>
-    <div class="font-semibold ml-4 text-base flex-1 truncate capitalize">
+    <div class="font-semibold ml-4 text-base flex-1 truncate capitalize text-gray-900 dark:text-white group-hover:text-epix-primary transition-colors duration-300">
       {{ conf?.prettyName || props.name }}
     </div>
     <div
       @click="addFavor"
-      class="pl-4 text-xl"
+      class="pl-4 text-xl transition-all duration-300 hover:scale-110"
       :class="{
-        'text-warning': dashboardStore?.favoriteMap?.[props.name],
-        'text-gray-300 dark:text-gray-500':
+        'text-yellow-500': dashboardStore?.favoriteMap?.[props.name],
+        'text-gray-300 dark:text-gray-500 hover:text-yellow-400':
           !dashboardStore?.favoriteMap?.[props.name],
       }"
     >

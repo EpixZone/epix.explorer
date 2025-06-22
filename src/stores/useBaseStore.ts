@@ -17,6 +17,13 @@ export const useBaseStore = defineStore('baseStore', {
                 | 'light'
                 | 'dark',
             connected: true,
+            // Cache for processed transactions
+            _cachedTxs: [] as {
+                height: string;
+                hash: string;
+                tx: DecodedTxRaw;
+            }[],
+            _lastProcessedBlockHash: '',
         };
     },
     getters: {
@@ -42,11 +49,21 @@ export const useBaseStore = defineStore('baseStore', {
             return this.latest.block?.header.chain_id || '';
         },
         txsInRecents() {
+            // Create a hash of current recents to check if we need to recompute
+            const currentBlocksHash = this.recents.map(b => b.block_id?.hash).join(',');
+
+            // If cache is valid, return cached results
+            if (this._lastProcessedBlockHash === currentBlocksHash && this._cachedTxs.length > 0) {
+                return this._cachedTxs;
+            }
+
+            // Recompute transactions
             const txs = [] as {
                 height: string;
                 hash: string;
                 tx: DecodedTxRaw;
             }[];
+
             this.recents.forEach((b) =>
                 b.block?.data?.txs.forEach((tx: string) => {
                     if (tx) {
@@ -63,7 +80,14 @@ export const useBaseStore = defineStore('baseStore', {
                     }
                 })
             );
-            return txs.sort((a, b) => {return Number(b.height) - Number(a.height)});
+
+            const sortedTxs = txs.sort((a, b) => { return Number(b.height) - Number(a.height) });
+
+            // Update cache
+            this._cachedTxs = sortedTxs;
+            this._lastProcessedBlockHash = currentBlocksHash;
+
+            return sortedTxs;
         },
     },
     actions: {
@@ -72,22 +96,28 @@ export const useBaseStore = defineStore('baseStore', {
         },
         async clearRecentBlocks() {
             this.recents = [];
+            // Clear transaction cache when clearing blocks
+            this._cachedTxs = [];
+            this._lastProcessedBlockHash = '';
         },
         async fetchLatest() {
-            try{
+            try {
                 this.latest = await this.blockchain.rpc?.getBaseBlockLatest();
                 this.connected = true
-            }catch(e) {
+            } catch (e) {
                 this.connected = false
             }
             if (
                 !this.earlest ||
                 this.earlest?.block?.header?.chain_id !=
-                    this.latest?.block?.header?.chain_id
+                this.latest?.block?.header?.chain_id
             ) {
                 //reset earlest and recents
                 this.earlest = this.latest;
                 this.recents = [];
+                // Clear transaction cache when chain changes
+                this._cachedTxs = [];
+                this._lastProcessedBlockHash = '';
             }
             //check if the block exists in recents
             if (

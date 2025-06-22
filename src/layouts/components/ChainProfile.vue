@@ -47,47 +47,47 @@ function changeEndpoint(item: Endpoint) {
     </label>
     <div
       tabindex="0"
-      class="dropdown-content -left-6 w-80 menu shadow bg-base-200 rounded-box overflow-auto"
+      class="dropdown-content -left-6 w-80 menu shadow-modern-lg modern-card rounded-xl overflow-auto mt-2"
     >
       <!-- rest -->
       <div
-        class="px-4 py-2 text-sm text-gray-400"
+        class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-200 dark:border-gray-700"
         v-if="chainStore.current?.endpoints?.rest"
       >
         Rest Endpoint
       </div>
       <div
         v-for="(item, index) in chainStore.current?.endpoints?.rest"
-        class="px-4 py-2 w-full hover:bg-gray-100 dark:hover:bg-[#384059] cursor-pointer"
+        class="px-4 py-3 w-full hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200"
         :key="index"
         @click="changeEndpoint(item)"
       >
         <div class="flex flex-col">
           <div class="flex items-center justify-between w-full">
-            <div class="text-gray-500 dark:text-gray-200 capitalize">
+            <div class="text-gray-700 dark:text-gray-200 capitalize font-medium">
               {{ item.provider }}
             </div>
             <span
               v-if="item.address === chainStore.endpoint?.address"
-              class="bg-yes inline-block h-2 w-2 rounded-full"
+              class="bg-epix-primary inline-block h-3 w-3 rounded-full"
             />
           </div>
-          <div class="text-gray-400 text-xs whitespace-nowrap">
+          <div class="text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap mt-1">
             {{ item.address }}
           </div>
         </div>
       </div>
 
       <!-- rest -->
-      <div class="px-4 py-2 text-sm text-gray-400">Information</div>
-      <div class="w-full">
-        <div class="py-2 px-4">
-          Chain Id: {{ baseStore.latest.block?.header.chain_id && baseStore.connected
+      <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 font-semibold border-t border-gray-200 dark:border-gray-700">Information</div>
+      <div class="w-full pb-2">
+        <div class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300">
+          <span class="font-medium">Chain Id:</span> {{ baseStore.latest.block?.header.chain_id && baseStore.connected
                         ? baseStore.latest.block.header.chain_id
                         : 'N/A' }}
         </div>
-        <div class="py-2 px-4">
-          Height: {{ baseStore.latest.block?.header.height && baseStore.connected
+        <div class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300">
+          <span class="font-medium">Height:</span> {{ baseStore.latest.block?.header.height && baseStore.connected
                       ? baseStore.latest.block.header.height
                       : '0' }}
         </div>
