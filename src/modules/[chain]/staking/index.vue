@@ -8,7 +8,7 @@ import {
     useTxDialog,
 } from '@/stores';
 import { computed } from '@vue/reactivity';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { Key, SlashingParam, Validator } from '@/types';
 import { formatSeconds}  from '@/libs/utils'
@@ -29,7 +29,17 @@ const tab = ref('active');
 const unbondList = ref([] as Validator[]);
 const slashing = ref({} as SlashingParam)
 
+// Create a local reactive copy of validators
+const localValidators = ref([] as Validator[]);
+
+// Create a reactive list that we'll update manually
+const list = ref([] as any[]);
+
 onMounted(() => {
+    // Initialize local validators with current store data (for menu navigation)
+    localValidators.value = [...staking.validators];
+    updateList();
+
     staking.fetchUnbondingValdiators().then((res) => {
         unbondList.value = res.concat(unbondList.value);
     });
@@ -39,6 +49,20 @@ onMounted(() => {
     chainStore.rpc.getSlashingParams().then(res => {
         slashing.value = res.params
     })
+});
+
+// Watch for changes in validators and update local copy
+watch(() => staking.validators, (newValidators) => {
+    localValidators.value = [...newValidators]
+    // Update the list after validators change
+    nextTick(() => {
+        updateList()
+    })
+}, { deep: true });
+
+// Watch for tab changes and update list
+watch(tab, () => {
+    updateList()
 });
 
 async function fetchChange(blockWindow: number = 14400) {
@@ -118,9 +142,10 @@ const change24Color = (entry: { consensus_pubkey: Key; tokens: string }) => {
 const calculateRank = function (position: number) {
     let sum = 0;
     for (let i = 0; i < position; i++) {
-        sum += Number(staking.validators[i]?.delegator_shares);
+        sum += Number(localValidators.value[i]?.delegator_shares);
     }
-    const percent = sum / staking.totalPower;
+    const totalPower = localValidators.value.reduce((s, e) => s + parseInt(e.delegator_shares), 0);
+    const percent = sum / totalPower;
 
     switch (true) {
         case tab.value === 'active' && percent < 0.33:
@@ -137,21 +162,27 @@ function isFeatured(endpoints: string[], who?: {website?: string, moniker: strin
     return endpoints.findIndex(x => who.website && who.website?.substring(0, who.website?.lastIndexOf('.')).endsWith(x) || who?.moniker?.toLowerCase().search(x.toLowerCase()) > -1) > -1
 }
 
-const list = computed(() => {
+// Function to update the list based on current tab and validators
+const updateList = () => {
     if (tab.value === 'active') {
-        return staking.validators.map((x, i) => ({v: x, rank: calculateRank(i), logo: logo(x.description.identity)}));
+        const result = localValidators.value.map((x, i) => ({v: x, rank: calculateRank(i), logo: logo(x.description.identity)}));
+        list.value = result;
     } else if (tab.value === 'featured') {
         const endpoint = chainStore.current?.endpoints?.rest?.map(x => x.provider)
         if(endpoint) {
             endpoint.push('ping')
-            return staking.validators
+            const result = localValidators.value
                 .filter(x => isFeatured(endpoint, x.description))
                 .map((x, i) => ({v: x, rank: 'primary', logo: logo(x.description.identity)}));
+            list.value = result;
+        } else {
+            list.value = [];
         }
-        return []        
+    } else {
+        const result = unbondList.value.map((x, i) => ({v: x, rank: 'primary', logo: logo(x.description.identity)}));
+        list.value = result;
     }
-    return unbondList.value.map((x, i) => ({v: x, rank: 'primary', logo: logo(x.description.identity)}));
-});
+};
 
 const fetchAvatar = (identity: string) => {
   // fetch avatar from keybase
