@@ -81,7 +81,8 @@ const messages = computed(() => {
 });
 
 const feeTooltip = computed(() => {
-    const feeAmount = tx.value.tx?.auth_info?.fee?.amount;
+    // Try both camelCase (from recent blocks) and snake_case (from API)
+    const feeAmount = tx.value.tx?.authInfo?.fee?.amount || tx.value.tx?.auth_info?.fee?.amount;
     if (!feeAmount || feeAmount.length === 0) return '';
 
     // Get the first fee amount (usually there's only one)
@@ -185,7 +186,7 @@ const feeTooltip = computed(() => {
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('tx.fee') }}</label>
                         <div class="relative">
                             <div class="modern-input px-4 py-3 font-mono group cursor-help">
-                                {{ format.formatTokens(tx.tx?.auth_info?.fee?.amount, true, '0,0.[000000000000000000]') }}
+                                {{ format.formatTokens(tx.tx?.authInfo?.fee?.amount || tx.tx?.auth_info?.fee?.amount, true, '0,0.[000000000000000000]') }}
                                 <div v-if="feeTooltip"
                                      class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-10">
                                     {{ feeTooltip }}

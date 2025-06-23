@@ -37,26 +37,12 @@ const formatFee = (item: any) => {
     // Try both camelCase (from recent blocks) and snake_case (from API)
     const feeAmount = item.tx?.authInfo?.fee?.amount || item.tx?.auth_info?.fee?.amount;
 
-    // Debug logging
-    console.log('Fee debug for tx:', item.hash);
-    console.log('AuthInfo (camelCase):', item.tx?.authInfo);
-    console.log('Fee object (camelCase):', item.tx?.authInfo?.fee);
-    console.log('Fee amount:', feeAmount);
-
     if (!feeAmount || feeAmount.length === 0) return '-';
     return format.formatTokens(feeAmount, true, '0,0.[000000000000000000]');
 };
 
 onMounted(() => {
     tab.value = String(vueRouters.currentRoute.value.query.tab || 'recent');
-    console.log('Tab value:', tab.value);
-    console.log('Recent transactions:', base.txsInRecents?.length || 0);
-    console.log('Recent blocks:', base.recents.length);
-
-    // Debug fee data
-    if (base.txsInRecents?.length > 0) {
-        console.log('Sample transaction fee data:', base.txsInRecents[0].tx?.auth_info?.fee);
-    }
 });
 
 function search() {
