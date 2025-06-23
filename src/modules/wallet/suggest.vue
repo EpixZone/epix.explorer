@@ -380,7 +380,7 @@ async function suggest() {
                     ]"
                 >
                     <Icon icon="mdi:shield-account" class="text-lg" />
-                    Keplr - Consensus Layer
+                    Consensus Layer
                 </button>
                 <button
                     @click="wallet = 'metamask-evm'; onchange()"
@@ -392,7 +392,7 @@ async function suggest() {
                     ]"
                 >
                     <Icon icon="mdi:code-braces" class="text-lg" />
-                    MetaMask - EVM Layer
+                    EVM Layer
                 </button>
             </div>
 
