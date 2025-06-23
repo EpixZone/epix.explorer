@@ -7,8 +7,7 @@ import {
 } from '@/stores';
 import DynamicComponent from '@/components/dynamic/DynamicComponent.vue';
 import DonutChart from '@/components/charts/DonutChart.vue';
-import { computed, ref } from '@vue/reactivity';
-import { onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { Icon } from '@iconify/vue';
 
 import type {
@@ -38,7 +37,17 @@ const unbonding = ref([] as UnbondingResponses[]);
 const unbondingTotal = ref(0);
 const chart = {};
 onMounted(() => {
-  loadAccount(props.address);
+  // Wait for blockchain to be properly initialized
+  if (blockchain.chainName === props.chain && blockchain.rpc) {
+    loadAccount(props.address);
+  }
+});
+
+// Watch for blockchain changes
+blockchain.$subscribe((mutation, state) => {
+  if (state.chainName === props.chain && state.rpc) {
+    loadAccount(props.address);
+  }
 });
 const totalAmountByCategory = computed(() => {
   let sumDel = 0;
@@ -60,6 +69,14 @@ const totalAmountByCategory = computed(() => {
     });
   });
   return [sumBal, sumDel, sumRew, sumUn];
+});
+
+// Formatted amounts for chart display (converted from aepix to EPIX)
+const formattedAmountByCategory = computed(() => {
+  return totalAmountByCategory.value.map(amount => {
+    // Convert from aepix (18 decimals) to EPIX
+    return Number((amount / 1e18).toFixed(2));
+  });
 });
 
 const labels = ['Balance', 'Delegation', 'Reward', 'Unbonding'];
@@ -89,21 +106,41 @@ const totalValue = computed(() => {
 
 
 function loadAccount(address: string) {
+  // Check if RPC client is ready
+  if (!blockchain.rpc) {
+    return;
+  }
+
+  // Reset data
+  balances.value = [];
+  delegations.value = [];
+  rewards.value = { total: [], rewards: [] };
+  unbonding.value = [];
+  unbondingTotal.value = 0;
+
   blockchain.rpc.getAuthAccount(address).then((x) => {
     account.value = x.account;
+  }).catch((error) => {
+    // Set a minimal account object so we can still display the page
+    account.value = { address: address } as AuthAccount;
   });
+
   blockchain.rpc.getTxsBySender(address).then((x) => {
     txs.value = x.tx_responses;
   });
+
   blockchain.rpc.getDistributionDelegatorRewards(address).then((x) => {
     rewards.value = x;
   });
+
   blockchain.rpc.getStakingDelegations(address).then((x) => {
     delegations.value = x.delegation_responses;
   });
+
   blockchain.rpc.getBankBalances(address).then((x) => {
-    balances.value = x.balances;
+    balances.value = x.balances || [];
   });
+
   blockchain.rpc.getStakingDelegatorUnbonding(address).then((x) => {
     unbonding.value = x.unbonding_responses;
     x.unbonding_responses?.forEach((y) => {
@@ -131,7 +168,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
 }
 </script>
 <template>
-  <div v-if="account">
+  <div v-if="props.address">
     <!-- address -->
     <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
       <div class="flex items-center">
@@ -148,7 +185,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
         <!-- content -->
         <div class="flex flex-1 flex-col truncate pl-4">
           <h2 class="text-sm font-semibold text-white mb-1">{{ $t('account.address') }}:</h2>
-          <span class="text-xs text-gray-400 truncate font-mono"> {{ address }}</span>
+          <span class="text-xs text-gray-400 truncate font-mono"> {{ props.address }}</span>
         </div>
       </div>
     </div>
@@ -183,7 +220,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
       <div class="grid md:grid-cols-3 gap-6">
         <div class="md:col-span-1">
-          <DonutChart :series="totalAmountByCategory" :labels="labels" />
+          <DonutChart :series="formattedAmountByCategory" :labels="labels" />
         </div>
         <div class="md:col-span-2">
           <!-- list-->
@@ -194,7 +231,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
               v-for="(balanceItem, index) in balances"
               :key="index"
             >
-              <div class="w-10 h-10 rounded-lg bg-epix-teal/10 border border-epix-teal/20 flex items-center justify-center mr-4">
+              <div class="w-10 h-10 rounded-lg bg-epix-teal/10 border border-epix-teal/20 flex items-center justify-center mr-4" title="Available Balance">
                 <Icon icon="mdi-account-cash" class="text-epix-teal" size="20" />
               </div>
               <div class="flex-1">
@@ -215,8 +252,8 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
               v-for="(delegationItem, index) in delegations"
               :key="index"
             >
-              <div class="w-10 h-10 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center mr-4">
-                <Icon icon="mdi-user-clock" class="text-yellow-500" size="20" />
+              <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mr-4" title="Staked (Delegated)">
+                <Icon icon="mdi-user-clock" class="text-orange-500" size="20" />
               </div>
               <div class="flex-1">
                 <div class="text-sm font-semibold text-white">
@@ -241,10 +278,10 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
               v-for="(rewardItem, index) in rewards.total"
               :key="index"
             >
-              <div class="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center mr-4">
+              <div class="w-10 h-10 rounded-lg bg-epix-teal/10 border border-epix-teal/20 flex items-center justify-center mr-4" title="Staking Rewards">
                 <Icon
                   icon="mdi-account-arrow-up"
-                  class="text-green-500"
+                  class="text-epix-teal"
                   size="20"
                 />
               </div>
@@ -260,10 +297,10 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
             </div>
             <!-- unbonding -->
             <div class="flex items-center p-4 bg-gray-900/50 border border-gray-800 rounded-lg">
-              <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center mr-4">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mr-4" title="Unbonding (Unstaking)">
                 <Icon
                   icon="mdi-account-arrow-right"
-                  class="text-red-500"
+                  class="text-blue-500"
                   size="20"
                 />
               </div>
