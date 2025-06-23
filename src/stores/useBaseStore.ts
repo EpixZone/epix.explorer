@@ -50,7 +50,7 @@ export const useBaseStore = defineStore('baseStore', {
         },
         txsInRecents() {
             // Create a hash of current recents to check if we need to recompute
-            const currentBlocksHash = this.recents.map(b => b.block_id?.hash).join(',');
+            const currentBlocksHash = this.recents.map(b => b.block_id?.hash || '').join(',');
 
             // If cache is valid, return cached results
             if (this._lastProcessedBlockHash === currentBlocksHash && this._cachedTxs.length > 0) {
@@ -64,22 +64,30 @@ export const useBaseStore = defineStore('baseStore', {
                 tx: DecodedTxRaw;
             }[];
 
-            this.recents.forEach((b) =>
-                b.block?.data?.txs.forEach((tx: string) => {
-                    if (tx) {
-                        const raw = fromBase64(tx);
-                        try {
-                            txs.push({
-                                height: b.block.header.height,
-                                hash: hashTx(raw),
-                                tx: decodeTxRaw(raw),
-                            });
-                        } catch (e) {
-                            console.error(e);
+            this.recents.forEach((b) => {
+                // Add safety checks for block structure
+                if (b?.block?.data?.txs && Array.isArray(b.block.data.txs)) {
+                    b.block.data.txs.forEach((tx: string) => {
+                        if (tx && typeof tx === 'string') {
+                            try {
+                                const raw = fromBase64(tx);
+                                const decodedTx = decodeTxRaw(raw);
+
+                                // Validate that the decoded transaction has the expected structure
+                                if (decodedTx && typeof decodedTx === 'object') {
+                                    txs.push({
+                                        height: b.block.header.height,
+                                        hash: hashTx(raw),
+                                        tx: decodedTx,
+                                    });
+                                }
+                            } catch (e) {
+                                console.error('Error processing transaction:', e);
+                            }
                         }
-                    }
-                })
-            );
+                    });
+                }
+            });
 
             const sortedTxs = txs.sort((a, b) => { return Number(b.height) - Number(a.height) });
 

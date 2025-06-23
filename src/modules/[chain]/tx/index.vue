@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useBaseStore, useBlockchain, useFormatter } from '@/stores';
 import { useRouter } from 'vue-router';
 const props = defineProps(['chain']);
@@ -13,30 +13,50 @@ const format = useFormatter();
 const hashReg = /^[A-Z\d]{64}$/;
 const hash = ref('');
 const current = chainStore?.current?.chainName || '';
-const isLoadingRecents = ref(false);
 
-// Computed property for recent transactions with loading state
+// Computed property for recent transactions
 const recentTxs = computed(() => {
     if (tab.value === 'recent') {
-        return base.txsInRecents;
+        return base.txsInRecents || [];
     }
     return [];
 });
 
-// Watch for tab changes to manage loading state
-watch(tab, (newTab) => {
-    if (newTab === 'recent') {
-        isLoadingRecents.value = true;
-        // Use nextTick to allow UI to update before heavy computation
-        setTimeout(() => {
-            isLoadingRecents.value = false;
-        }, 100);
-    }
-}, { immediate: true });
+// Computed property to check if we have transactions
+const hasTransactions = computed(() => {
+    return recentTxs.value.length > 0;
+});
+
+// Computed property to check if we're still loading (no blocks yet)
+const isLoading = computed(() => {
+    return tab.value === 'recent' && base.recents.length === 0;
+});
+
+// Helper function to format fees properly
+const formatFee = (item: any) => {
+    // Try both camelCase (from recent blocks) and snake_case (from API)
+    const feeAmount = item.tx?.authInfo?.fee?.amount || item.tx?.auth_info?.fee?.amount;
+
+    // Debug logging
+    console.log('Fee debug for tx:', item.hash);
+    console.log('AuthInfo (camelCase):', item.tx?.authInfo);
+    console.log('Fee object (camelCase):', item.tx?.authInfo?.fee);
+    console.log('Fee amount:', feeAmount);
+
+    if (!feeAmount || feeAmount.length === 0) return '-';
+    return format.formatTokens(feeAmount, true, '0,0.[000000000000000000]');
+};
 
 onMounted(() => {
     tab.value = String(vueRouters.currentRoute.value.query.tab || 'recent');
-    console.log(tab.value);
+    console.log('Tab value:', tab.value);
+    console.log('Recent transactions:', base.txsInRecents?.length || 0);
+    console.log('Recent blocks:', base.recents.length);
+
+    // Debug fee data
+    if (base.txsInRecents?.length > 0) {
+        console.log('Sample transaction fee data:', base.txsInRecents[0].tx?.auth_info?.fee);
+    }
 });
 
 function search() {
@@ -56,10 +76,21 @@ function search() {
 
         <div v-show="tab === 'recent'" class="modern-card shadow-modern overflow-x-auto">
             <!-- Loading indicator -->
-            <div v-if="isLoadingRecents" class="flex items-center justify-center py-12">
+            <div v-if="isLoading" class="flex items-center justify-center py-12">
                 <div class="flex items-center space-x-3">
                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-epix-primary"></div>
                     <span class="text-gray-600 dark:text-gray-400">Loading recent transactions...</span>
+                </div>
+            </div>
+
+            <!-- No transactions message -->
+            <div v-else-if="!hasTransactions" class="flex items-center justify-center py-12">
+                <div class="text-center">
+                    <div class="text-gray-500 dark:text-gray-400 mb-2">No recent transactions found</div>
+                    <div class="text-sm text-gray-400 dark:text-gray-500">
+                        Recent blocks: {{ base.recents.length }} |
+                        Transactions: {{ recentTxs.length }}
+                    </div>
                 </div>
             </div>
 
@@ -84,8 +115,8 @@ function search() {
                     item.hash
                 }}</RouterLink>
                             </td>
-                            <td class="py-3 px-4 text-gray-900 dark:text-white">{{ format.messages(item.tx.body.messages) }}</td>
-                            <td class="py-3 px-4 text-gray-900 dark:text-white">{{ format.formatTokens(item.tx.auth_info.fee?.amount) }}</td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">{{ format.messages(item.tx?.body?.messages || []) }}</td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">{{ formatFee(item) }}</td>
                         </tr>
                     </tbody>
                 </table>
