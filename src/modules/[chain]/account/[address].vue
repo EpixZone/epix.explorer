@@ -211,9 +211,115 @@ function updateEvent() {
 
 function mapAmount(events:{type: string, attributes: {key: string, value: string}[]}[]) {
   if(!events) return []
-  return events.find(x => x.type==='coin_received')?.attributes
-    .filter(x => x.key === 'YW1vdW50'|| x.key === `amount`)
-    .map(x => x.key==='amount'? x.value : String.fromCharCode(...fromBase64(x.value)))
+
+  // Find all coin_received events (there might be multiple)
+  const coinReceivedEvents = events.filter(x => x.type === 'coin_received')
+  if (coinReceivedEvents.length === 0) return []
+
+
+
+  const allAmounts: string[] = []
+  const processedAmounts = new Set<string>() // To avoid duplicates
+
+  // Process each coin_received event
+  coinReceivedEvents.forEach(event => {
+    // Check if this event is for the current address (not a fee collection to another address)
+    const receiverAttr = event.attributes.find(x =>
+      x.key === 'cmVjZWl2ZXI=' || x.key === 'receiver' // 'receiver' in base64 is 'cmVjZWl2ZXI='
+    )
+
+    let shouldProcess = false
+
+    if (receiverAttr) {
+      const receiver = receiverAttr.key === 'receiver'
+        ? receiverAttr.value
+        : String.fromCharCode(...fromBase64(receiverAttr.value))
+
+      // Only process if this event is for the current address
+      shouldProcess = receiver === props.address
+    } else {
+      // If no receiver attribute found, process anyway (fallback for different event structures)
+      shouldProcess = true
+    }
+
+    if (shouldProcess) {
+      // Look for amount attributes in this event
+      const amounts = event.attributes
+        .filter(x => x.key === 'YW1vdW50' || x.key === 'amount')
+        .map(x => x.key === 'amount' ? x.value : String.fromCharCode(...fromBase64(x.value)))
+
+      // Add to set to avoid duplicates
+      amounts.forEach(amount => {
+        if (!processedAmounts.has(amount)) {
+          processedAmounts.add(amount)
+          allAmounts.push(amount)
+        }
+      })
+    }
+  })
+
+  // If no amounts found with receiver filtering, try without filtering as fallback
+  if (allAmounts.length === 0) {
+    coinReceivedEvents.forEach(event => {
+      const amounts = event.attributes
+        .filter(x => x.key === 'YW1vdW50' || x.key === 'amount')
+        .map(x => x.key === 'amount' ? x.value : String.fromCharCode(...fromBase64(x.value)))
+
+      amounts.forEach(amount => {
+        if (!processedAmounts.has(amount)) {
+          processedAmounts.add(amount)
+          allAmounts.push(amount)
+        }
+      })
+    })
+  }
+
+  if (allAmounts.length === 0) return []
+
+  // Parse and format each amount string, filtering out likely fee amounts
+  const formattedAmounts = allAmounts.map(amountStr => {
+    // Parse amount strings like "1000000000000000000aepix"
+    const match = amountStr.match(/^(\d+)([a-zA-Z]+)$/)
+    if (match) {
+      const [, amount, denom] = match
+
+      // Custom formatting for received amounts to handle small values properly
+      if (denom === 'aepix') {
+        // Convert from aepix (18 decimals) to EPIX
+        const epixAmount = Number(amount) / Math.pow(10, 18)
+
+        // Don't filter out small amounts - they might be legitimate small transfers
+        // The receiver filtering above should already handle fee vs legitimate transfer distinction
+
+        // Format with appropriate decimal places and commas
+        let formattedAmount
+        if (epixAmount >= 1000) {
+          formattedAmount = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          }).format(epixAmount)
+        } else if (epixAmount >= 0.01) {
+          formattedAmount = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6
+          }).format(epixAmount)
+        } else {
+          formattedAmount = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 6,
+            maximumFractionDigits: 18
+          }).format(epixAmount)
+        }
+
+        return `${formattedAmount} EPIX`
+      }
+
+      // Fallback to standard formatting for other denominations
+      return format.formatToken({ amount, denom }, true, '0,0.[000000000000000000]')
+    }
+    return amountStr // fallback to original string if parsing fails
+  }).filter(amount => amount !== null) // Remove null values (filtered out amounts)
+
+  return formattedAmounts
 }
 </script>
 <template>

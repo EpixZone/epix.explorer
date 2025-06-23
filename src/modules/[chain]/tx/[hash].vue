@@ -79,6 +79,22 @@ const messages = computed(() => {
         return x
     }) || [];
 });
+
+const feeTooltip = computed(() => {
+    const feeAmount = tx.value.tx?.auth_info?.fee?.amount;
+    if (!feeAmount || feeAmount.length === 0) return '';
+
+    // Get the first fee amount (usually there's only one)
+    const fee = feeAmount[0];
+    if (!fee || fee.denom !== 'aepix') return '';
+
+    // Convert aepix to EPIX for tooltip
+    const amount = Number(fee.amount);
+    const epixAmount = amount / Math.pow(10, 18);
+
+    // Format with full precision
+    return `${epixAmount.toFixed(18)} EPIX`;
+});
 </script>
 <template>
     <div>
@@ -167,8 +183,15 @@ const messages = computed(() => {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('tx.fee') }}</label>
-                        <div class="modern-input px-4 py-3 font-mono">
-                            {{ format.formatTokens(tx.tx?.auth_info?.fee?.amount, true, '0,0.[00]') }}
+                        <div class="relative">
+                            <div class="modern-input px-4 py-3 font-mono group cursor-help">
+                                {{ format.formatTokens(tx.tx?.auth_info?.fee?.amount, true, '0,0.[000000000000000000]') }}
+                                <div v-if="feeTooltip"
+                                     class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-10">
+                                    {{ feeTooltip }}
+                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div>

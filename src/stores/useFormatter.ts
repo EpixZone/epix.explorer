@@ -274,13 +274,24 @@ export const useFormatter = defineStore('formatter', {
             denom = unit.denom.toUpperCase();
           }
         }
-        if (amount < 0.000001) {
+
+        if (amount === 0) {
           return `0 ${denom.substring(0, 10)}`;
         }
-        if (amount < 0.01) {
-          fmt = '0.[000000]'
+        let formattedAmount;
+        if (amount < 1e-12) {
+          // For extremely small numbers, show the original amount with original denom
+          const originalAmount = Number(token.amount);
+          formattedAmount = numeral(originalAmount).format('0,0');
+          denom = token.denom.toUpperCase();
+        } else if (amount < 0.01) {
+          fmt = '0.[000000000000000000]'
+          formattedAmount = numeral(amount).format(fmt);
+        } else {
+          formattedAmount = numeral(amount).format(fmt);
         }
-        return `${numeral(amount).format(fmt)} ${withDenom ? denom.substring(0, 10) : ''
+
+        return `${formattedAmount} ${withDenom ? denom.substring(0, 10) : ''
           }`;
       }
       return '-';

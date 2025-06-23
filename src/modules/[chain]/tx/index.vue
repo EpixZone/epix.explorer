@@ -85,7 +85,7 @@ function search() {
                 }}</RouterLink>
                             </td>
                             <td class="py-3 px-4 text-gray-900 dark:text-white">{{ format.messages(item.tx.body.messages) }}</td>
-                            <td class="py-3 px-4 text-gray-900 dark:text-white">{{ format.formatTokens(item.tx.authInfo.fee?.amount) }}</td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">{{ format.formatTokens(item.tx.auth_info.fee?.amount) }}</td>
                         </tr>
                     </tbody>
                 </table>
