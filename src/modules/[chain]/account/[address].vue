@@ -4,11 +4,14 @@ import {
   useFormatter,
   useStakingStore,
   useTxDialog,
+  useBaseStore,
 } from '@/stores';
 import DynamicComponent from '@/components/dynamic/DynamicComponent.vue';
 import DonutChart from '@/components/charts/DonutChart.vue';
+import ApexCharts from 'vue3-apexcharts';
 import { computed, ref, onMounted } from 'vue';
 import { Icon } from '@iconify/vue';
+import { getDonutChartConfig } from '@/components/charts/apexChartConfig';
 
 import type {
   AuthAccount,
@@ -27,6 +30,7 @@ const blockchain = useBlockchain();
 const stakingStore = useStakingStore();
 const dialog = useTxDialog();
 const format = useFormatter();
+const baseStore = useBaseStore();
 const account = ref({} as AuthAccount);
 const txs = ref({} as TxResponse[]);
 const delegations = ref([] as Delegation[]);
@@ -77,6 +81,51 @@ const formattedAmountByCategory = computed(() => {
     // Convert from aepix (18 decimals) to EPIX
     return Number((amount / 1e18).toFixed(2));
   });
+});
+
+// Custom chart configuration with formatted tooltips
+const customChartConfig = computed(() => {
+  const baseConfig = getDonutChartConfig(baseStore.theme, labels);
+  return {
+    ...baseConfig,
+    tooltip: {
+      theme: 'dark',
+      y: {
+        formatter: function (val: number, opts: any) {
+          // Format the value with commas for thousands
+          const formattedValue = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          }).format(val);
+          return `${formattedValue} EPIX`;
+        }
+      }
+    },
+    plotOptions: {
+      ...baseConfig.plotOptions,
+      pie: {
+        ...baseConfig.plotOptions.pie,
+        donut: {
+          ...baseConfig.plotOptions.pie.donut,
+          labels: {
+            ...baseConfig.plotOptions.pie.donut.labels,
+            value: {
+              ...baseConfig.plotOptions.pie.donut.labels.value,
+              formatter: function (val: string) {
+                // Format the center value with commas for thousands
+                const numVal = parseFloat(val);
+                const formattedValue = new Intl.NumberFormat('en-US', {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2
+                }).format(numVal);
+                return formattedValue;
+              }
+            }
+          }
+        }
+      }
+    }
+  };
 });
 
 const labels = ['Balance', 'Delegation', 'Reward', 'Unbonding'];
@@ -220,7 +269,12 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
       <div class="grid md:grid-cols-3 gap-6">
         <div class="md:col-span-1">
-          <DonutChart :series="formattedAmountByCategory" :labels="labels" />
+          <ApexCharts
+            type="donut"
+            height="410"
+            :options="customChartConfig"
+            :series="formattedAmountByCategory"
+          />
         </div>
         <div class="md:col-span-2">
           <!-- list-->
