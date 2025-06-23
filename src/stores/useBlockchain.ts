@@ -76,6 +76,26 @@ export const useBlockchain = defineStore('blockchain', {
         } else {
           document.body.style.setProperty('--p', '237.65 100% 70%');
         }
+        // Icon mapping for different modules
+        const moduleIcons: Record<string, string> = {
+          'dashboard': 'mdi:view-dashboard',
+          'blocks': 'mdi:cube',
+          'staking': 'mdi:shield-account',
+          'governance': 'mdi:vote',
+          'parameters': 'mdi:cog',
+          'uptime': 'mdi:chart-line',
+          'consensus': 'mdi:handshake',
+          'state-sync': 'mdi:sync',
+          'cosmwasm': 'mdi:code-braces',
+          'widget': 'mdi:widgets',
+          'tx': 'mdi:swap-horizontal',
+          'ibc': 'mdi:link-variant',
+          'nft': 'mdi:image-multiple',
+          'supply': 'mdi:currency-usd',
+          'account': 'mdi:account-multiple',
+          'ecosystem': 'mdi:earth',
+        };
+
         // Return menu items directly without the chain wrapper to avoid duplicate branding
         currNavItem = routes
           .filter((x) => x.meta.i18n) // defined menu name
@@ -87,7 +107,7 @@ export const useBlockchain = defineStore('blockchain', {
           .map((x) => ({
             title: `module.${x.meta.i18n}`,
             to: { path: x.path.replace(':chain', this.chainName) },
-            icon: { icon: 'mdi-chevron-right', size: '22' },
+            icon: { icon: moduleIcons[String(x.meta.i18n)] || 'mdi:circle', size: '22' },
             i18n: true,
             order: Number(x.meta.order || 100),
           }))

@@ -81,59 +81,59 @@ const show_ad = computed(() => {
   <div class="bg-gray-50 dark:bg-epix-dark min-h-screen">
     <!-- sidebar -->
     <div
-      class="w-64 fixed z-50 left-0 top-0 bottom-0 overflow-auto bg-black border-r border-gray-800"
+      class="w-64 fixed z-50 left-0 top-0 bottom-0 overflow-auto bg-black border-r border-gray-900/50"
       :class="{ block: sidebarShow, 'hidden xl:!block': !sidebarShow }"
       style="border-radius: 0;">
-      <div class="flex justify-between mt-1 pl-4 py-6 mb-2 border-b border-gray-800">
+      <div class="flex justify-between px-6 py-8 mb-6">
         <RouterLink to="/" class="flex items-center group">
           <div class="relative">
-            <img class="w-12 h-12" src="../../assets/logo.svg" alt="Epix Logo" />
+            <img class="w-10 h-10" src="../../assets/logo.svg" alt="Epix Logo" />
           </div>
-          <h1 class="flex-1 ml-3 text-2xl font-bold gradient-text">
+          <h1 class="flex-1 ml-3 text-xl font-semibold gradient-text tracking-tight">
             Epix
           </h1>
         </RouterLink>
-        <div class="pr-4 cursor-pointer xl:!hidden hover:bg-gray-800 rounded-lg p-2 transition-colors duration-200" @click="sidebarShow = false">
-          <Icon icon="mdi-close" class="text-xl text-gray-400" />
+        <div class="cursor-pointer xl:!hidden hover:bg-gray-800/50 rounded-md p-1.5 transition-colors duration-200" @click="sidebarShow = false">
+          <Icon icon="mdi-close" class="text-lg text-gray-400" />
         </div>
       </div>
-      <div v-for="(item, index) of blockchain.computedChainMenu" :key="index" class="px-3 mb-1">
+      <div v-for="(item, index) of blockchain.computedChainMenu" :key="index" class="px-4 mb-2">
         <div v-if="isNavGroup(item)" :tabindex="index" class="collapse" :class="{
           'collapse-arrow': index > 0 && item?.children?.length > 0,
           'collapse-open': index === 0 && sidebarOpen,
           'collapse-close': index === 0 && !sidebarOpen,
         }">
-          <input v-if="index > 0" type="checkbox" class="cursor-pointer !h-12 block" @click="changeOpen(index)" />
+          <input v-if="index > 0" type="checkbox" class="cursor-pointer !h-11 block" @click="changeOpen(index)" />
           <div
-            class="collapse-title !py-0 px-4 flex items-center cursor-pointer rounded-xl hover:bg-gray-800 transition-all duration-200 hover-lift">
-            <Icon v-if="item?.icon?.icon" :icon="item?.icon?.icon" class="text-xl mr-3" :class="{
-              'text-yellow-500': item?.title === 'Favorite',
+            class="collapse-title !py-0 px-3 flex items-center cursor-pointer rounded-lg hover:bg-gray-800/30 transition-colors duration-200">
+            <Icon v-if="item?.icon?.icon" :icon="item?.icon?.icon" class="text-lg mr-3" :class="{
+              'text-yellow-400': item?.title === 'Favorite',
               'text-epix-primary': item?.title !== 'Favorite',
             }" />
-            <img v-if="item?.icon?.image" :src="item?.icon?.image" class="w-7 h-7 rounded-full mr-3 ring-2 ring-gray-700" alt="Chain icon" />
-            <div class="text-base capitalize flex-1 text-gray-200 whitespace-nowrap font-medium">
+            <img v-if="item?.icon?.image" :src="item?.icon?.image" class="w-6 h-6 rounded-full mr-3 ring-1 ring-gray-700/50" alt="Chain icon" />
+            <div class="text-sm capitalize flex-1 text-gray-100 whitespace-nowrap font-medium tracking-wide">
               {{ item?.title === 'Favorite' ? item?.title : $t(item?.title) }}
             </div>
-            <div v-if="item?.badgeContent" class="mr-2 px-2 py-1 text-xs font-semibold rounded-full bg-epix-primary text-white">
+            <div v-if="item?.badgeContent" class="mr-1 px-2 py-0.5 text-xs font-medium rounded-md bg-epix-primary/20 text-epix-primary border border-epix-primary/30">
               {{ item?.badgeContent }}
             </div>
           </div>
-          <div class="collapse-content pl-2">
+          <div class="collapse-content pl-1">
             <div v-for="(el, key) of item?.children" class="menu w-full !p-0">
               <RouterLink v-if="isNavLink(el)" @click="sidebarShow = false"
-                class="hover:bg-gray-800 rounded-lg cursor-pointer px-4 py-3 flex items-center mb-1 transition-all duration-200 hover-lift"
+                class="hover:bg-gray-800/20 rounded-md cursor-pointer px-3 py-2.5 flex items-center mb-1 transition-colors duration-200"
                 :class="{
-                  '!bg-gray-700 !text-white': selected($route, el),
+                  '!bg-epix-primary/10 !text-epix-primary border-l-2 border-epix-primary': selected($route, el),
                 }" :to="el.to">
-                <Icon v-if="!el?.icon?.image" icon="mdi:chevron-right" class="mr-3 ml-2 text-sm" :class="{
-                  'text-white': selected($route, el),
-                  'text-gray-400': !selected($route, el),
+                <Icon v-if="!el?.icon?.image" :icon="el?.icon?.icon || 'mdi:circle'" class="mr-2 ml-3 text-sm" :class="{
+                  'text-epix-primary': selected($route, el),
+                  'text-gray-500': !selected($route, el),
                 }" />
-                <img v-if="el?.icon?.image" :src="el?.icon?.image" class="w-6 h-6 rounded-full mr-3 ml-4 ring-1 ring-gray-700" :class="{
-                  'ring-white': selected($route, el),
+                <img v-if="el?.icon?.image" :src="el?.icon?.image" class="w-5 h-5 rounded-full mr-2 ml-4 ring-1 ring-gray-700/30" :class="{
+                  'ring-epix-primary': selected($route, el),
                 }" alt="Chain icon" />
-                <div class="text-sm capitalize text-gray-300 font-medium" :class="{
-                  '!text-white': selected($route, el),
+                <div class="text-xs capitalize text-gray-300 font-medium tracking-wide" :class="{
+                  '!text-epix-primary': selected($route, el),
                 }">
                   {{ item?.title === 'Favorite' ? el?.title : $t(el?.title) }}
                 </div>
@@ -142,13 +142,13 @@ const show_ad = computed(() => {
             <div v-if="index === 0 && dashboard.networkType === NetworkType.Testnet"
               class="menu w-full !p-0">
               <RouterLink
-                class="hover:bg-gray-800 rounded-lg cursor-pointer px-4 py-3 flex items-center mb-1 transition-all duration-200 hover-lift"
+                class="hover:bg-gray-800/20 rounded-md cursor-pointer px-3 py-2.5 flex items-center mb-1 transition-colors duration-200"
                 :to="`/${blockchain.chainName}/faucet`">
-                <Icon icon="mdi:chevron-right" class="mr-3 ml-2 text-sm text-gray-400"></Icon>
-                <div class="text-sm capitalize text-gray-300 font-medium">
+                <Icon icon="mdi:water" class="mr-2 ml-3 text-sm text-gray-500"></Icon>
+                <div class="text-xs capitalize text-gray-300 font-medium tracking-wide">
                   Faucet
                 </div>
-                <div class="ml-auto px-2 py-1 text-xs font-semibold rounded-full bg-red-500 text-white">
+                <div class="ml-auto px-1.5 py-0.5 text-xs font-medium rounded bg-red-500/20 text-red-400 border border-red-500/30">
                   New
                 </div>
               </RouterLink>
@@ -157,51 +157,51 @@ const show_ad = computed(() => {
         </div>
 
         <RouterLink v-if="isNavLink(item)" :to="item?.to" @click="sidebarShow = false"
-          class="cursor-pointer rounded-xl px-4 flex items-center py-3 hover:bg-gray-800 transition-all duration-200 hover-lift">
-          <Icon v-if="item?.icon?.icon" :icon="item?.icon?.icon" class="text-xl mr-3" :class="{
-            'text-yellow-500': item?.title === 'Favorite',
+          class="cursor-pointer rounded-lg px-3 flex items-center py-2.5 hover:bg-gray-800/30 transition-colors duration-200">
+          <Icon v-if="item?.icon?.icon" :icon="item?.icon?.icon" class="text-lg mr-3" :class="{
+            'text-yellow-400': item?.title === 'Favorite',
             'text-epix-primary': item?.title !== 'Favorite',
           }" />
           <img v-if="item?.icon?.image" :src="item?.icon?.image"
-            class="w-7 h-7 rounded-full mr-3 ring-2 ring-gray-700" alt="Chain icon" />
-          <div class="text-base capitalize flex-1 text-gray-200 whitespace-nowrap font-medium">
+            class="w-6 h-6 rounded-full mr-3 ring-1 ring-gray-700/50" alt="Chain icon" />
+          <div class="text-sm capitalize flex-1 text-gray-100 whitespace-nowrap font-medium tracking-wide">
             {{ item?.title === 'Favorite' ? item?.title : $t(item?.title) }}
           </div>
-          <div v-if="item?.badgeContent" class="px-2 py-1 text-xs font-semibold rounded-full bg-epix-primary text-white">
+          <div v-if="item?.badgeContent" class="px-2 py-0.5 text-xs font-medium rounded-md bg-epix-primary/20 text-epix-primary border border-epix-primary/30">
             {{ item?.badgeContent }}
           </div>
         </RouterLink>
-        <div v-if="isNavTitle(item)" class="px-4 text-sm text-gray-400 pb-2 uppercase">
+        <div v-if="isNavTitle(item)" class="px-3 text-xs text-gray-500 pb-2 uppercase font-semibold tracking-wider">
           {{ item?.heading }}
         </div>
       </div>
-      <div class="px-3 mt-6">
-        <div class="px-4 text-xs pt-2 text-gray-400 pb-3 uppercase font-semibold tracking-wider">
+      <div class="px-4 mt-8">
+        <div class="px-3 text-xs pt-2 text-gray-500 pb-3 uppercase font-semibold tracking-wider">
           Tools
         </div>
         <RouterLink to="/wallet/suggest"
-          class="py-3 px-4 flex items-center cursor-pointer rounded-xl hover:bg-gray-800 transition-all duration-200 hover-lift mb-1">
-          <Icon icon="mdi:frequently-asked-questions" class="text-xl mr-3 text-epix-primary" />
-          <div class="text-base capitalize flex-1 text-gray-200 font-medium">
+          class="py-2.5 px-3 flex items-center cursor-pointer rounded-lg hover:bg-gray-800/30 transition-colors duration-200 mb-1">
+          <Icon icon="mdi:frequently-asked-questions" class="text-lg mr-3 text-epix-primary" />
+          <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
             Wallet Helper
           </div>
         </RouterLink>
-        <div v-if="showDiscord" class="px-4 text-xs pt-4 text-gray-400 pb-3 uppercase font-semibold tracking-wider">
+        <div v-if="showDiscord" class="px-3 text-xs pt-6 text-gray-500 pb-3 uppercase font-semibold tracking-wider">
           {{ $t('module.sponsors') }}
         </div>
         <Sponsors v-if="showDiscord" />
-        <div class="px-4 text-xs pt-4 text-gray-400 pb-3 uppercase font-semibold tracking-wider">{{ $t('module.links') }}</div>
+        <div class="px-3 text-xs pt-6 text-gray-500 pb-3 uppercase font-semibold tracking-wider">{{ $t('module.links') }}</div>
         <a href="https://twitter.com/zone_epix" target="_blank"
-          class="py-3 px-4 flex items-center cursor-pointer rounded-xl hover:bg-gray-800 transition-all duration-200 hover-lift mb-1">
-          <Icon icon="simple-icons:x" class="text-xl mr-3 text-white" />
-          <div class="text-base capitalize flex-1 text-gray-200 font-medium">
+          class="py-2.5 px-3 flex items-center cursor-pointer rounded-lg hover:bg-gray-800/30 transition-colors duration-200 mb-1">
+          <Icon icon="simple-icons:x" class="text-lg mr-3 text-white" />
+          <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
             Epix
           </div>
         </a>
         <a v-if="showDiscord" href="https://docs.epix.zone/epix-docs" target="_blank"
-          class="py-3 px-4 flex items-center rounded-xl cursor-pointer hover:bg-gray-800 transition-all duration-200 hover-lift mb-1">
-          <Icon icon="mdi:book" class="text-xl mr-3 text-green-500" />
-          <div class="text-base capitalize flex-1 text-gray-200 font-medium">
+          class="py-2.5 px-3 flex items-center rounded-lg cursor-pointer hover:bg-gray-800/30 transition-colors duration-200 mb-1">
+          <Icon icon="mdi:book" class="text-lg mr-3 text-green-400" />
+          <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
             Docs
           </div>
         </a>

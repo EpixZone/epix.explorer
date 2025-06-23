@@ -20,14 +20,35 @@ const chains = computed(() => {
 
 onMounted(() => {
     const chainStore = useBlockchain()
+
+    // Detect network type based on URL
+    const isTestnet = window.location.hostname.search("testnet") > -1 || window.location.hostname === "localhost"
+    network.value = isTestnet ? NetworkType.Testnet : NetworkType.Mainnet
+
     selected.value = chainStore.current || Object.values(dashboard.chains)[0]
     initParamsForKeplr()
 
     dashboard.loadLocalConfig(NetworkType.Mainnet).then((res) => {
         mainnet.value = Object.values<ChainConfig>(res)
+        // Auto-select EPIX chain for mainnet if we're on mainnet
+        if (!isTestnet && mainnet.value.length > 0) {
+            const epixChain = mainnet.value.find(chain => chain.chainName === 'epix')
+            if (epixChain) {
+                selected.value = epixChain
+                initParamsForKeplr()
+            }
+        }
     })
     dashboard.loadLocalConfig(NetworkType.Testnet).then((res) => {
         testnet.value = Object.values<ChainConfig>(res)
+        // Auto-select EPIX chain for testnet if we're on testnet
+        if (isTestnet && testnet.value.length > 0) {
+            const epixChain = testnet.value.find(chain => chain.chainName === 'epix')
+            if (epixChain) {
+                selected.value = epixChain
+                initParamsForKeplr()
+            }
+        }
     })
 })
 
@@ -35,6 +56,16 @@ function onchange() {
     // Clear messages when configuration changes
     error.value = ""
     success.value = ""
+
+    // Auto-select EPIX chain when network changes
+    const currentChains = network.value === NetworkType.Mainnet ? mainnet.value : testnet.value
+    if (currentChains.length > 0) {
+        const epixChain = currentChains.find(chain => chain.chainName === 'epix')
+        if (epixChain) {
+            selected.value = epixChain
+        }
+    }
+
     wallet.value === "keplr" ? initParamsForKeplr() : initSnap()
 }
 

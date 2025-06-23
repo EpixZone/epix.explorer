@@ -40,7 +40,7 @@ export const useBaseStore = defineStore('baseStore', {
                     return diff / (blocks);
                 }
             }
-            return 6000;
+            return 2000; // Default to 2s for EPIX chain
         },
         blockchain() {
             return useBlockchain();
