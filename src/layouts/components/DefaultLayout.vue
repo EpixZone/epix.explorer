@@ -207,7 +207,7 @@ const show_ad = computed(() => {
         </a>
       </div>
     </div>
-    <div class="xl:!ml-64 px-4 pt-6">
+    <div class="xl:!ml-64 px-4 pt-6 flex flex-col min-h-screen">
       <!-- header -->
       <div class="flex items-center py-4 modern-card mb-6 px-6 sticky top-4 z-10 shadow-modern">
         <div class="text-2xl pr-4 cursor-pointer xl:!hidden hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors duration-200" @click="sidebarShow = true">
@@ -227,7 +227,7 @@ const show_ad = computed(() => {
       </div>
 
       <!-- 👉 Pages -->
-      <div style="min-height: calc(100vh - 200px);" class="pb-8">
+      <div class="flex-1 pb-8">
         <div v-if="behind" class="modern-card mb-6 p-4 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
           <div class="flex gap-3 items-center">
             <div class="flex-shrink-0">

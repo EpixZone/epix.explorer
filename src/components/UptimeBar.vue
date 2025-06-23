@@ -21,7 +21,7 @@ function getMatrixColor(color: string) {
 
 </script>
 <template>
-  <div class="flex gap-px w-full justify-center">
+  <div class="flex gap-px w-full justify-center overflow-hidden">
     <div class="cursor-default" v-for="(item, index) in blocks" :key="index">
       <div class="tooltip matrix-block"
           :data-tip="`Block ${item.height}`"
@@ -36,9 +36,24 @@ function getMatrixColor(color: string) {
 <style scoped>
 .matrix-block {
   width: 6px;
-  height: 24px;
+  height: 26px;
   border-radius: 0;
   position: relative;
+}
+
+/* Mobile responsive adjustments for blocks */
+@media (max-width: 640px) {
+  .matrix-block {
+    width: 6px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .matrix-block {
+    width: 5px;
+    height: 22px;
+  }
 }
 
 .matrix-committed {

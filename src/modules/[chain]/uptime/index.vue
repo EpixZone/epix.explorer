@@ -261,9 +261,9 @@ const getValidatorIdentity = (moniker: string) => {
 
       <!-- Matrix-style uptime visualization -->
       <div :class="tab === '2' ? '' : 'hidden'">
-        <div class="flex flex-row flex-wrap gap-x-4 mt-4 justify-center">
+        <div class="flex flex-row flex-wrap gap-4 mt-4 justify-center px-2 sm:px-0">
           <div v-for="(unit, i) in grid" :key="i" class="matrix-validator-card relative">
-            <div class="flex justify-between items-center py-2 w-full px-2 rounded-t-lg bg-black dark:bg-black">
+            <div class="flex justify-between items-center py-2 w-full px-2 sm:px-2 rounded-t-lg bg-black dark:bg-black">
               <div class="flex items-center gap-2 truncate text-sm flex-1">
                 <!-- Validator Avatar next to name -->
                 <div
@@ -294,12 +294,12 @@ const getValidatorIdentity = (moniker: string) => {
                 </div>
               </div>
             </div>
-            <div class="bg-black dark:bg-black p-4 rounded-b-lg border border-green-500/20 w-full">
+            <div class="bg-black dark:bg-black p-4 sm:p-4 rounded-b-lg border border-green-500/20 w-full">
               <UptimeBar :blocks="unit.blocks" />
             </div>
           </div>
         </div>
-        <div class="mt-5 text-xs flex justify-center gap-4 font-mono">
+        <div class="mt-5 text-xs flex flex-wrap justify-center gap-2 sm:gap-4 font-mono px-2">
           <span class="font-bold text-gray-900 dark:text-green-400">{{ $t('uptime.legend') }}: </span>
           <span class="flex items-center gap-1">
             <span class="w-3 h-3 bg-green-400 rounded-sm shadow-sm shadow-green-400/50">&nbsp;</span>
@@ -401,8 +401,24 @@ const getValidatorIdentity = (moniker: string) => {
   border-radius: 8px;
   overflow: hidden;
   position: relative;
-  width: 380px;
-  min-width: 380px;
+  width: 100%;
+  max-width: 380px;
+  min-width: 280px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .matrix-validator-card {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .matrix-validator-card {
+    min-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+  }
 }
 
 .matrix-validator-card::before {
