@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 import { suggestChain } from '@leapwallet/cosmos-snap-provider';
 import { useDashboard, type ChainConfig, useBlockchain, NetworkType } from '@/stores';
 import { CosmosRestClient } from '@/libs/client';
@@ -18,6 +19,27 @@ const chains = computed(() => {
     return network.value === NetworkType.Mainnet? mainnet.value : testnet.value
 })
 
+// Track if component is being unmounted to prevent state updates
+const isUnmounting = ref(false)
+
+// Cleanup function to cancel any ongoing operations
+function cleanup() {
+    isUnmounting.value = true
+    // Clear any pending timeouts or intervals if they exist
+    // This helps prevent state updates after component unmount
+}
+
+// Route guard to ensure proper cleanup when navigating away
+onBeforeRouteLeave((to, from, next) => {
+    cleanup()
+    next()
+})
+
+// Component unmount cleanup
+onBeforeUnmount(() => {
+    cleanup()
+})
+
 onMounted(() => {
     const chainStore = useBlockchain()
 
@@ -26,30 +48,55 @@ onMounted(() => {
     network.value = isTestnet ? NetworkType.Testnet : NetworkType.Mainnet
 
     selected.value = chainStore.current || Object.values(dashboard.chains)[0]
-    initParamsForKeplr()
 
-    dashboard.loadLocalConfig(NetworkType.Mainnet).then((res) => {
-        mainnet.value = Object.values<ChainConfig>(res)
-        // Auto-select EPIX chain for mainnet if we're on mainnet
-        if (!isTestnet && mainnet.value.length > 0) {
-            const epixChain = mainnet.value.find(chain => chain.chainName === 'epix')
-            if (epixChain) {
-                selected.value = epixChain
-                initParamsForKeplr()
+    // Use setTimeout to defer async operations and prevent blocking navigation
+    setTimeout(() => {
+        if (isUnmounting.value) return
+        initParamsForKeplr()
+    }, 0)
+
+    // Load configurations asynchronously without blocking
+    setTimeout(() => {
+        if (isUnmounting.value) return
+
+        dashboard.loadLocalConfig(NetworkType.Mainnet).then((res) => {
+            if (isUnmounting.value) return
+            mainnet.value = Object.values<ChainConfig>(res)
+            // Auto-select EPIX chain for mainnet if we're on mainnet
+            if (!isTestnet && mainnet.value.length > 0) {
+                const epixChain = mainnet.value.find(chain => chain.chainName === 'epix')
+                if (epixChain && !isUnmounting.value) {
+                    selected.value = epixChain
+                    setTimeout(() => {
+                        if (!isUnmounting.value) initParamsForKeplr()
+                    }, 0)
+                }
             }
-        }
-    })
-    dashboard.loadLocalConfig(NetworkType.Testnet).then((res) => {
-        testnet.value = Object.values<ChainConfig>(res)
-        // Auto-select EPIX chain for testnet if we're on testnet
-        if (isTestnet && testnet.value.length > 0) {
-            const epixChain = testnet.value.find(chain => chain.chainName === 'epix')
-            if (epixChain) {
-                selected.value = epixChain
-                initParamsForKeplr()
+        }).catch((e) => {
+            if (!isUnmounting.value) {
+                console.error('Failed to load mainnet config:', e)
             }
-        }
-    })
+        })
+
+        dashboard.loadLocalConfig(NetworkType.Testnet).then((res) => {
+            if (isUnmounting.value) return
+            testnet.value = Object.values<ChainConfig>(res)
+            // Auto-select EPIX chain for testnet if we're on testnet
+            if (isTestnet && testnet.value.length > 0) {
+                const epixChain = testnet.value.find(chain => chain.chainName === 'epix')
+                if (epixChain && !isUnmounting.value) {
+                    selected.value = epixChain
+                    setTimeout(() => {
+                        if (!isUnmounting.value) initParamsForKeplr()
+                    }, 0)
+                }
+            }
+        }).catch((e) => {
+            if (!isUnmounting.value) {
+                console.error('Failed to load testnet config:', e)
+            }
+        })
+    }, 100) // Small delay to ensure component is fully mounted
 })
 
 function onchange() {
@@ -71,15 +118,22 @@ function onchange() {
 
 async function initParamsForKeplr() {
     try {
+        if (isUnmounting.value) return // Don't proceed if component is unmounting
+
         error.value = ""
         success.value = ""
         const chain = selected.value
         if(!chain.endpoints?.rest?.at(0)) {
-            error.value = "No REST endpoint configured for this chain"
+            if (!isUnmounting.value) {
+                error.value = "No REST endpoint configured for this chain"
+            }
             return
         }
         const client = CosmosRestClient.newDefault(chain.endpoints.rest?.at(0)?.address || "")
         const b = await client.getBaseBlockLatest()
+
+        if (isUnmounting.value) return // Check again after async operation
+
         const chainid = b.block.header.chain_id
 
     const gasPriceStep = chain.keplrPriceStep || {
@@ -134,24 +188,33 @@ async function initParamsForKeplr() {
         features: chain.keplrFeatures || [],
     }, null, '\t')
     } catch (e) {
-        error.value = `Failed to initialize Keplr configuration: ${e.message || e}`
-        conf.value = ""
+        if (!isUnmounting.value) {
+            error.value = `Failed to initialize Keplr configuration: ${e.message || e}`
+            conf.value = ""
+        }
     }
 }
 
 async function initSnap() {
     try {
+        if (isUnmounting.value) return // Don't proceed if component is unmounting
+
         error.value = ""
         success.value = ""
         const chain = selected.value
         const [token] = chain.assets
 
         if(!chain.endpoints?.rest?.at(0)) {
-            error.value = "No REST endpoint configured for this chain"
+            if (!isUnmounting.value) {
+                error.value = "No REST endpoint configured for this chain"
+            }
             return
         }
         const client = CosmosRestClient.newDefault(chain.endpoints.rest?.at(0)?.address || "")
         const b = await client.getBaseBlockLatest()
+
+        if (isUnmounting.value) return // Check again after async operation
+
         const chainId = b.block.header.chain_id
 
     conf.value = JSON.stringify({
@@ -178,8 +241,10 @@ async function initSnap() {
         ],
     }, null, '\t')
     } catch (e) {
-        error.value = `Failed to initialize Metamask configuration: ${e.message || e}`
-        conf.value = ""
+        if (!isUnmounting.value) {
+            error.value = `Failed to initialize Metamask configuration: ${e.message || e}`
+            conf.value = ""
+        }
     }
 }
 
