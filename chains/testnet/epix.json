@@ -22,7 +22,8 @@
         "account",
         "state-sync",
         "tx",
-        "ibc"
+        "ibc",
+        "parameters"
     ],
     "assets": [
         {

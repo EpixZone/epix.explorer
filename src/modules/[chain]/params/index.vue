@@ -39,14 +39,14 @@ onMounted(() => {
     <!-- Slashing Parameters -->
     <CardParameter :cardItem="store.slashing" />
     <!-- Application Version -->
-    <div class="bg-base-100 px-4 pt-3 pb-4 rounded-sm mt-6">
-      <div class="text-base mb-3 text-main">{{ store.appVersion?.title }}</div>
+    <div class="modern-card px-6 pt-4 pb-5 mt-6 shadow-modern">
+      <div class="text-lg mb-4 font-semibold text-gray-900 dark:text-white">{{ store.appVersion?.title }}</div>
       <ArrayObjectElement :value="store.appVersion?.items" :thead="false" />
     </div>
 
     <!-- Node Information -->
-    <div class="bg-base-100 px-4 pt-3 pb-4 rounded-sm mt-6">
-      <div class="text-base mb-3 text-main">{{ store.nodeVersion?.title }}</div>
+    <div class="modern-card px-6 pt-4 pb-5 mt-6 shadow-modern">
+      <div class="text-lg mb-4 font-semibold text-gray-900 dark:text-white">{{ store.nodeVersion?.title }}</div>
       <ArrayObjectElement :value="store.nodeVersion?.items" :thead="false" />
     </div>
   </div>

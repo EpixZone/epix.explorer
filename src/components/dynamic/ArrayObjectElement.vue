@@ -18,22 +18,22 @@ const header = computed(() => {
 });
 </script>
 <template>
-  <div class="overflow-auto max-h-96 ">
-    <table class="table table-xs table-compact table-pin-rows w-full">
+  <div class="overflow-auto max-h-96">
+    <table class="table table-xs table-compact table-pin-rows w-full text-gray-900 dark:text-white">
       <thead v-if="thead">
         <tr>
           <th
             v-for="(item, index) in header"
             :key="index"
-            class="text-left capitalize"
+            class="text-left capitalize text-gray-600 dark:text-gray-400 font-medium"
           >
             {{ item.replace(/_/g, ' ') }}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in value" :key="index">
-          <td v-for="(el, key) in header" :key="key">
+        <tr v-for="(item, index) in value" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200">
+          <td v-for="(el, key) in header" :key="key" class="text-sm">
             <DynamicComponent :value="item[el]" />
           </td>
         </tr>
