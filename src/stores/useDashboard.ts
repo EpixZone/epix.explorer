@@ -111,6 +111,7 @@ export interface LocalConfig {
     symbol: string;
   }[];
   chain_name: string;
+  pretty_name?: string;
   coin_type: string;
   logo: string;
   theme_color?: string;
@@ -173,7 +174,7 @@ export function fromLocal(lc: LocalConfig): ChainConfig {
   conf.bech32ConsensusPrefix = lc.consensus_prefix ?? lc.addr_prefix + 'valcons';
   conf.chainName = lc.chain_name;
   conf.coinType = lc.coin_type;
-  conf.prettyName = lc.registry_name || lc.chain_name;
+  conf.prettyName = lc.pretty_name || lc.registry_name || lc.chain_name;
   conf.endpoints = {
     rest: apiConverter(lc.api),
     rpc: apiConverter(lc.rpc),

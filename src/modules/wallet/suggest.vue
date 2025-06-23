@@ -90,9 +90,10 @@ async function initParamsForKeplr() {
     const coinDecimals = chain.assets[0].denom_units.find(x => x.denom === chain.assets[0].symbol.toLowerCase())?.exponent || 6
     conf.value = JSON.stringify({
         chainId: chainid,
-        chainName: chain.chainName,
+        chainName: chain.prettyName || chain.chainName,
         rpc: chain.endpoints?.rpc?.at(0)?.address,
         rest: chain.endpoints?.rest?.at(0)?.address,
+        chainSymbolImageUrl: chain.logo,
         bip44: {
             coinType: Number(chain.coinType),
         },
@@ -110,6 +111,7 @@ async function initParamsForKeplr() {
                 coinMinimalDenom: chain.assets[0].base,
                 coinDecimals,
                 coinGeckoId: chain.assets[0].coingecko_id || 'unknown',
+                coinImageUrl: chain.logo,
             },
         ],
         feeCurrencies: [
@@ -119,6 +121,7 @@ async function initParamsForKeplr() {
                 coinDecimals,
                 coinGeckoId: chain.assets[0].coingecko_id || 'unknown',
                 gasPriceStep,
+                coinImageUrl: chain.logo,
             },
         ],
         stakeCurrency: {
@@ -126,6 +129,7 @@ async function initParamsForKeplr() {
             coinMinimalDenom: chain.assets[0].base,
             coinDecimals,
             coinGeckoId: chain.assets[0].coingecko_id || 'unknown',
+            coinImageUrl: chain.logo,
         },
         features: chain.keplrFeatures || [],
     }, null, '\t')
@@ -152,7 +156,7 @@ async function initSnap() {
 
     conf.value = JSON.stringify({
         chainId,
-        chainName: chain.chainName,
+        chainName: chain.prettyName || chain.chainName,
         bech32Config: {
             bech32PrefixAccAddr: chain.bech32Prefix,
         },
@@ -190,9 +194,9 @@ function suggest() {
             try {
                 // @ts-ignore
                 window.keplr.experimentalSuggestChain(JSON.parse(conf.value)).then(() => {
-                    success.value = `Successfully suggested ${selected.value.chainName} to Keplr wallet!`
+                    success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to Keplr wallet!`
                 }).catch(e => {
-                    error.value = `Failed to suggest chain to Keplr: ${e.message || e}`
+                    error.value = `Failed to add chain to Keplr: ${e.message || e}`
                 })
             } catch (e) {
                 error.value = `Error parsing configuration: ${e.message || e}`
@@ -203,9 +207,9 @@ function suggest() {
     } else {
         try {
             suggestChain(JSON.parse(conf.value));
-            success.value = `Successfully suggested ${selected.value.chainName} to Metamask Snap!`
+            success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to Metamask Snap!`
         } catch (e) {
-            error.value = `Failed to suggest chain to Metamask: ${e.message || e}`
+            error.value = `Failed to add chain to Metamask: ${e.message || e}`
         }
     }
 }
@@ -256,7 +260,7 @@ function suggest() {
 
         <div class="mt-6 mb-6">
             <button class="modern-button px-6 py-3 text-white font-medium" @click="suggest">
-                Suggest {{ selected.chainName }} to {{ wallet }}
+                Add {{ selected.prettyName || selected.chainName }} to {{ wallet === 'keplr' ? 'Keplr' : 'Metamask' }}
             </button>
 
             <!-- Success Message -->

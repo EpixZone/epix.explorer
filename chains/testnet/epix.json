@@ -1,5 +1,6 @@
 {
     "chain_name": "epix",
+    "pretty_name": "Epix",
     "api": [
         "https://api.testnet.epix.zone"
     ],
@@ -11,7 +12,7 @@
     "coin_type": "60",
     "min_tx_fee": "800",
     "addr_prefix": "epix",
-    "logo": "logos/epix.png",
+    "logo": "https://raw.githubusercontent.com/EpixZone/assets/refs/heads/main/images/icons/icon.png",
     "features": [
         "dashboard",
         "governance",
