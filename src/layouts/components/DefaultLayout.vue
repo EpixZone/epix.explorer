@@ -181,9 +181,9 @@ const show_ad = computed(() => {
         </div>
         <RouterLink to="/wallet/suggest"
           class="py-2.5 px-3 flex items-center cursor-pointer rounded-lg hover:bg-gray-800/30 transition-colors duration-200 mb-1">
-          <Icon icon="mdi:frequently-asked-questions" class="text-lg mr-3 text-epix-primary" />
+          <Icon icon="mdi:wallet-plus" class="text-lg mr-3 text-epix-primary" />
           <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
-            Wallet Helper
+            Add to Wallet
           </div>
         </RouterLink>
         <div v-if="showDiscord" class="px-3 text-xs pt-6 text-gray-500 pb-3 uppercase font-semibold tracking-wider">
