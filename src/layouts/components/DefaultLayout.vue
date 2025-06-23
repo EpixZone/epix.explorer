@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 
 // Components
 import newFooter from '@/layouts/components/NavFooter.vue';
@@ -46,6 +46,20 @@ const changeOpen = (index: Number) => {
   }
 };
 const showDiscord = window.location.host.search('epix.zone') > -1;
+
+// Function to close mobile menu
+const closeMobileMenu = () => {
+  sidebarShow.value = false;
+};
+
+// Listen for navigation events to close mobile menu
+onMounted(() => {
+  window.addEventListener('close-mobile-menu', closeMobileMenu);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('close-mobile-menu', closeMobileMenu);
+});
 
 function isNavGroup(nav: VerticalNavItems | any): nav is NavGroup {
   return (<NavGroup>nav).children !== undefined;

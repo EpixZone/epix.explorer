@@ -19,6 +19,10 @@ router.beforeEach((to) => {
       blockchain.setCurrent(chain.toString())
     }
   }
+
+  // Close mobile menu on navigation
+  // Emit a custom event that the layout can listen to
+  window.dispatchEvent(new CustomEvent('close-mobile-menu'))
 })
 
 // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
