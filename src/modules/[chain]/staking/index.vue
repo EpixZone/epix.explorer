@@ -29,26 +29,53 @@ const tab = ref('active');
 const unbondList = ref([] as Validator[]);
 const slashing = ref({} as SlashingParam)
 
+// Loading and error states
+const loading = ref(true);
+const error = ref('');
+
 // Create a local reactive copy of validators
 const localValidators = ref([] as Validator[]);
 
 // Create a reactive list that we'll update manually
 const list = ref([] as any[]);
 
-onMounted(() => {
-    // Initialize local validators with current store data (for menu navigation)
-    localValidators.value = [...staking.validators];
-    updateList();
+onMounted(async () => {
+    try {
+        loading.value = true;
+        error.value = '';
 
-    staking.fetchUnbondingValdiators().then((res) => {
-        unbondList.value = res.concat(unbondList.value);
-    });
-    staking.fetchInacitveValdiators().then((res) => {
-        unbondList.value = unbondList.value.concat(res);
-    });
-    chainStore.rpc.getSlashingParams().then(res => {
-        slashing.value = res.params
-    })
+        // Initialize local validators with current store data (for menu navigation)
+        localValidators.value = [...staking.validators];
+        updateList();
+
+        // Fetch all required data
+        await Promise.all([
+            staking.fetchUnbondingValdiators().then((res) => {
+                unbondList.value = res.concat(unbondList.value);
+            }),
+            staking.fetchInacitveValdiators().then((res) => {
+                unbondList.value = unbondList.value.concat(res);
+            }),
+            chainStore.rpc.getSlashingParams().then(res => {
+                slashing.value = res.params
+            })
+        ]);
+
+        loading.value = false;
+    } catch (err: any) {
+        console.error('Error loading staking data:', err);
+        error.value = 'Failed to load staking data. Please try another RPC endpoint.';
+        loading.value = false;
+    }
+
+    // Add a timeout to prevent infinite loading
+    setTimeout(() => {
+        if (loading.value) {
+            console.error('Staking data loading timeout');
+            error.value = 'Loading timeout. Please try another RPC endpoint.';
+            loading.value = false;
+        }
+    }, 30000); // 30 second timeout
 });
 
 // Watch for changes in validators and update local copy
@@ -64,6 +91,11 @@ watch(() => staking.validators, (newValidators) => {
 watch(tab, () => {
     updateList()
 });
+
+// Watch for avatar changes and update list to refresh logos
+watch(avatars, () => {
+    updateList()
+}, { deep: true });
 
 async function fetchChange(blockWindow: number = 14400) {
     let page = 0;
@@ -201,7 +233,7 @@ const fetchAvatar = (identity: string) => {
         } else throw new Error(`failed to fetch avatar for ${identity}`);
       })
       .catch((error) => {
-        // console.error(error); // uncomment this if you want the user to see which avatars failed to load.
+        // Avatar loading failed, but continue without error
         resolve();
       });
   });
@@ -227,9 +259,9 @@ const loadAvatars = () => {
     }
   });
 
-  Promise.all(promises).then(() =>
-    localStorage.setItem('avatars', JSON.stringify(avatars.value))
-  );
+  Promise.all(promises).then(() => {
+    localStorage.setItem('avatars', JSON.stringify(avatars.value));
+  });
 };
 
 const logo = (identity?: string) => {
@@ -255,7 +287,88 @@ loadAvatars();
 </script>
 <template>
 <div>
-    <div class="modern-card shadow-modern grid sm:grid-cols-1 md:grid-cols-4 p-6 mb-6" >
+    <!-- Loading State -->
+    <div v-if="loading">
+        <!-- Stats Cards Skeleton -->
+        <div class="modern-card shadow-modern grid sm:grid-cols-1 md:grid-cols-4 p-6 mb-6">
+            <div v-for="i in 4" :key="i" class="flex items-center">
+                <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse mr-4"></div>
+                <div>
+                    <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2 w-20"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-24"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Skeleton -->
+        <div class="modern-card shadow-modern px-6 pt-4 pb-6">
+            <div class="flex items-center justify-between py-4 mb-4">
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-64"></div>
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16"></div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th v-for="i in 6" :key="i" class="p-4">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="i in 10" :key="i" class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="p-4">
+                                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8"></div>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse mr-4"></div>
+                                    <div>
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2 w-32"></div>
+                                        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-24"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20 ml-auto"></div>
+                            </td>
+                            <td class="p-4">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16 ml-auto"></div>
+                            </td>
+                            <td class="p-4">
+                                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12 ml-auto"></div>
+                            </td>
+                            <td class="p-4">
+                                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20 mx-auto"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="modern-card shadow-modern p-8 text-center mb-6">
+        <div class="text-red-500 mb-4">
+            <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Failed to Load Validators</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{{ error }}</p>
+            <button
+                @click="$router.go(0)"
+                class="modern-button px-6 py-2 text-sm"
+            >
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div v-else>
+        <div class="modern-card shadow-modern grid sm:grid-cols-1 md:grid-cols-4 p-6 mb-6" >
         <div class="flex items-center">
             <span>
                 <div class="relative w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center mr-4 bg-green-500/20">
@@ -351,7 +464,7 @@ loadAvatars();
                     </thead>
                     <tbody>
                         <tr
-                            v-for="({v, rank, logo}, i) in list"
+                            v-for="({v, rank, logo: validatorLogo}, i) in list"
                             :key="v.operator_address"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                         >
@@ -380,24 +493,29 @@ loadAvatars();
                                         <div
                                             class="w-8 h-8 rounded-full bg-gray-400 absolute opacity-10"
                                         ></div>
-                                        <div class="w-8 h-8 rounded-full">
+                                        <div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                                             <img
-                                                v-if="logo"
-                                                :src="logo"
-                                                class="object-contain"
+                                                v-if="validatorLogo"
+                                                :src="validatorLogo"
+                                                class="w-full h-full object-cover"
                                                 @error="
                                                     (e) => {
                                                         const identity = v.description?.identity;
-                                                        if (identity) loadAvatar(identity);
+                                                        if (identity) {
+                                                            loadAvatar(identity);
+                                                        }
+                                                        // Hide the broken image
+                                                        e.target.style.display = 'none';
                                                     }
                                                 "
+                                                @load="(e) => e.target.style.display = 'block'"
                                             />
                                             <Icon
-                                                v-else
-                                                class="text-3xl"
-                                                :icon="`mdi-help-circle-outline`"
+                                                v-if="!validatorLogo"
+                                                class="text-2xl text-gray-400"
+                                                icon="mdi:account-circle"
                                             />
-                                            
+
                                         </div>
                                     </div>
 
@@ -510,6 +628,7 @@ loadAvatars();
             </div>
         </div>
     </div>
+    </div> <!-- End of main content -->
 </div>
 </template>
 
