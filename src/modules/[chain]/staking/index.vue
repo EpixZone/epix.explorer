@@ -510,11 +510,12 @@ loadAvatars();
                                                 "
                                                 @load="(e) => e.target.style.display = 'block'"
                                             />
-                                            <Icon
-                                                v-if="!validatorLogo"
-                                                class="text-2xl text-gray-400"
-                                                icon="mdi:account-circle"
-                                            />
+                                            <div v-if="!validatorLogo" class="w-full h-full flex items-center justify-center">
+                                                <Icon
+                                                    class="text-gray-400 w-7 h-7"
+                                                    icon="mdi:account-circle"
+                                                />
+                                            </div>
 
                                         </div>
                                     </div>
