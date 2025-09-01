@@ -160,8 +160,9 @@ export const useIndexModule = defineStore('module-index', {
           title: 'Height',
           color: 'primary',
           icon: 'mdi-pound',
-          stats: String(base?.latest?.block?.header?.height || 0),
+          stats: formatter.formatNumber(Number(base?.latest?.block?.header?.height || 0), '0,0'),
           change: 0,
+          subtitle: 'Latest Block'
         },
         {
           title: 'Validators',
@@ -169,24 +170,27 @@ export const useIndexModule = defineStore('module-index', {
           icon: 'mdi-human-queue',
           stats: String(base?.latest?.block?.last_commit?.signatures.length || 0),
           change: 0,
+          subtitle: 'Active Validators'
         },
         {
           title: 'Supply',
           color: 'success',
           icon: 'mdi-currency-usd',
-          stats: formatter.formatTokenAmount(bank.supply),
+          stats: formatter.formatToken(bank.supply, false, '0.0a'),
           change: 0,
+          subtitle: formatter.tokenDisplayDenom(bank.supply?.denom)?.toUpperCase() || 'EPIX'
         },
         {
           title: 'Bonded Tokens',
           color: 'warning',
           icon: 'mdi-lock',
-          stats: formatter.formatTokenAmount({
+          stats: formatter.formatToken({
             // @ts-ignore
             amount: this.pool.bonded_tokens,
             denom: staking.params.bond_denom,
-          }),
+          }, false, '0.0a'),
           change: 0,
+          subtitle: `${formatter.calculateBondedRatio(this.pool)} Bonded`
         },
         {
           title: 'Inflation',
@@ -194,18 +198,20 @@ export const useIndexModule = defineStore('module-index', {
           icon: 'mdi-chart-multiple',
           stats: formatter.formatDecimalToPercent(mintStore.inflation),
           change: 0,
+          subtitle: 'Annual Rate'
         },
         {
           title: 'Community Pool',
           color: 'primary',
           icon: 'mdi-bank',
-          stats: formatter.formatTokens(
+          stats: formatter.formatToken(
             // @ts-ignore
-            this.communityPool?.filter(
+            this.communityPool?.find(
               (x: Coin) => x.denom === staking.params.bond_denom
-            )
+            ), false, '0.0a'
           ),
           change: 0,
+          subtitle: formatter.tokenDisplayDenom(staking.params.bond_denom)?.toUpperCase() || 'EPIX'
         },
       ];
     },

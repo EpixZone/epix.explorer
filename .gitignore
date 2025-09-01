@@ -3,6 +3,7 @@ node_modules/
 yarn-error.log
 dist
 .idea
+*.code-workspace
 
 # Yarn files
 .yarn/cache/

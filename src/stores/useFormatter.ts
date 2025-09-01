@@ -338,7 +338,15 @@ export const useFormatter = defineStore('formatter', {
       return numeral(percent > 0.0001 ? percent : 0).format('0.[00]%');
     },
     formatDecimalToPercent(decimal: string) {
-      return numeral(decimal).format('0.[00]%');
+      // Handle case where decimal is already a percentage (> 1) vs a decimal (< 1)
+      const num = Number(decimal);
+      if (num > 1) {
+        // Already a percentage, just format
+        return numeral(num).format('0.[00]') + '%';
+      } else {
+        // It's a decimal, convert to percentage
+        return numeral(num).format('0.[00]%');
+      }
     },
     formatCommissionRate(rate?: string) {
       if (!rate) return '-';

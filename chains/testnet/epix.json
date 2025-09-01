@@ -2,13 +2,13 @@
     "chain_name": "epix",
     "pretty_name": "Epix",
     "api": [
-        "https://api.testnet.epix.zone"
+        "http://localhost:1317"
     ],
     "rpc": [
-        "https://rpc.testnet.epix.zone"
+        "http://localhost:26657"
     ],
     "snapshot_provider": "",
-    "sdk_version": "0.50.8",
+    "sdk_version": "0.53.4",
     "coin_type": "60",
     "min_tx_fee": "800",
     "addr_prefix": "epix",
@@ -31,7 +31,8 @@
             "base": "aepix",
             "symbol": "EPIX",
             "exponent": "18",
-            "coingecko_id": "unknown"
+            "coingecko_id": "unknown",
+            "logo": "https://raw.githubusercontent.com/EpixZone/assets/refs/heads/main/images/icons/icon.png"
         }
     ],
     "keplr_features": [

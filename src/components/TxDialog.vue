@@ -10,7 +10,7 @@ const chainStore = useBlockchain()
     :endpoint="store.endpoint"
     :params='store.params'
     :hd-path="store.hdPaths"
-    :registry-name="chainStore.current?.prettyName || chainStore.chainName"
+    :registry-name="chainStore.chainName"
     @view="store.view"
     @confirmed="store.confirmed"
   ></ping-tx-dialog>

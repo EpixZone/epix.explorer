@@ -11,6 +11,10 @@ const props = defineProps({
 const formatter = useFormatter();
 function calculateValue(value: any) {
   if (Array.isArray(value)) {
+    // Check if it's a Coin array (has amount and denom properties)
+    if (value[0] && value[0].amount && value[0].denom) {
+      return formatter.formatTokens(value, true, '0,0.[00]');
+    }
     return (value[0] && value[0].amount) || '-';
   }
   if(String(value).search(/^\d+s$/g) > -1) {
