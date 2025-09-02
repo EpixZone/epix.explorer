@@ -44,6 +44,41 @@ function proposalAdapter(p: any): GovProposal {
 
 // EPIX custom request
 export const requests: Partial<RequestRegistry> = {
+  // Custom supply endpoints for EpixChain's epixmint module
+  bank_supply_by_denom: {
+    url: '/epix/mint/v1beta1/current_supply',
+    adapter: async (data: any): Promise<{ amount: any }> => {
+      try {
+        // EpixChain returns current supply, format it as expected by the bank module
+        return {
+          amount: {
+            denom: 'aepix', // EpixChain's base denomination
+            amount: data.current_supply || '0'
+          }
+        };
+      } catch (error) {
+        console.error('[EPIX Adapter] Error fetching supply:', error);
+        return {
+          amount: {
+            denom: 'aepix',
+            amount: '0'
+          }
+        };
+      }
+    },
+  },
+  // Additional EpixChain mint endpoints
+  mint_max_supply: {
+    url: '/epix/mint/v1beta1/max_supply',
+    adapter: async (data: any): Promise<{ max_supply: string }> => {
+      try {
+        return { max_supply: data.max_supply || '0' };
+      } catch (error) {
+        console.error('[EPIX Adapter] Error fetching max supply:', error);
+        return { max_supply: '0' };
+      }
+    },
+  },
   mint_inflation: {
     url: '/epix/mint/v1beta1/inflation',
     adapter: async (data: any): Promise<{ inflation: string }> => {
