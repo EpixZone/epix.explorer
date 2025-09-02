@@ -223,6 +223,38 @@ ping-tx-dialog .btn.btn-primary:hover {
   font-size: 13px;
 }
 
+/* Ensure modern-button styling takes precedence when combined with DaisyUI classes */
+.btn.modern-button,
+.btn-xs.modern-button {
+  background: #6366F1 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: white !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.025em !important;
+  transition: background-color 0.2s ease !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+.btn.modern-button:hover,
+.btn-xs.modern-button:hover {
+  background: #4F46E5 !important;
+}
+
+.btn.modern-button:active,
+.btn-xs.modern-button:active {
+  background: #3730A3 !important;
+}
+
+.btn.modern-button:disabled,
+.btn-xs.modern-button:disabled {
+  background: #6B7280 !important;
+  cursor: not-allowed !important;
+}
+
 .btn-circle {
   border-radius: 50%;
   width: 32px;
