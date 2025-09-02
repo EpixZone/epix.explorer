@@ -2,9 +2,11 @@
     "chain_name": "epix",
     "pretty_name": "Epix",
     "api": [
+        "https://api.epix.zone",
         "http://localhost:1317"
     ],
     "rpc": [
+        "https://rpc.epix.zone",
         "http://localhost:26657"
     ],
     "snapshot_provider": "",
@@ -42,9 +44,9 @@
         "ibc-go"
     ],
     "keplr_price_step": {
-        "low": 0.01,
-        "average": 0.025,
-        "high": 0.04
+        "low": 1000000000,
+        "average": 2500000000,
+        "high": 4200000000
     },
     "chain_id": "epix_1917-1"
 }

@@ -17,14 +17,30 @@ import {
   type PaginatedProposalDeposit,
   type Pagination,
 } from '@/types';
-import { ref, reactive } from 'vue';
+import { ref, reactive, watchEffect } from 'vue';
 import Countdown from '@/components/Countdown.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { fromBech32, toHex } from '@cosmjs/encoding';
 
 
 const props = defineProps(['proposal_id', 'chain']);
-const proposal = ref({} as GovProposal);
+const proposal = ref({
+  final_tally_result: {
+    yes: '0',
+    no: '0',
+    abstain: '0',
+    no_with_veto: '0'
+  }
+} as GovProposal);
+
+// Create separate reactive refs for tally data
+const tallyData = ref({
+  yes: '0',
+  no: '0',
+  abstain: '0',
+  no_with_veto: '0'
+});
+
 const format = useFormatter();
 const store = useGovStore();
 const dialog = useTxDialog();
@@ -33,16 +49,24 @@ const chainStore = useBlockchain();
 
 store.fetchProposal(props.proposal_id).then((res) => {
   let proposalDetail = reactive(res.proposal);
-  // when status under the voting, final_tally_result are no data, should request fetchTally
-  if (res.proposal?.status === 'PROPOSAL_STATUS_VOTING_PERIOD') {
-    store.fetchTally(props.proposal_id).then((tallRes) => {
-      proposalDetail.final_tally_result = tallRes?.tally;
-    });
-  }
   proposal.value = proposalDetail;
+
+  // Always fetch tally data to ensure it's in the correct format
+  console.log('Fetching tally for proposal:', props.proposal_id);
+  store.fetchTally(props.proposal_id).then((tallRes) => {
+    if (tallRes?.tally) {
+      // Update both the proposal and separate tally data
+      Object.assign(proposal.value.final_tally_result, tallRes.tally);
+      // Replace the entire ref to force reactivity
+      tallyData.value = { ...tallRes.tally };
+    }
+  }).catch((error) => {
+    console.error('Error fetching tally:', error);
+  });
+
   // load origin params if the proposal is param change
   if(proposalDetail.content?.changes) {
-    proposalDetail.content?.changes.forEach((item) => {  
+    proposalDetail.content?.changes.forEach((item) => {
         chainStore.rpc.getParams(item.subspace, item.key).then((res) => {
           if(proposal.value.content && res.param) {
             if(proposal.value.content.current){
@@ -98,6 +122,8 @@ const status = computed(() => {
   return '';
 });
 
+
+
 const deposit = ref({} as PaginatedProposalDeposit);
 store.fetchProposalDeposits(props.proposal_id).then((x) => (deposit.value = x));
 
@@ -135,59 +161,72 @@ const upgradeCountdown = computed((): number => {
   return end.getTime() - now.getTime();
 });
 
-const total = computed(() => {
-  const tally = proposal.value.final_tally_result;
-  let sum = 0;
-  if (tally) {
-    sum += Number(tally.abstain || 0);
-    sum += Number(tally.yes || 0);
-    sum += Number(tally.no || 0);
-    sum += Number(tally.no_with_veto || 0);
-  }
-  return sum;
+// Use a simple ref instead of computed
+const total = ref(0);
+
+// Use watchEffect to update the total when tallyData changes
+watchEffect(() => {
+  const tally = tallyData.value;
+
+  const yesNum = Number(tally.yes || 0);
+  const noNum = Number(tally.no || 0);
+  const abstainNum = Number(tally.abstain || 0);
+  const vetoNum = Number(tally.no_with_veto || 0);
+
+  const sum = yesNum + noNum + abstainNum + vetoNum;
+  total.value = sum;
 });
 
-const turnout = computed(() => {
+// Use ref instead of computed for turnout
+const turnout = ref(0);
+
+// Update turnout when total changes
+watchEffect(() => {
   if (total.value > 0) {
     const bonded = stakingStore.pool?.bonded_tokens || '1';
-    return format.percent(total.value / Number(bonded));
+    turnout.value = format.percent(total.value / Number(bonded));
+  } else {
+    turnout.value = 0;
   }
-  return 0;
 });
 
-const yes = computed(() => {
-  if (total.value > 0) {
-    const yes = proposal.value?.final_tally_result?.yes || 0;
-    return format.percent(Number(yes) / total.value);
-  }
-  return 0;
-});
+// Use refs instead of computed for percentage calculations
+const yes = ref(0);
+const no = ref(0);
+const veto = ref(0);
+const abstain = ref(0);
 
-const no = computed(() => {
+// Update percentages when total or tallyData changes
+watchEffect(() => {
   if (total.value > 0) {
-    const value = proposal.value?.final_tally_result?.no || 0;
-    return format.percent(Number(value) / total.value);
-  }
-  return 0;
-});
+    const yesValue = Number(tallyData.value.yes || 0);
+    const noValue = Number(tallyData.value.no || 0);
+    const vetoValue = Number(tallyData.value.no_with_veto || 0);
+    const abstainValue = Number(tallyData.value.abstain || 0);
 
-const veto = computed(() => {
-  if (total.value > 0) {
-    const value = proposal.value?.final_tally_result?.no_with_veto || 0;
-    return format.percent(Number(value) / total.value);
+    yes.value = format.percent(yesValue / total.value);
+    no.value = format.percent(noValue / total.value);
+    veto.value = format.percent(vetoValue / total.value);
+    abstain.value = format.percent(abstainValue / total.value);
+  } else {
+    yes.value = 0;
+    no.value = 0;
+    veto.value = 0;
+    abstain.value = 0;
   }
-  return 0;
 });
+// Use ref instead of computed for processList
+const processList = ref([
+  { name: 'Turnout', value: '0%', class: 'bg-info' },
+  { name: 'Yes', value: '0%', class: 'bg-success' },
+  { name: 'No', value: '0%', class: 'bg-error' },
+  { name: 'No With Veto', value: '0%', class: 'bg-red-800' },
+  { name: 'Abstain', value: '0%', class: 'bg-gray-400' },
+]);
 
-const abstain = computed(() => {
-  if (total.value > 0) {
-    const value = proposal.value?.final_tally_result?.abstain || 0;
-    return format.percent(Number(value) / total.value);
-  }
-  return 0;
-});
-const processList = computed(() => {
-  return [
+// Update processList when percentage values change
+watchEffect(() => {
+  processList.value = [
     { name: 'Turnout', value: turnout.value, class: 'bg-info' },
     { name: 'Yes', value: yes.value, class: 'bg-success' },
     { name: 'No', value: no.value, class: 'bg-error' },
@@ -264,6 +303,7 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
       <!-- flex-1 -->
       <div class="modern-card px-4 pt-3 pb-4 shadow-modern">
         <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">{{ $t('gov.tally') }}</h2>
+
         <div class="mb-1" v-for="(item, index) of processList" :key="index">
           <div class="block text-sm mb-1 text-gray-700 dark:text-gray-300">{{ item.name }}</div>
           <div class="h-5 w-full relative">
@@ -286,15 +326,17 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
           </div>
         </div>
         <div class="mt-6 grid grid-cols-2 gap-2">
-          <button
-            class="modern-button px-4 py-2 text-sm"
+          <label
+            for="vote"
+            class="modern-button px-4 py-2 text-sm cursor-pointer text-center"
             @click="dialog.open('vote', { proposal_id })"
-            >{{ $t('gov.btn_vote') }}</button
+            >{{ $t('gov.btn_vote') }}</label
           >
-          <button
-            class="modern-button px-4 py-2 text-sm"
+          <label
+            for="deposit"
+            class="modern-button px-4 py-2 text-sm cursor-pointer text-center"
             @click="dialog.open('deposit', { proposal_id })"
-            >{{ $t('gov.btn_deposit') }}</button
+            >{{ $t('gov.btn_deposit') }}</label
           >
         </div>
       </div>
