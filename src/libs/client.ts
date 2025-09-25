@@ -375,4 +375,12 @@ export class CosmosRestClient extends BaseRestClient<RequestRegistry> {
   async getInterchainSecurityConsumerValidators(chain_id: string) {
     return this.request(this.registry.interchain_security_consumer_validators, {chain_id});
   }
+
+  // Top Holders API methods
+  async getTopHolders(query = '') {
+    return this.request(this.registry.topholders_top_holders, {}, query);
+  }
+  async getTopHoldersCacheStatus() {
+    return this.request(this.registry.topholders_cache_status, {});
+  }
 }

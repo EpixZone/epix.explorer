@@ -376,7 +376,7 @@ loadAvatars();
                 </div>
             </span>
             <span>
-                <div class="font-bold text-gray-900 dark:text-white">{{ format.percent(mintStore.inflation) }}</div>
+                <div class="font-bold text-gray-900 dark:text-white">{{ format.formatDecimalToPercent(mintStore.inflation) }}</div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('staking.inflation') }}</div>
             </span>
         </div>

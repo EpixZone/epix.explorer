@@ -2,11 +2,11 @@
     "chain_name": "epix",
     "pretty_name": "Epix",
     "api": [
-        "https://api.epix.zone",
+        "https://api.testnet.epix.zone",
         "http://localhost:1317"
     ],
     "rpc": [
-        "https://rpc.epix.zone",
+        "https://rpc.testnet.epix.zone",
         "http://localhost:26657"
     ],
     "snapshot_provider": "",
@@ -24,6 +24,7 @@
         "consensus",
         "account",
         "state-sync",
+        "rich-list",
         "tx",
         "ibc",
         "parameters"

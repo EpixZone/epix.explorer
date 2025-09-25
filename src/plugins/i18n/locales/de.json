@@ -7,6 +7,7 @@
     "parameters": "Parameter",
     "uptime": "Verfügbarkeit",
     "state-sync": "State Sync",
+    "rich-list": "Reichenliste",
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
     "tx": "Transaktionen",
@@ -21,6 +22,21 @@
     "all_blockchains": "Alle Blockchains",
     "sponsors": "Sponsoren",
     "links": "Links"
+  },
+  "rich_list": {
+    "title": "Reichenliste",
+    "description": "Top-Token-Inhaber nach Gesamtsaldo (flüssig + gebunden + entbindend)",
+    "rank": "Rang",
+    "address": "Adresse",
+    "liquid_balance": "Flüssiger Saldo",
+    "bonded_balance": "Gebundener Saldo",
+    "unbonding_balance": "Entbindender Saldo",
+    "total_balance": "Gesamtsaldo",
+    "module": "Modul",
+    "loading": "Lade Top-Inhaber...",
+    "error": "Fehler beim Laden der Top-Inhaber-Daten. Bitte versuchen Sie es erneut.",
+    "try_again": "Erneut Versuchen",
+    "showing": "Zeige {start} bis {end} der Top {total} Inhaber"
   },
   "pages": {
     "title": "Epix Dashboard",

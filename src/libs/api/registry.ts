@@ -47,6 +47,7 @@ import type {
   Validator,
 } from '@/types/staking';
 import type { PaginatedTxs, Tx, TxResponse } from '@/types';
+import type { TopHoldersResponse, CacheStatusResponse } from '@/types';
 import semver from 'semver'
 export interface Request<T> {
   url: string;
@@ -166,6 +167,10 @@ export interface RequestRegistry extends AbstractRegistry {
   interchain_security_ccv_provider_validator_consumer_addr: Request<{consumer_address: string}>
   interchain_security_provider_opted_in_validators: Request<{validators_provider_addresses: string[]}>
   interchain_security_consumer_validators: Request<{validators: {provider_address: string, consumer_key: {ed25519: string}, power: string}[]}>
+
+  // Top Holders API
+  topholders_top_holders: Request<TopHoldersResponse>;
+  topholders_cache_status: Request<CacheStatusResponse>;
 }
 
 export function adapter<T>(source: any): Promise<T> {

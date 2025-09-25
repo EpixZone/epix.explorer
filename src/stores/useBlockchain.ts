@@ -94,6 +94,7 @@ export const useBlockchain = defineStore('blockchain', {
           'supply': 'mdi:currency-usd',
           'account': 'mdi:account-multiple',
           'ecosystem': 'mdi:earth',
+          'rich-list': 'mdi:format-list-numbered',
         };
 
         // Return menu items directly without the chain wrapper to avoid duplicate branding

@@ -229,4 +229,8 @@ export const DEFAULT: RequestRegistry = {
     adapter,
   },
 
+  // Top Holders API (placeholder - will be overridden by EPIX customization)
+  topholders_top_holders: { url: '/topholders/v1/top_holders', adapter },
+  topholders_cache_status: { url: '/topholders/v1/cache_status', adapter },
+
 };

@@ -136,4 +136,14 @@ export const requests: Partial<RequestRegistry> = {
     url: '/cosmos/gov/v1/proposals/{proposal_id}/votes/{voter}',
     adapter,
   },
+
+  // Top Holders API
+  topholders_top_holders: {
+    url: '/topholders/v1/top_holders',
+    adapter,
+  },
+  topholders_cache_status: {
+    url: '/topholders/v1/cache_status',
+    adapter,
+  },
 };

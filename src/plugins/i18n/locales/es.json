@@ -7,6 +7,7 @@
     "parameters": "Parámetros",
     "uptime": "Tiempo en línea",
     "state-sync": "Sincronización de estado",
+    "rich-list": "Lista de Ricos",
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
     "tx": "Transacciones",
@@ -21,6 +22,21 @@
     "all_blockchains": "Todas las Blockchains",
     "sponsors": "Patrocinadores",
     "links": "Enlaces"
+  },
+  "rich_list": {
+    "title": "Lista de Ricos",
+    "description": "Los principales poseedores de tokens clasificados por saldo total (líquido + vinculado + desvinculando)",
+    "rank": "Rango",
+    "address": "Dirección",
+    "liquid_balance": "Saldo Líquido",
+    "bonded_balance": "Saldo Vinculado",
+    "unbonding_balance": "Saldo Desvinculando",
+    "total_balance": "Saldo Total",
+    "module": "Módulo",
+    "loading": "Cargando principales poseedores...",
+    "error": "Error al cargar los datos de los principales poseedores. Por favor, inténtelo de nuevo.",
+    "try_again": "Intentar de Nuevo",
+    "showing": "Mostrando {start} a {end} de los principales {total} poseedores"
   },
   "pages": {
     "title": "Panel de control Epix",

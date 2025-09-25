@@ -7,6 +7,7 @@
     "parameters": "Parameter",
     "uptime": "Pemantauan",
     "state-sync": "State Sync",
+    "rich-list": "Daftar Kaya",
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
     "ibc": "IBC",
@@ -19,6 +20,21 @@
     "all_blockchains": "All Blockchain",
     "sponsors": "Sponsors",
     "links": "Tautan"
+  },
+  "rich_list": {
+    "title": "Daftar Kaya",
+    "description": "Pemegang token teratas berdasarkan saldo total (likuid + terikat + melepas ikatan)",
+    "rank": "Peringkat",
+    "address": "Alamat",
+    "liquid_balance": "Saldo Likuid",
+    "bonded_balance": "Saldo Terikat",
+    "unbonding_balance": "Saldo Melepas Ikatan",
+    "total_balance": "Saldo Total",
+    "module": "Modul",
+    "loading": "Memuat pemegang teratas...",
+    "error": "Gagal memuat data pemegang teratas. Silakan coba lagi.",
+    "try_again": "Coba Lagi",
+    "showing": "Menampilkan {start} hingga {end} dari {total} pemegang teratas"
   },
   "pages": {
     "title": "Epix Dashboard",

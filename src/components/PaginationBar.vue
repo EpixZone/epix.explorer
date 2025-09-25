@@ -5,8 +5,9 @@ const props = defineProps({
     total: { type: String },
     limit: { type: Number },
     callback: { type: Function, required: true },
+    currentPage: { type: Number, default: 1 },
 });
-const current = ref(1)
+const current = computed(() => props.currentPage)
 const showSize = 3
 const pages = computed(() => {
     const pages: { color: string, page: number }[] = []
@@ -31,7 +32,6 @@ const pages = computed(() => {
 })
 
 function gotoPage(pageNum: number) {
-    current.value = pageNum
     props.callback(pageNum)
 }
 

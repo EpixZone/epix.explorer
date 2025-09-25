@@ -620,11 +620,12 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
               <th class="py-3 text-left text-gray-400 font-medium">{{ $t('account.initial_balance') }}</th>
               <th class="py-3 text-left text-gray-400 font-medium">{{ $t('account.balance') }}</th>
               <th class="py-3 text-left text-gray-400 font-medium">{{ $t('account.completion_time') }}</th>
+              <th class="py-3 text-right text-gray-400 font-medium">{{ $t('account.actions') }}</th>
             </tr>
           </thead>
           <tbody v-for="(v, index) in unbonding" :key="index">
               <tr>
-                <td class="py-3 bg-gray-900/50 border border-gray-800 rounded-lg" colspan="4">
+                <td class="py-3 bg-gray-900/50 border border-gray-800 rounded-lg" colspan="5">
                   <RouterLink
                     :to="`/${chain}/staking/${v.validator_address}`"
                     class="text-epix-teal hover:text-epix-accent transition-colors font-mono text-sm"
@@ -662,6 +663,25 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
                 </td>
                 <td class="py-3 text-white">
                   <Countdown :time="new Date(entry.completion_time).getTime() - new Date().getTime()" />
+                </td>
+                <td class="py-3 text-right">
+                  <label
+                    for="cancel_unbond"
+                    class="modern-button text-xs px-3 py-1 bg-red-600/10 border border-red-600/20 text-red-400 hover:bg-red-600/20 transition-colors"
+                    @click="
+                      dialog.open(
+                        'cancel_unbond',
+                        {
+                          validator_address: v.validator_address,
+                          creation_height: entry.creation_height,
+                          initial_balance: entry.initial_balance,
+                          bond_denom: stakingStore.params.bond_denom,
+                        },
+                        updateEvent
+                      )
+                    "
+                    >{{ $t('account.btn_cancel_unbond') }}</label
+                  >
                 </td>
               </tr>
           </tbody>

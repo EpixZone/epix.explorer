@@ -255,8 +255,8 @@ async function addToMetaMaskEVM() {
                 symbol: 'EPIX',
                 decimals: 18,
             },
-            blockExplorerUrls: [isTestnet ? 'http://testscan.epix.zone/' : 'http://scan.epix.zone/'],
-            iconUrls: [chain.logo]
+            blockExplorerUrls: [isTestnet ? 'https://testscan.epix.zone/' : 'https://scan.epix.zone/'],
+            iconUrls: [chain.logo || 'https://raw.githubusercontent.com/EpixZone/assets/refs/heads/main/images/icons/icon.png']
         }
 
         // @ts-ignore

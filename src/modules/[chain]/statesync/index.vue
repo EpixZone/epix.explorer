@@ -53,6 +53,7 @@ onMounted(() => {
       </div>
     </div>
 
+
     <div class="modern-card shadow-modern px-6 pt-4 pb-5 mb-6">
       <h2 class="text-xl font-semibold text-gray-900 dark:text-white truncate mb-3">
         {{ $t('statesync.title_2') }}

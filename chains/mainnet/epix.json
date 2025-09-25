@@ -22,6 +22,7 @@
         "consensus",
         "account",
         "state-sync",
+        "rich-list",
         "tx",
         "ibc",
         "parameters"
