@@ -82,13 +82,13 @@ function changeEndpoint(item: Endpoint) {
       <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 font-semibold border-t border-gray-200 dark:border-gray-700">Information</div>
       <div class="w-full pb-2">
         <div class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300">
-          <span class="font-medium">Chain Id:</span> {{ baseStore.latest.block?.header.chain_id && baseStore.connected
+          <span class="font-medium">Chain Id:</span> {{ baseStore.latest?.block?.header?.chain_id && baseStore.connected
                         ? baseStore.latest.block.header.chain_id
                         : 'N/A' }}
         </div>
         <div class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300">
-          <span class="font-medium">Height:</span> {{ baseStore.latest.block?.header.height && baseStore.connected
-                      ? baseStore.latest.block.header.height
+          <span class="font-medium">Height:</span> {{ baseStore.latest?.block?.header?.height && baseStore.connected
+                      ? baseStore.latest?.block?.header?.height
                       : '0' }}
         </div>
       </div>

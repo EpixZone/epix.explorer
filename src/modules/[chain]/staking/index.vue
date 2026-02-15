@@ -7,8 +7,7 @@ import {
     useStakingStore,
     useTxDialog,
 } from '@/stores';
-import { computed } from '@vue/reactivity';
-import { onMounted, ref, watch, nextTick } from 'vue';
+import { computed, onMounted, ref, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { Key, SlashingParam, Validator } from '@/types';
 import { formatSeconds}  from '@/libs/utils'
@@ -85,6 +84,10 @@ watch(() => staking.validators, (newValidators) => {
     nextTick(() => {
         updateList()
     })
+    // Load avatars for any new validators (e.g. on first load when validators arrive late)
+    if (newValidators.length > 0) {
+        loadAvatars()
+    }
 }, { deep: true });
 
 // Watch for tab changes and update list

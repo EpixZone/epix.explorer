@@ -2,10 +2,12 @@
     "chain_name": "epix",
     "pretty_name": "Epix",
     "api": [
-        "https://api.epix.zone"
+        { "address": "https://api.epix.zone", "provider": "Epix" },
+        { "address": "https://rest.cosmos.directory/epix", "provider": "Cosmos Directory" }
     ],
     "rpc": [
-        "https://rpc.epix.zone"
+        { "address": "https://rpc.epix.zone", "provider": "Epix" },
+        { "address": "https://rpc.cosmos.directory/epix", "provider": "Cosmos Directory" }
     ],
     "snapshot_provider": "",
     "sdk_version": "0.53.4",
@@ -33,6 +35,9 @@
             "symbol": "EPIX",
             "exponent": "18",
             "coingecko_id": "unknown",
+            "osmosis_symbol": "EPIX",
+            "osmosis_alloyed": "EPIX",
+            "osmosis_ibc": "EPIX.epix",
             "logo": "https://raw.githubusercontent.com/EpixZone/assets/refs/heads/main/images/icons/icon.png"
         }
     ],

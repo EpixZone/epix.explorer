@@ -11,9 +11,9 @@ import {
   useStakingStore,
   useParamStore,
 } from '@/stores';
-import { onMounted, ref } from 'vue';
+import { formatSmallPrice } from '@/stores/useFormatter';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useIndexModule, colorMap, tickerUrl } from './indexStore';
-import { computed } from '@vue/reactivity';
 
 import CardStatisticsVertical from '@/components/CardStatisticsVertical.vue';
 import ProposalListItem from '@/components/ProposalListItem.vue';
@@ -36,19 +36,23 @@ onMounted(() => {
   store.loadDashboard();
   walletStore.loadMyAsset();
   paramStore.handleAbciInfo()
-  // if(!(coinInfo.value && coinInfo.value.name)) {
-  // }
 });
-const ticker = computed(() => store.coinInfo.tickers[store.tickerIndex]);
+const ticker = computed(() => store.coinInfo.tickers?.[store.tickerIndex]);
 
-const currName = ref("")
-blockchain.$subscribe((m, s) => {
+const currName = ref(blockchain.chainName)
+let isActive = true;
+const unsubscribe = blockchain.$subscribe((m, s) => {
+  if (!isActive) return;
   if (s.chainName !== currName.value) {
     currName.value = s.chainName
     store.loadDashboard();
     walletStore.loadMyAsset();
     paramStore.handleAbciInfo()
   }
+});
+onUnmounted(() => {
+  isActive = false;
+  unsubscribe();
 });
 function shortName(name: string, id: string) {
   return name.toLowerCase().startsWith('ibc/') ||
@@ -57,30 +61,10 @@ function shortName(name: string, id: string) {
     : name;
 }
 
-const comLinks = computed(()=> {
-  return [
-  {
-    name: 'Website',
-    icon: 'mdi-web',
-    href: store.homepage,
-  },
-  {
-    name: 'Twitter',
-    icon: 'mdi-twitter',
-    href: store.twitter,
-  },
-  {
-    name: 'Telegram',
-    icon: 'mdi-telegram',
-    href: store.telegram,
-  },
-  {
-    name: 'Github',
-    icon: 'mdi-github',
-    href: store.github,
-  },
-];
-})
+function formatPrice(value: number | undefined): string {
+  if (value == null) return '0';
+  return formatSmallPrice(value);
+}
 
 // wallet box
 const change = computed(() => {
@@ -117,10 +101,10 @@ const qty = computed({
 })
 const amount = computed({
   get: () => {
-    return quantity.value * ticker.value.converted_last.usd || 0
+    return quantity.value * (ticker.value?.converted_last?.usd || 0)
   },
   set: val => {
-    quantity.value = val / ticker.value.converted_last.usd || 0
+    quantity.value = val / (ticker.value?.converted_last?.usd || 1)
   }
 })
 
@@ -136,22 +120,8 @@ const amount = computed({
               coinInfo.symbol
             }}</span>)
           </div>
-          <div class="text-xs mt-2">
-            {{ $t('index.rank') }}:
-            <div class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-              #{{ coinInfo.market_cap_rank }}
-            </div>
-          </div>
 
-          <div class="my-4 flex flex-wrap items-center">
-            <a v-for="(item, index) of comLinks" :key="index" :href="item.href"
-              class="text-epix-teal hover:text-epix-accent px-2 py-1 rounded-sm no-underline hover:bg-gray-100 dark:hover:bg-epix-gray-light flex items-center transition-colors duration-200">
-              <Icon :icon="item?.icon" />
-              <span class="ml-1 text-sm uppercase">{{ item?.name }}</span>
-            </a>
-          </div>
-
-          <div>
+          <div v-if="ticker">
             <div class="dropdown dropdown-hover w-full">
               <label>
                 <div
@@ -169,7 +139,7 @@ const amount = computed({
 
                   <div class="text-right">
                     <div class="text-xl font-semibold text-gray-900 dark:text-white">
-                      ${{ ticker?.converted_last?.usd }}
+                      ${{ formatPrice(ticker?.converted_last?.usd) }}
                     </div>
                     <div class="text-sm" :class="store.priceColor">
                       {{ store.priceChange }}%
@@ -194,7 +164,7 @@ const amount = computed({
                         </div>
 
                         <div class="text-base text-gray-900 dark:text-white">
-                           ${{ item?.converted_last?.usd }}
+                           ${{ formatPrice(item?.converted_last?.usd) }}
                         </div>
                       </div>
                     </li>
@@ -211,6 +181,7 @@ const amount = computed({
               <input type="checkbox" id="calculator" class="modal-toggle" />
               <div class="modal">
                 <div class="modal-box">
+                  <label for="calculator" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</label>
                   <h3 class="text-lg font-bold">{{ $t('index.price_calculator') }}</h3>
                   <div class="flex flex-col w-full mt-5">
                     <div class="grid h-20 flex-grow card rounded-box place-items-center">
@@ -289,7 +260,7 @@ const amount = computed({
           <div class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ format.formatToken(walletStore.balanceOfStakingToken) }}
           </div>
-          <div class="text-sm" :class="color">
+          <div class="text-sm text-green-600 dark:text-green-400">
             ${{ format.tokenValue(walletStore.balanceOfStakingToken) }}
           </div>
         </div>
@@ -298,7 +269,7 @@ const amount = computed({
           <div class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ format.formatToken(walletStore.stakingAmount) }}
           </div>
-          <div class="text-sm" :class="color">
+          <div class="text-sm text-green-600 dark:text-green-400">
             ${{ format.tokenValue(walletStore.stakingAmount) }}
           </div>
         </div>
@@ -307,7 +278,7 @@ const amount = computed({
           <div class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ format.formatToken(walletStore.rewardAmount) }}
           </div>
-          <div class="text-sm" :class="color">
+          <div class="text-sm text-green-600 dark:text-green-400">
             ${{ format.tokenValue(walletStore.rewardAmount) }}
           </div>
         </div>
@@ -316,7 +287,7 @@ const amount = computed({
           <div class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ format.formatToken(walletStore.unbondingAmount) }}
           </div>
-          <div class="text-sm" :class="color">
+          <div class="text-sm text-green-600 dark:text-green-400">
             ${{ format.tokenValue(walletStore.unbondingAmount) }}
           </div>
         </div>

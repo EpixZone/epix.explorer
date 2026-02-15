@@ -11,6 +11,7 @@ import { useMintStore } from '@/stores/useMintStore';
 import { useStakingStore } from '@/stores/useStakingStore';
 import type { Coin, Tally } from '@/types';
 import numeral from 'numeral';
+import { nextTick } from 'vue';
 import { defineStore } from 'pinia';
 
 export function colorMap(color: string) {
@@ -34,7 +35,8 @@ const CODEMAP: Record<string, string[]> = {
 export const useIndexModule = defineStore('module-index', {
   state: () => {
     return {
-      days: 14,
+      days: 7,
+      chartLoading: false,
       tickerIndex: 0,
       coinInfo: {
         name: '',
@@ -220,12 +222,37 @@ export const useIndexModule = defineStore('module-index', {
       this.tickerIndex = 0;
       // @ts-ignore
       const [firstAsset] = this.blockchain?.assets || [];
-      return firstAsset.coingecko_id
+      if (!firstAsset) return '';
+      if (firstAsset.coingecko_id && firstAsset.coingecko_id !== 'unknown') {
+        return firstAsset.coingecko_id;
+      }
+      if ((firstAsset as any).osmosis_symbol) {
+        return `osmosis-${(firstAsset as any).osmosis_symbol.toLowerCase()}`;
+      }
+      return '';
     }
   },
   actions: {
     async loadDashboard() {
-      this.$reset();
+      this.tickerIndex = 0;
+      this.coinInfo = {
+        name: '',
+        symbol: '',
+        description: { en: '' },
+        categories: [],
+        market_cap_rank: 0,
+        links: {
+          twitter_screen_name: '',
+          homepage: [],
+          repos_url: { github: [] },
+          telegram_channel_identifier: '',
+        },
+        market_data: { price_change_percentage_24h: 0 },
+        tickers: [],
+      };
+      this.marketData = { market_caps: [], prices: [], total_volumes: [] };
+      this.communityPool = [];
+      this.tally = {};
       this.initCoingecko();
       useMintStore().fetchInflation();
       useDistributionStore()
@@ -249,17 +276,91 @@ export const useIndexModule = defineStore('module-index', {
     initCoingecko() {
       this.tickerIndex = 0;
       const [firstAsset] = this.blockchain?.assets || [];
-      if (firstAsset && firstAsset.coingecko_id) {
+      if (!firstAsset) return;
+
+      const osmosisSymbol = (firstAsset as any).osmosis_symbol;
+      const osmosisIbc = (firstAsset as any).osmosis_ibc;
+
+      if (firstAsset.coingecko_id && firstAsset.coingecko_id !== 'unknown') {
         this.coingecko.getCoinInfo(firstAsset.coingecko_id).then((x) => {
           this.coinInfo = x;
-          // this.coinInfo.tickers.sort((a, b) => a.converted_last.usd - b.converted_last.usd)
         });
+        this.fetchChartData();
+      } else if (osmosisSymbol) {
+        this.coingecko.getOsmosisTokenInfo(osmosisSymbol).then((tokenData) => {
+          if (tokenData) {
+            this.coinInfo = {
+              name: useBlockchain().current?.prettyName || firstAsset.display || firstAsset.symbol,
+              symbol: firstAsset.symbol,
+              description: { en: '' },
+              categories: [],
+              market_cap_rank: 0,
+              links: {
+                twitter_screen_name: '',
+                homepage: [],
+                repos_url: { github: [] },
+                telegram_channel_identifier: '',
+              },
+              market_data: {
+                price_change_percentage_24h: tokenData.price_24h_change || 0,
+              },
+              tickers: [{
+                market: { name: 'Osmosis DEX', identifier: 'osmosis' },
+                coin_id: osmosisSymbol.toLowerCase(),
+                target_coin_id: 'usd',
+                trust_score: 'green',
+                trade_url: `https://app.osmosis.zone/?from=USDC&to=${osmosisIbc || osmosisSymbol}`,
+                converted_last: { btc: 0, eth: 0, usd: tokenData.price || 0 },
+                base: osmosisSymbol,
+                target: 'USD',
+              }],
+            };
+          }
+        });
+
+        this.fetchChartData();
+      }
+    },
+    fetchChartData() {
+      const [firstAsset] = this.blockchain?.assets || [];
+      if (!firstAsset) return;
+      const osmosisSymbol = (firstAsset as any).osmosis_symbol;
+      this.chartLoading = true;
+
+      if (firstAsset.coingecko_id && firstAsset.coingecko_id !== 'unknown') {
         this.coingecko
           .getMarketChart(this.days, firstAsset.coingecko_id)
           .then((x) => {
             this.marketData = x;
-          });
+          })
+          .finally(() => { this.chartLoading = false; });
+      } else if (osmosisSymbol) {
+        // Map days to Osmosis tf (minutes): pick a resolution that gives a reasonable number of data points
+        let tf = 60;
+        if (this.days <= 1/24) tf = 5;        // 1H → 5min candles
+        else if (this.days <= 1) tf = 15;      // 1D → 15min candles
+        else if (this.days <= 7) tf = 60;      // 7D → 1h candles
+        else if (this.days <= 30) tf = 240;    // 30D → 4h candles
+        else if (this.days <= 365) tf = 1440;  // 1Y → 1d candles
+        else tf = 10080;                        // ALL → 1w candles
+
+        this.coingecko.getOsmosisMarketChart(osmosisSymbol, tf).then((x: any) => {
+          // Filter data to the requested time window (Osmosis API returns full history)
+          if (this.days < 9999) {
+            const cutoff = Date.now() - this.days * 24 * 60 * 60 * 1000;
+            x.prices = x.prices.filter((p: any) => p[0] >= cutoff);
+            x.total_volumes = x.total_volumes.filter((p: any) => p[0] >= cutoff);
+          }
+          this.marketData = x;
+        }).finally(() => { this.chartLoading = false; });
+      } else {
+        this.chartLoading = false;
       }
+    },
+    setTimeframe(days: number) {
+      this.days = days;
+      this.marketData = { market_caps: [], prices: [], total_volumes: [] };
+      this.fetchChartData();
     },
     selectTicker(i: number) {
       this.tickerIndex = i;

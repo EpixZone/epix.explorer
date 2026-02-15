@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import { computed, ref } from '@vue/reactivity';
+import { computed, ref, onMounted } from 'vue';
 import { useBaseStore, useBlockchain, useFormatter } from '@/stores';
 import { PageRequest, type AuthAccount, type Pagination } from '@/types';
-import { onMounted } from 'vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 const props = defineProps(['chain']);
 

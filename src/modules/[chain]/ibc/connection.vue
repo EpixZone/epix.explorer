@@ -29,7 +29,7 @@ function pageload(p: number) {
     list.value = x.connections;
     pageResponse.value = x.pagination
     if(x.pagination.total && Number(x.pagination.total) > 0) {
-      ibcStore.showConnection(0)
+      ibcStore.showConnection('connection-1')
     }
   });
 }

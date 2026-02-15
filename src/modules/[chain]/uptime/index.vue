@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
 import { fromHex, toBase64, fromBase64, toHex } from '@cosmjs/encoding';
 import {
   useStakingStore,
@@ -233,6 +233,26 @@ const loadAvatar = (identity: string) => {
     localStorage.setItem('avatars', JSON.stringify(avatars.value));
   });
 };
+
+const loadAvatars = () => {
+  const promises = stakingStore.validators.map((validator) => {
+    const identity = validator.description?.identity;
+    if (identity && !avatars.value[identity]) {
+      return fetchAvatar(identity);
+    }
+    return Promise.resolve();
+  });
+  Promise.all(promises).then(() => {
+    localStorage.setItem('avatars', JSON.stringify(avatars.value));
+  });
+};
+
+// Load avatars when validators become available
+watch(() => stakingStore.validators, (newValidators) => {
+  if (newValidators.length > 0) {
+    loadAvatars();
+  }
+}, { immediate: true });
 
 // Get validator identity from moniker
 const getValidatorIdentity = (moniker: string) => {

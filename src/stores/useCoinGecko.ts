@@ -50,5 +50,20 @@ export const useCoingecko = defineStore('coingecko', {
         this.currency = currency;
       }
     },
+    getOsmosisTokenInfo(symbol: string) {
+      return get(`https://data.app.osmosis.zone/tokens/v2/${symbol}`).then((data: any[]) => {
+        if (data && data.length > 0) return data[0];
+        return null;
+      });
+    },
+    getOsmosisMarketChart(symbol: string, tf = 60) {
+      return get(`https://data.app.osmosis.zone/tokens/v2/historical/${symbol}/chart?tf=${tf}`).then((data: any[]) => {
+        if (!data || !Array.isArray(data)) return { prices: [], total_volumes: [], market_caps: [] };
+        const prices = data.map(d => [d.time * 1000, d.close]);
+        const total_volumes = data.map(d => [d.time * 1000, d.volume]);
+        const market_caps: any[] = [];
+        return { prices, total_volumes, market_caps };
+      });
+    },
   },
 });

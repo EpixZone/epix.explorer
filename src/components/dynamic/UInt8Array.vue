@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { toBase64, toHex } from '@cosmjs/encoding';
-import { computed } from '@vue/reactivity';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps(['value']);
 const format = ref('base64');

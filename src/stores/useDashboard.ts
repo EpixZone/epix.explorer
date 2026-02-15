@@ -106,6 +106,9 @@ export interface LocalConfig {
   assets: {
     base: string;
     coingecko_id: string;
+    osmosis_symbol?: string;
+    osmosis_alloyed?: string;
+    osmosis_ibc?: string;
     exponent: string;
     logo: string;
     symbol: string;
@@ -160,6 +163,9 @@ export function fromLocal(lc: LocalConfig): ChainConfig {
       symbol: x.symbol,
       logo_URIs: { svg: x.logo },
       coingecko_id: x.coingecko_id,
+      osmosis_symbol: x.osmosis_symbol,
+      osmosis_alloyed: x.osmosis_alloyed,
+      osmosis_ibc: x.osmosis_ibc,
       exponent: x.exponent,
       denom_units: [
         { denom: x.base, exponent: 0 },
@@ -312,15 +318,26 @@ export const useDashboard = defineStore('dashboard', {
     },
     loadingPrices() {
       const coinIds = [] as string[]
+      const osmosisSymbols = [] as string[]
       const keys = Object.keys(this.chains) // load all blockchain
       // Object.keys(this.favoriteMap) //only load favorite once it has too many chains
       keys.forEach(k => {
-        if (Array.isArray(this.chains[k]?.assets)) this.chains[k].assets.forEach(a => {
-          if (a.coingecko_id !== undefined && a.coingecko_id.length > 0) {
+        if (Array.isArray(this.chains[k]?.assets)) this.chains[k].assets.forEach((a: any) => {
+          if (a.coingecko_id && a.coingecko_id !== 'unknown' && a.coingecko_id.length > 0) {
             coinIds.push(a.coingecko_id)
-            a.denom_units.forEach(u => {
+            a.denom_units.forEach((u: any) => {
               this.coingecko[u.denom] = {
                 coinId: a.coingecko_id || '',
+                exponent: u.exponent,
+                symbol: a.symbol
+              }
+            })
+          } else if (a.osmosis_symbol) {
+            const syntheticId = `osmosis-${a.osmosis_symbol.toLowerCase()}`
+            osmosisSymbols.push(a.osmosis_symbol)
+            a.denom_units.forEach((u: any) => {
+              this.coingecko[u.denom] = {
+                coinId: syntheticId,
                 exponent: u.exponent,
                 symbol: a.symbol
               }
@@ -329,9 +346,26 @@ export const useDashboard = defineStore('dashboard', {
         })
       })
 
-      const currencies = ['usd, cny'] // usd,cny,eur,jpy,krw,sgd,hkd
-      get(`https://api.coingecko.com/api/v3/simple/price?include_24hr_change=true&vs_currencies=${currencies.join(',')}&ids=${coinIds.join(",")}`).then(x => {
-        this.prices = x
+      if (coinIds.length > 0) {
+        const currencies = ['usd, cny'] // usd,cny,eur,jpy,krw,sgd,hkd
+        get(`https://api.coingecko.com/api/v3/simple/price?include_24hr_change=true&vs_currencies=${currencies.join(',')}&ids=${coinIds.join(",")}`).then(x => {
+          this.prices = { ...this.prices, ...x }
+        })
+      }
+
+      osmosisSymbols.forEach(symbol => {
+        get(`https://data.app.osmosis.zone/tokens/v2/${symbol}`).then((data: any[]) => {
+          if (data && data.length > 0) {
+            const token = data[0]
+            this.prices = {
+              ...this.prices,
+              [`osmosis-${symbol.toLowerCase()}`]: {
+                usd: token.price,
+                usd_24h_change: token.price_24h_change,
+              }
+            }
+          }
+        }).catch(() => {})
       })
     },
     async loadingFromRegistry() {
@@ -346,7 +380,7 @@ export const useDashboard = defineStore('dashboard', {
       }
     },
     async loadingFromLocal() {
-      if (window.location.hostname.search("testnet") > -1 || window.location.hostname === "localhost") {
+      if (window.location.hostname.search("testnet") > -1) {
         this.networkType = NetworkType.Testnet
       }
       const source: Record<string, LocalConfig> =
@@ -358,6 +392,41 @@ export const useDashboard = defineStore('dashboard', {
       });
       this.setupDefault();
       this.status = LoadingStatus.Loaded;
+
+      // Fetch community endpoints from Cosmos Directory and merge them in
+      if (this.networkType === NetworkType.Mainnet) {
+        this.fetchDirectoryEndpoints();
+      }
+    },
+    fetchDirectoryEndpoints() {
+      Object.keys(this.chains).forEach((chainName) => {
+        get(`https://chains.cosmos.directory/${chainName}`).then((res: any) => {
+          const chain = res?.chain;
+          if (!chain?.apis) return;
+          const config = this.chains[chainName];
+          if (!config) return;
+
+          // Normalize addresses for dedup (strip trailing slash)
+          const normalize = (addr: string) => addr.replace(/\/+$/, '');
+          const existingRest = new Set((config.endpoints.rest || []).map((e: Endpoint) => normalize(e.address)));
+          const existingRpc = new Set((config.endpoints.rpc || []).map((e: Endpoint) => normalize(e.address)));
+
+          const newRest = (chain.apis.rest || [])
+            .filter((e: any) => e.address && !existingRest.has(normalize(e.address)))
+            .map((e: any) => ({ address: normalize(e.address), provider: e.provider || 'Unknown' }));
+
+          const newRpc = (chain.apis.rpc || [])
+            .filter((e: any) => e.address && !existingRpc.has(normalize(e.address)))
+            .map((e: any) => ({ address: normalize(e.address), provider: e.provider || 'Unknown' }));
+
+          if (newRest.length > 0) {
+            config.endpoints.rest = [...(config.endpoints.rest || []), ...newRest];
+          }
+          if (newRpc.length > 0) {
+            config.endpoints.rpc = [...(config.endpoints.rpc || []), ...newRpc];
+          }
+        }).catch(() => {});
+      });
     },
     async loadLocalConfig(network: NetworkType) {
       const config: Record<string, ChainConfig> = {}

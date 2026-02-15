@@ -47,7 +47,7 @@ onMounted(() => {
     const chainStore = useBlockchain()
 
     // Detect network type based on URL
-    const isTestnet = window.location.hostname.search("testnet") > -1 || window.location.hostname === "localhost"
+    const isTestnet = false //window.location.hostname.search("testnet") > -1 || window.location.hostname === "localhost"
     network.value = isTestnet ? NetworkType.Testnet : NetworkType.Mainnet
 
     // Check for URL parameters to set wallet type

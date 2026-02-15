@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from '@vue/reactivity';
+import { computed, ref, reactive, watchEffect } from 'vue';
 import MdEditor from 'md-editor-v3';
 import ObjectElement from '@/components/dynamic/ObjectElement.vue';
 import {
@@ -17,7 +17,6 @@ import {
   type PaginatedProposalDeposit,
   type Pagination,
 } from '@/types';
-import { ref, reactive, watchEffect } from 'vue';
 import Countdown from '@/components/Countdown.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { fromBech32, toHex } from '@cosmjs/encoding';

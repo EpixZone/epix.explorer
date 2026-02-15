@@ -1,6 +1,18 @@
 import { defineStore } from 'pinia';
 import { useBlockchain } from './useBlockchain';
 import numeral from 'numeral';
+
+/** Truncates (not rounds) a number to 2 significant digits after leading zeros.
+ *  e.g. 1.259 → "1.25", 0.00209 → "0.0020", 0.0000932 → "0.000093" */
+export function formatSmallPrice(value: number): string {
+  if (value >= 1) return value.toFixed(2);
+  if (value <= 0) return '0';
+  const s = value.toFixed(20);
+  const match = s.match(/^0\.(0*)/);
+  if (!match) return value.toFixed(2);
+  const leadingZeros = match[1].length;
+  return s.slice(0, 2 + leadingZeros + 2);
+}
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -111,7 +123,8 @@ export const useFormatter = defineStore('formatter', {
     },
     tokenValue(token?: Coin) {
       if (token) {
-        return numeral(this.tokenValueNumber(token)).format("0,0.[00]")
+        const val = this.tokenValueNumber(token);
+        return formatSmallPrice(val);
       }
       return ""
     },
