@@ -87,6 +87,12 @@ function trustColor(v: string) {
   return `text-${colorMap(v)}`;
 }
 
+const marketCap = computed(() => {
+  const price = ticker.value?.converted_last?.usd || 0;
+  const supplyAmount = format.tokenDisplayNumber(store.bankStore.supply);
+  return price * supplyAmount;
+});
+
 const quantity = ref(100);
 const qty = computed({
   get: () => {
@@ -222,6 +228,10 @@ const amount = computed({
                 target="_blank">
                 {{ $t('index.buy') }} {{ coinInfo.symbol || '' }}
               </a>
+            </div>
+            <div class="mt-3 bg-gray-50 dark:bg-epix-gray rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700">
+              <div class="text-sm text-gray-600 dark:text-gray-400">Market Cap</div>
+              <div class="text-lg font-semibold text-gray-900 dark:text-white">${{ formatSmallPrice(marketCap) }}</div>
             </div>
           </div>
         </div>
