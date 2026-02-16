@@ -7,7 +7,6 @@ import newFooter from '@/layouts/components/NavFooter.vue';
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue';
 import NavbarSearch from '@/layouts/components/NavbarSearch.vue';
 import ChainProfile from '@/layouts/components/ChainProfile.vue';
-import Sponsors from '@/layouts/components/Sponsors.vue';
 
 import { useDashboard } from '@/stores/useDashboard';
 import { NetworkType } from '@/types/chaindata';
@@ -206,10 +205,6 @@ const show_ad = computed(() => {
             Add to Wallet
           </div>
         </RouterLink>
-        <div v-if="showDiscord" class="px-3 text-xs pt-6 text-gray-500 pb-3 uppercase font-semibold tracking-wider">
-          {{ $t('module.sponsors') }}
-        </div>
-        <Sponsors v-if="showDiscord" />
         <div class="px-3 text-xs pt-6 text-gray-500 pb-3 uppercase font-semibold tracking-wider">{{ $t('module.links') }}</div>
         <a href="https://twitter.com/zone_epix" target="_blank"
           class="py-2.5 px-3 flex items-center cursor-pointer rounded-lg hover:bg-gray-800/30 transition-colors duration-200 mb-1">
@@ -218,7 +213,7 @@ const show_ad = computed(() => {
             Epix
           </div>
         </a>
-        <a v-if="showDiscord" href="https://docs.epix.zone/epix-docs" target="_blank"
+        <a v-if="showDiscord" href="https://docs.epix.zone/" target="_blank"
           class="py-2.5 px-3 flex items-center rounded-lg cursor-pointer hover:bg-gray-800/30 transition-colors duration-200 mb-1">
           <Icon icon="mdi:book" class="text-lg mr-3 text-green-400" />
           <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
