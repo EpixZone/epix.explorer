@@ -1,4 +1,5 @@
 import { useBlockchain } from '@/stores';
+import { formatSmallPrice } from '@/stores/useFormatter';
 import numeral from 'numeral';
 
 const chainStore = useBlockchain();
@@ -341,14 +342,14 @@ export const getDonutChartConfig = (theme: string, labels: string[]) => {
             value: {
               fontSize: '1.5rem',
               color: themeSecondaryTextColor,
-              formatter: (val: string) => `${parseInt(val, 10)}`,
+              formatter: (val: string) => formatSmallPrice(parseFloat(val)),
             },
             total: {
-              show: false,
+              show: true,
+              label: 'Total',
               fontSize: '1.5rem',
-              // label: 'Operational',
-              // formatter: () => '31%',
               color: themePrimaryTextColor,
+              formatter: (w: any) => formatSmallPrice(w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0)),
             },
           },
         },

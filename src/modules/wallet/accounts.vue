@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { CosmosRestClient } from '@/libs/client';
 import { useBlockchain, useDashboard, useFormatter } from '@/stores';
+import { formatSmallPrice } from '@/stores/useFormatter';
 import type { CoinWithPrice, Delegation } from '@/types';
 import { fromBech32, toBase64 } from '@cosmjs/encoding';
 import { Icon } from '@iconify/vue';
@@ -196,9 +197,8 @@ async function loadBalances(chainName: string, endpoint: string, address: string
           </div>
           <div class="flex flex-col text-right">
             <span class="text-sm text-gray-600 dark:text-gray-400">Total Value</span>
-            <span class="text-2xl font-bold text-green-500">${{ format.formatNumber(totalValue, '0,0.[00]') }}</span>
-            <span class="text-sm" :class="format.color(totalChange)">{{ format.formatNumber(totalChange, '+0,0.[00]')
-            }}</span>
+            <span class="text-2xl font-bold text-green-500">${{ formatSmallPrice(totalValue) }}</span>
+            <span class="text-sm" :class="format.color(totalChange)">{{ totalChange >= 0 ? '+' : '' }}{{ formatSmallPrice(totalChange) }}</span>
           </div>
         </div>
       </div>
@@ -268,9 +268,9 @@ async function loadBalances(chainName: string, endpoint: string, address: string
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="font-bold text-gray-900 dark:text-white">${{ format.formatNumber(x.delegation.value, '0,0.[00]') }}</div>
+                  <div class="font-bold text-gray-900 dark:text-white">${{ formatSmallPrice(x.delegation.value || 0) }}</div>
                   <div class="text-xs" :class="format.color(x.delegation.change24h)">
-                    {{ format.formatNumber((x.delegation.change24h || 0) * (x.delegation.value || 0) / 100, '+0,0.[00]') }}
+                    {{ ((x.delegation.change24h || 0) * (x.delegation.value || 0) / 100) >= 0 ? '+' : '' }}{{ formatSmallPrice((x.delegation.change24h || 0) * (x.delegation.value || 0) / 100) }}
                   </div>
                 </div>
               </RouterLink>
@@ -302,9 +302,9 @@ async function loadBalances(chainName: string, endpoint: string, address: string
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="font-bold text-gray-900 dark:text-white">${{ format.formatNumber(x.value, '0,0.[00]') }}</div>
+                  <div class="font-bold text-gray-900 dark:text-white">${{ formatSmallPrice(x.value || 0) }}</div>
                   <div class="text-xs" :class="format.color(x.change24h)">
-                    {{ format.formatNumber((x.change24h || 0) * (x.value || 0) / 100, '+0,0.[00]') }}
+                    {{ ((x.change24h || 0) * (x.value || 0) / 100) >= 0 ? '+' : '' }}{{ formatSmallPrice((x.change24h || 0) * (x.value || 0) / 100) }}
                   </div>
                 </div>
               </RouterLink>

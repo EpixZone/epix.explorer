@@ -13,6 +13,7 @@ const conf = ref("")
 const dashboard = useDashboard()
 const selected = ref({} as ChainConfig)
 const wallet = ref("keplr") // Default to Keplr consensus layer for EPIX
+const selectedConsensusWallet = ref("keplr") // Which consensus wallet to use: keplr or leap
 const network = ref(NetworkType.Mainnet)
 const mainnet = ref([] as ChainConfig[])
 const testnet = ref([] as ChainConfig[])
@@ -233,6 +234,23 @@ async function initParamsForKeplr() {
 
 // initSnap function removed - focusing on EVM integration
 
+function getEvmChainConfig() {
+    const chain = selected.value
+    const isTestnet = network.value === NetworkType.Testnet
+    return {
+        chainId: isTestnet ? '0x77d' : '0x77c', // 1917 in hex for testnet, 1916 for mainnet
+        chainName: isTestnet ? 'Epix Testnet' : 'Epix',
+        rpcUrls: [isTestnet ? 'https://evmrpc.testnet.epix.zone/' : 'https://evmrpc.epix.zone/'],
+        nativeCurrency: {
+            name: 'EPIX',
+            symbol: 'EPIX',
+            decimals: 18,
+        },
+        blockExplorerUrls: [isTestnet ? 'https://testscan.epix.zone/' : 'https://scan.epix.zone/'],
+        iconUrls: [chain.logo || 'https://raw.githubusercontent.com/EpixZone/assets/refs/heads/main/images/icons/icon.png']
+    }
+}
+
 // Add EVM MetaMask integration for EPIX chain
 async function addToMetaMaskEVM() {
     // @ts-ignore
@@ -241,39 +259,22 @@ async function addToMetaMaskEVM() {
         return
     }
 
+    const evmChainConfig = getEvmChainConfig()
+
     try {
-        const chain = selected.value
-        const isTestnet = network.value === NetworkType.Testnet
-
-        // EVM chain configuration for EPIX
-        const evmChainConfig = {
-            chainId: isTestnet ? '0x77d' : '0x77c', // 1917 in hex for testnet, 1916 for mainnet
-            chainName: isTestnet ? 'Epix Testnet' : 'Epix',
-            rpcUrls: [isTestnet ? 'https://evmrpc.testnet.epix.zone/' : 'https://evmrpc.epix.zone/'],
-            nativeCurrency: {
-                name: 'EPIX',
-                symbol: 'EPIX',
-                decimals: 18,
-            },
-            blockExplorerUrls: [isTestnet ? 'https://testscan.epix.zone/' : 'https://scan.epix.zone/'],
-            iconUrls: [chain.logo || 'https://raw.githubusercontent.com/EpixZone/assets/refs/heads/main/images/icons/icon.png']
-        }
-
         // @ts-ignore
         await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [evmChainConfig],
         })
 
-        success.value = `Successfully added ${chain.prettyName || chain.chainName} to MetaMask!`
+        success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to MetaMask!`
     } catch (e: any) {
         // MetaMask sometimes throws errors even when the operation succeeds
         // Always try to verify if the network was actually added successfully
         // by attempting to switch to it, regardless of the error
         try {
-            const chain = selected.value
-            const isTestnet = network.value === NetworkType.Testnet
-            const chainId = isTestnet ? '0x77d' : '0x77c'
+            const chainId = evmChainConfig.chainId
 
             // @ts-ignore
             await window.ethereum.request({
@@ -282,7 +283,7 @@ async function addToMetaMaskEVM() {
             })
 
             // If we can switch to it, it was added successfully
-            success.value = `Successfully added ${chain.prettyName || chain.chainName} to MetaMask!`
+            success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to MetaMask!`
 
         } catch (switchError: any) {
             // Handle user rejection of the original add request
@@ -317,7 +318,33 @@ async function addToMetaMaskEVM() {
     }
 }
 
-// Cosmos Snap integration removed - focusing on EVM integration
+// Add EVM Trust Wallet integration for EPIX chain
+async function addToTrustWalletEVM() {
+    // @ts-ignore
+    const provider = window.trustwallet
+    if (!provider) {
+        error.value = "Trust Wallet is not installed or not available. Please install the Trust Wallet extension."
+        return
+    }
+
+    const evmChainConfig = getEvmChainConfig()
+
+    try {
+        await provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [evmChainConfig],
+        })
+
+        success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to Trust Wallet!`
+    } catch (e: any) {
+        if (e && e.code === 4001) {
+            error.value = "User rejected the request to add the chain to Trust Wallet."
+            return
+        }
+        const errorMessage = e?.message || 'Unknown error occurred while adding chain to Trust Wallet'
+        error.value = `Failed to add chain to Trust Wallet: ${errorMessage}`
+    }
+}
 
 async function suggest() {
     // Clear previous messages
@@ -325,22 +352,47 @@ async function suggest() {
     success.value = ""
 
     if(wallet.value === "keplr") {
-        // @ts-ignore
-        if (window.keplr) {
-            try {
-                // @ts-ignore
-                await window.keplr.experimentalSuggestChain(JSON.parse(conf.value))
-                success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to Keplr wallet!`
-            } catch (e) {
-                error.value = `Failed to add chain to Keplr: ${e.message || e}`
+        if (selectedConsensusWallet.value === "leap") {
+            // @ts-ignore
+            if (window.leap) {
+                try {
+                    // @ts-ignore
+                    await window.leap.experimentalSuggestChain(JSON.parse(conf.value))
+                    success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to Leap wallet!`
+                } catch (e) {
+                    error.value = `Failed to add chain to Leap: ${e.message || e}`
+                }
+            } else {
+                error.value = "Leap wallet is not installed or not available. Please install the Leap extension."
             }
         } else {
-            error.value = "Keplr wallet is not installed or not available. Please install Keplr extension."
+            // @ts-ignore
+            if (window.keplr) {
+                try {
+                    // @ts-ignore
+                    await window.keplr.experimentalSuggestChain(JSON.parse(conf.value))
+                    success.value = `Successfully added ${selected.value.prettyName || selected.value.chainName} to Keplr wallet!`
+                } catch (e) {
+                    error.value = `Failed to add chain to Keplr: ${e.message || e}`
+                }
+            } else {
+                error.value = "Keplr wallet is not installed or not available. Please install Keplr extension."
+            }
         }
     } else {
         // Default to MetaMask EVM integration
         await addToMetaMaskEVM()
     }
+}
+
+function suggestToLeap() {
+    selectedConsensusWallet.value = "leap"
+    suggest()
+}
+
+function suggestToKeplr() {
+    selectedConsensusWallet.value = "keplr"
+    suggest()
 }
 </script>
 
@@ -410,7 +462,7 @@ async function suggest() {
                         <!-- Wallet Tiles -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8">
                             <!-- Keplr Wallet Tile -->
-                            <div class="modern-card p-6 hover-lift cursor-pointer transition-all duration-200 border-2 border-transparent hover:border-epix-primary" @click="suggest">
+                            <div class="modern-card p-6 hover-lift cursor-pointer transition-all duration-200 border-2 border-transparent hover:border-epix-primary" @click="suggestToKeplr">
                                 <div class="flex flex-col items-center text-center">
                                     <img src="/logos/Keplr.png" alt="Keplr" class="w-16 h-16 mb-4 rounded-lg" />
                                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Keplr</h4>
@@ -422,14 +474,14 @@ async function suggest() {
                             </div>
 
                             <!-- Leap Wallet Tile -->
-                            <div class="modern-card p-6 opacity-60 cursor-not-allowed transition-all duration-200 border-2 border-gray-300 dark:border-gray-600">
+                            <div class="modern-card p-6 hover-lift cursor-pointer transition-all duration-200 border-2 border-transparent hover:border-epix-primary" @click="suggestToLeap">
                                 <div class="flex flex-col items-center text-center">
                                     <img src="/logos/Leap.png" alt="Leap" class="w-16 h-16 mb-4 rounded-lg" />
                                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Leap</h4>
                                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Advanced Cosmos wallet</p>
-                                    <div class="px-6 py-2 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 font-medium text-sm w-full rounded-lg">
-                                        Coming Soon
-                                    </div>
+                                    <button class="modern-button px-6 py-2 text-white font-medium text-sm w-full">
+                                        Add Epix to Leap
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -517,14 +569,14 @@ async function suggest() {
                             </div>
 
                             <!-- Trust Wallet Tile -->
-                            <div class="modern-card p-6 opacity-60 cursor-not-allowed transition-all duration-200 border-2 border-gray-300 dark:border-gray-600">
+                            <div class="modern-card p-6 hover-lift cursor-pointer transition-all duration-200 border-2 border-transparent hover:border-epix-primary" @click="addToTrustWalletEVM">
                                 <div class="flex flex-col items-center text-center">
                                     <img src="/logos/Trust.png" alt="Trust Wallet" class="w-16 h-16 mb-4 rounded-lg" />
                                     <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Trust Wallet</h4>
                                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Mobile-first crypto wallet</p>
-                                    <div class="px-6 py-2 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 font-medium text-sm w-full rounded-lg">
-                                        Coming Soon
-                                    </div>
+                                    <button class="modern-button px-6 py-2 text-white font-medium text-sm w-full">
+                                        Add Epix to Trust Wallet
+                                    </button>
                                 </div>
                             </div>
                         </div>

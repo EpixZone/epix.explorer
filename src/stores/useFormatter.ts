@@ -5,7 +5,7 @@ import numeral from 'numeral';
 /** Truncates (not rounds) a number to 2 significant digits after leading zeros.
  *  e.g. 1.259 -> "1.25", 0.00209 -> "0.0020", 0.0000932 -> "0.000093" */
 export function formatSmallPrice(value: number): string {
-  if (value >= 1) return value.toFixed(2);
+  if (value >= 1) return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (value <= 0) return '0';
   const s = value.toFixed(20);
   const match = s.match(/^0\.(0*)/);

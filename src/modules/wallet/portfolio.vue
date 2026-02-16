@@ -1,74 +1,26 @@
 <script lang="ts" setup>
 import { CosmosRestClient } from '@/libs/client';
 import type { Coin, Delegation } from '@/types';
-import { ref, watchEffect, computed } from 'vue';
+import { ref, computed } from 'vue';
 import type { AccountEntry } from './utils';
-import { useBaseStore, useBlockchain, useFormatter } from '@/stores';
+import { useDashboard, useBlockchain, useFormatter } from '@/stores';
+import { formatSmallPrice } from '@/stores/useFormatter';
 import { Icon } from '@iconify/vue';
 import DonutChart from '@/components/charts/DonutChart.vue';
-import ApexCharts from 'vue3-apexcharts';
-import { get } from '@/libs';
-import { getMarketPriceChartConfig } from '@/components/charts/apexChartConfig';
 import AdBanner from '@/components/ad/AdBanner.vue';
 
 const format = useFormatter();
+const dashboard = useDashboard();
 const conf = ref(JSON.parse(localStorage.getItem('imported-addresses') || '{}') as Record<string, AccountEntry[]>);
 const chainStore = useBlockchain();
 const balances = ref({} as Record<string, Coin[]>);
 const delegations = ref({} as Record<string, Delegation[]>);
 const tokenMeta = ref({} as Record<string, AccountEntry>);
 
-const priceloading = ref(false);
-const currency = ref(localStorage.getItem('currency') || 'usd');
-
-const prices = ref(
-  [] as {
-    id: string;
-    symbol: string;
-    name: string;
-    image: string;
-    current_price: number;
-    market_cap: number;
-    market_cap_rank: number;
-    fully_diluted_valuation: number;
-    total_volume: number;
-    high_24h: number;
-    low_24h: number;
-    price_change_24h: number;
-    price_change_percentage_24h: number;
-    market_cap_change_24h: number;
-    market_cap_change_percentage_24h: number;
-    circulating_supply: number;
-    total_supply: number;
-    max_supply: number;
-    ath: number;
-    ath_change_percentage: number;
-    ath_date: string;
-    atl: string;
-    atl_change_percentage: number;
-    atl_date: string;
-    roi: string;
-    last_updated: string;
-    sparkline_in_7d: { prices: number[] };
-  }[]
-);
-
-const loading = ref(0);
-const loaded = ref(0);
-watchEffect(() => {
-  if (loading.value > 0 && loading.value === loaded.value) {
-    if (!priceloading.value) {
-      priceloading.value = true;
-      loadPrice();
-    }
-  }
-});
-
 Object.values(conf.value).forEach((imported) => {
   if (imported)
     imported.forEach((x) => {
       if (x.endpoint && x.address) {
-        loading.value += 1;
         const endpoint = chainStore.randomEndpoint(x.chainName);
         const client = CosmosRestClient.newDefault(endpoint?.address || x.endpoint);
         client
@@ -79,9 +31,6 @@ Object.values(conf.value).forEach((imported) => {
             bal.forEach((b) => {
               tokenMeta.value[b.denom] = x;
             });
-          })
-          .finally(() => {
-            loaded.value += 1;
           });
         client.getStakingDelegations(x.address).then((res) => {
           if (res && res.delegation_responses) delegations.value[x.address || ''] = res.delegation_responses;
@@ -94,16 +43,12 @@ Object.values(conf.value).forEach((imported) => {
 });
 
 const tokenQty = computed(() => {
-  const values = {} as Record<string, { coinId: string; qty: number }>;
+  const values = {} as Record<string, number>;
   Object.values(balances.value).forEach((b) => {
     b.forEach((coin) => {
       const v = format.tokenDisplayNumber(coin);
       if (v) {
-        if (values[coin.denom]) {
-          values[coin.denom].qty += v;
-        } else {
-          values[coin.denom] = { qty: v, coinId: format.findGlobalAssetConfig(coin.denom)?.coingecko_id || '' };
-        }
+        values[coin.denom] = (values[coin.denom] || 0) + v;
       }
     });
   });
@@ -111,14 +56,7 @@ const tokenQty = computed(() => {
     b.forEach((d) => {
       const v = format.tokenDisplayNumber(d.balance);
       if (v) {
-        if (values[d.balance.denom]) {
-          values[d.balance.denom].qty += v;
-        } else {
-          values[d.balance.denom] = {
-            qty: v,
-            coinId: format.findGlobalAssetConfig(d.balance.denom)?.coingecko_id || '',
-          };
-        }
+        values[d.balance.denom] = (values[d.balance.denom] || 0) + v;
       }
     });
   });
@@ -126,11 +64,13 @@ const tokenQty = computed(() => {
 });
 
 const tokenValues = computed(() => {
+  // Access dashboard.prices to ensure reactivity when prices load
+  const _ = dashboard.prices;
   const values = {} as Record<string, number>;
-  Object.keys(tokenQty.value).forEach((k) => {
-    const x = tokenQty.value[k];
-    const marketData = prices.value.find((p: any) => p.id === x.coinId);
-    values[k] = marketData ? x.qty * marketData.current_price : 0;
+  Object.keys(tokenQty.value).forEach((denom) => {
+    const qty = tokenQty.value[denom];
+    const unitPrice = format.price(denom);
+    values[denom] = qty * unitPrice;
   });
   return values;
 });
@@ -142,102 +82,36 @@ const totalValue = computed(() => {
 const tokenList = computed(() => {
   const list = [] as {
     denom: string;
+    qty: number;
     value: number;
     logo: string;
     chainName: string;
     percentage: number;
   }[];
-  Object.keys(tokenValues.value).map((x) => {
+  Object.keys(tokenQty.value).map((denom) => {
     list.push({
-      denom: x,
-      value: tokenValues.value[x],
-      chainName: tokenMeta.value[x]?.chainName,
-      logo: tokenMeta.value[x]?.logo,
-      percentage: tokenValues.value[x] / totalValue.value,
+      denom,
+      qty: tokenQty.value[denom],
+      value: tokenValues.value[denom] || 0,
+      chainName: tokenMeta.value[denom]?.chainName,
+      logo: tokenMeta.value[denom]?.logo,
+      percentage: totalValue.value > 0 ? (tokenValues.value[denom] || 0) / totalValue.value : 0,
     });
   });
-  return list.filter((x) => x.value > 0).sort((a, b) => b.value - a.value);
+  return list.filter((x) => x.qty > 0).sort((a, b) => b.value - a.value);
 });
 
-function loadPrice() {
-  localStorage.setItem('currency', currency.value);
-  const ids = Object.values(tokenQty.value)
-    .map((x) => x.coinId)
-    .join(',');
-  get(
-    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency.value}&ids=${ids}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=14d&locale=en`
-  ).then((res) => {
-    prices.value = res;
-  });
-}
 const totalChangeIn24 = computed(() => {
-  return Object.values(tokenQty.value)
-    .map((x) => {
-      const marketData = prices.value.find((p: any) => p.id === x.coinId);
-      if (marketData) return x.qty * (marketData.price_change_24h || 0);
-      return 0;
+  const _ = dashboard.prices;
+  return Object.keys(tokenQty.value)
+    .map((denom) => {
+      const qty = tokenQty.value[denom];
+      const change = format.priceChanges(denom);
+      const unitPrice = format.price(denom);
+      // Convert percentage change to absolute change
+      return unitPrice > 0 && change ? qty * unitPrice * (change / 100) : 0;
     })
     .reduce((s, c) => s + c, 0);
-});
-// Compute data for trend chart
-const changeData = computed(() => {
-  const vals = Object.keys(tokenQty.value)
-    .map((denom) => {
-      const token = tokenQty.value[denom];
-      const marketData: any = prices.value.find((x) => x.id === token.coinId);
-      if (marketData) {
-        return marketData.sparkline_in_7d?.price.map((p: number) => p * token.qty) as number[];
-      }
-      return [];
-    })
-    .filter((x) => x.length > 0);
-
-  const width = vals.at(0)?.length || 0;
-  const sum = new Array(width).fill(0);
-
-  for (let i = 0; i < width; i++) {
-    for (let j = 0; j < vals.length; j++) {
-      sum[i] += vals.at(j)?.at(i) || 0;
-    }
-  }
-
-  return [{ name: 'value', data: sum }];
-});
-
-const baseStore = useBaseStore();
-const chartConfig = computed(() => {
-  const theme = baseStore.theme;
-  const labels = [] as any[];
-  const time = new Date().getTime();
-  for (let i = 0; i < 168; i++) {
-    // only works for 14d
-    labels.unshift(time - i * 2 * 60 * 60 * 1000);
-  }
-  return getMarketPriceChartConfig(theme, labels);
-});
-
-const currencySign = computed(() => {
-  switch (currency.value) {
-    case 'usd':
-      return '$';
-    case 'cny':
-      return '\u00a5';
-    case 'eur':
-      return '\u20ac';
-    case 'hkd':
-      return 'HK$';
-    case 'jpy':
-      return '\u00a5';
-    case 'sdg':
-      return 'S$';
-    case 'krw':
-      return '\u20a9';
-    case 'btc':
-      return 'BTC';
-    case 'eth':
-      return 'ETH';
-  }
-  return '$';
 });
 </script>
 <template>
@@ -249,44 +123,21 @@ const currencySign = computed(() => {
           <h2 class="text-2xl font-bold leading-7 sm:!truncate sm:!text-3xl sm:!tracking-tight text-gray-900 dark:text-white">
             Portfolio
           </h2>
-          <div class="mt-3">
-            <div class="flex items-center text-sm">
-              <span class="text-gray-600 dark:text-gray-400 mr-2">Currency:</span>
-              <select
-                v-model="currency"
-                @change="loadPrice"
-                class="modern-input px-3 py-1 text-sm uppercase font-medium"
-              >
-                <option>usd</option>
-                <option>cny</option>
-                <option>eur</option>
-                <option>hkd</option>
-                <option>jpy</option>
-                <option>sgd</option>
-                <option>krw</option>
-                <option>btc</option>
-                <option>eth</option>
-              </select>
-            </div>
-          </div>
         </div>
         <div class="text-right">
           <div class="text-sm text-gray-600 dark:text-gray-400">Total Value</div>
-          <div class="text-2xl font-bold text-green-500">{{ currencySign }} {{ format.formatNumber(totalValue, '0,0.[00]') }}</div>
+          <div class="text-2xl font-bold text-green-500">${{ formatSmallPrice(totalValue) }}</div>
           <div class="text-sm" :class="{ 'text-green-500': totalChangeIn24 > 0, 'text-red-500': totalChangeIn24 < 0 }">
-            {{ format.formatNumber(totalChangeIn24, '+0,0.[00]') }}
+            {{ totalChangeIn24 >= 0 ? '+' : '' }}{{ formatSmallPrice(totalChangeIn24) }}
           </div>
         </div>
       </div>
     </div>
     <div class="modern-card shadow-modern p-6 mb-6">
-      <div v-if="tokenList" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div v-if="tokenList.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white dark:bg-epix-gray rounded-lg p-4">
           <DonutChart height="280" :series="Object.values(tokenValues)"
             :labels="Object.keys(tokenValues).map(x => format.tokenDisplayDenom(x)?.toUpperCase())" />
-        </div>
-        <div class="md:col-span-2 bg-white dark:bg-epix-gray rounded-lg p-4">
-          <ApexCharts type="area" height="280" :options="chartConfig" :series="changeData" />
         </div>
       </div>
 
@@ -308,14 +159,14 @@ const currencySign = computed(() => {
                   <div class="font-bold text-lg text-gray-900 dark:text-white uppercase">
                     {{ format.tokenDisplayDenom(x.denom) }}
                   </div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                    {{ x.chainName }}
+                  <div class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ format.formatNumber(x.qty, '0,0.[0000]') }} {{ format.tokenDisplayDenom(x.denom)?.toUpperCase() }}
                   </div>
                 </div>
               </div>
               <div class="text-right">
                 <div class="font-bold text-lg text-gray-900 dark:text-white">
-                  {{ currencySign }}{{ format.formatNumber(x.value, '0,0.[00]') }}
+                  ${{ formatSmallPrice(x.value) }}
                 </div>
                 <div class="text-sm text-gray-600 dark:text-gray-400">
                   {{ format.percent(x.percentage) }}
@@ -330,7 +181,6 @@ const currencySign = computed(() => {
         <Icon icon="mdi:chart-pie" class="text-4xl mb-2 text-gray-400" />
         <div>No portfolio data available</div>
       </div>
-      <div class="p-4 text-center" v-if="tokenList.length === 0">No Data</div>
     </div>
     <div class="text-center modern-card shadow-modern my-6 p-6">
       <RouterLink to="./accounts" class="modern-button inline-flex items-center gap-2">
