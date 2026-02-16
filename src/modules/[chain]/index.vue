@@ -388,17 +388,6 @@ const amount = computed({
       </Teleport>
     </div>
 
-    <div class="modern-card mt-4 shadow-modern">
-      <div class="px-4 pt-4 pb-2 text-lg font-semibold text-gray-900 dark:text-white">
-        {{ $t('index.app_versions') }}
-      </div>
-      <!-- Application Version -->
-      <ArrayObjectElement
-        :value="paramStore.appVersion?.items"
-        :thead="false"
-      />
-      <div class="h-4"></div>
-    </div>
 
     <div v-if="!store.coingeckoId" class="modern-card mt-4 shadow-modern">
       <div class="px-4 pt-4 pb-2 text-lg font-semibold text-gray-900 dark:text-white">

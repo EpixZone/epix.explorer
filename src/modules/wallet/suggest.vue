@@ -667,7 +667,7 @@ function suggestToKeplr() {
                     If you're having trouble adding the network, make sure you have the latest version of your wallet extension installed.
                 </p>
                 <div class="flex flex-wrap justify-center gap-4">
-                    <a href="https://docs.epix.zone/epix-docs" target="_blank" class="px-4 py-2 text-sm flex items-center bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
+                    <a href="https://docs.epix.zone/" target="_blank" class="px-4 py-2 text-sm flex items-center bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
                         <Icon icon="mdi:book-open" class="mr-2 text-base" />
                         Documentation
                     </a>

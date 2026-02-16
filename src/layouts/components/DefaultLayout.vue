@@ -213,7 +213,14 @@ const show_ad = computed(() => {
             Epix
           </div>
         </a>
-        <a v-if="showDiscord" href="https://docs.epix.zone/" target="_blank"
+        <a href="https://discord.com/invite/bF2GKHgrfv" target="_blank"
+          class="py-2.5 px-3 flex items-center cursor-pointer rounded-lg hover:bg-gray-800/30 transition-colors duration-200 mb-1">
+          <Icon icon="simple-icons:discord" class="text-lg mr-3 text-indigo-400" />
+          <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
+            Discord
+          </div>
+        </a>
+        <a href="https://docs.epix.zone/" target="_blank"
           class="py-2.5 px-3 flex items-center rounded-lg cursor-pointer hover:bg-gray-800/30 transition-colors duration-200 mb-1">
           <Icon icon="mdi:book" class="text-lg mr-3 text-green-400" />
           <div class="text-sm capitalize flex-1 text-gray-100 font-medium tracking-wide">
