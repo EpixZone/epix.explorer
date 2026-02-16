@@ -28,6 +28,7 @@ const connId = computed(() => {
   return props.connection_id || 0;
 });
 
+const showClientInfo = ref(false);
 const loading = ref(false);
 const txs = ref({} as PaginatedTxs);
 const direction = ref('');
@@ -150,97 +151,112 @@ function color(v: string) {
       </div>
     </div>
 
-    <div class="bg-base-100 px-4 pt-3 pb-4 rounded mb-4 shadow">
-      <h2 class="card-title mb-4 overflow-hidden">
-        {{ $t('ibc.title_2')
-        }}<span class="ml-2 text-sm">{{
-          clientState.client_state?.['@type']
-        }}</span>
-      </h2>
-      <div class="overflow-x-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-        <table class="table table-sm capitalize">
-          <thead class="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th colspan="3" class="text-gray-700 dark:text-gray-300 font-semibold">{{ $t('ibc.trust_parameters') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="w-52 text-gray-700 dark:text-gray-300">{{ $t('ibc.trust_level') }}:</td>
-              <td class="text-gray-900 dark:text-white">
-                {{ clientState.client_state?.trust_level?.numerator }}/{{
-                  clientState.client_state?.trust_level?.denominator
-                }}
-              </td>
-            </tr>
-            <tr>
-              <td class="w-52">{{ $t('ibc.trusting_period') }}:</td>
-              <td>
-                {{ formatSeconds(clientState.client_state?.trusting_period) }}
-              </td>
-            </tr>
-            <tr>
-              <td class="w-52">{{ $t('ibc.unbonding_period') }}:</td>
-              <td>
-                {{ formatSeconds(clientState.client_state?.unbonding_period) }}
-              </td>
-            </tr>
-            <tr>
-              <td class="w-52">{{ $t('ibc.max_clock_drift') }}:</td>
-              <td>
-                {{ formatSeconds(clientState.client_state?.max_clock_drift) }}
-              </td>
-            </tr>
-            <tr>
-              <td class="w-52 text-gray-700 dark:text-gray-300">{{ $t('ibc.frozen_height') }}:</td>
-              <td class="text-gray-900 dark:text-white">{{ clientState.client_state?.frozen_height }}</td>
-            </tr>
-            <tr>
-              <td class="w-52 text-gray-700 dark:text-gray-300">{{ $t('ibc.latest_height') }}:</td>
-              <td class="text-gray-900 dark:text-white">{{ clientState.client_state?.latest_height }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <table class="table table-sm text-sm w-full capitalize">
-          <thead class="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th colspan="2" class="text-gray-700 dark:text-gray-300 font-semibold">{{ $t('ibc.upgrade_parameters') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="2">
-                <div class="flex justify-between">
-                  <span>{{ $t('ibc.allow_update_after_expiry') }}:</span>
-                  <span>{{
-                    clientState.client_state?.allow_update_after_expiry
-                  }}</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2">
-                <div class="flex justify-between">
-                  <span>{{ $t('ibc.allow_update_after_misbehaviour') }}: </span>
-                  <span>{{
-                    clientState.client_state?.allow_update_after_misbehaviour
-                  }}</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td class="w-52">{{ $t('ibc.upgrade_path') }}:</td>
-              <td class="text-right">
-                {{ clientState.client_state?.upgrade_path.join(', ') }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
     <div class="bg-base-100 px-4 pt-3 pb-4 rounded mb-4 shadow overflow-hidden">
-      <h2 class="card-title">{{ $t('ibc.channels') }}</h2>
-      <div class="overflow-auto">
+      <div class="flex gap-2 mb-4">
+        <button
+          class="btn btn-sm"
+          :class="showClientInfo ? 'btn-ghost' : 'btn-primary'"
+          @click="showClientInfo = false"
+        >
+          {{ $t('ibc.channels') }}
+        </button>
+        <button
+          class="btn btn-sm"
+          :class="showClientInfo ? 'btn-primary' : 'btn-ghost'"
+          @click="showClientInfo = true"
+        >
+          Client Info
+        </button>
+      </div>
+
+      <!-- Client Info Tab -->
+      <div v-if="showClientInfo">
+        <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ clientState.client_state?.['@type'] }}</div>
+        <div class="overflow-x-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+          <table class="table table-sm capitalize">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th colspan="3" class="text-gray-700 dark:text-gray-300 font-semibold">{{ $t('ibc.trust_parameters') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="w-52 text-gray-700 dark:text-gray-300">{{ $t('ibc.trust_level') }}:</td>
+                <td class="text-gray-900 dark:text-white">
+                  {{ clientState.client_state?.trust_level?.numerator }}/{{
+                    clientState.client_state?.trust_level?.denominator
+                  }}
+                </td>
+              </tr>
+              <tr>
+                <td class="w-52">{{ $t('ibc.trusting_period') }}:</td>
+                <td>
+                  {{ formatSeconds(clientState.client_state?.trusting_period) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="w-52">{{ $t('ibc.unbonding_period') }}:</td>
+                <td>
+                  {{ formatSeconds(clientState.client_state?.unbonding_period) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="w-52">{{ $t('ibc.max_clock_drift') }}:</td>
+                <td>
+                  {{ formatSeconds(clientState.client_state?.max_clock_drift) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="w-52 text-gray-700 dark:text-gray-300">{{ $t('ibc.frozen_height') }}:</td>
+                <td class="text-gray-900 dark:text-white">{{ clientState.client_state?.frozen_height }}</td>
+              </tr>
+              <tr>
+                <td class="w-52 text-gray-700 dark:text-gray-300">{{ $t('ibc.latest_height') }}:</td>
+                <td class="text-gray-900 dark:text-white">{{ clientState.client_state?.latest_height }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table table-sm text-sm w-full capitalize">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th colspan="2" class="text-gray-700 dark:text-gray-300 font-semibold">{{ $t('ibc.upgrade_parameters') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="2">
+                  <div class="flex justify-between">
+                    <span>{{ $t('ibc.allow_update_after_expiry') }}:</span>
+                    <span>{{
+                      clientState.client_state?.allow_update_after_expiry
+                    }}</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <div class="flex justify-between">
+                    <span>{{ $t('ibc.allow_update_after_misbehaviour') }}: </span>
+                    <span>{{
+                      clientState.client_state?.allow_update_after_misbehaviour
+                    }}</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="w-52">{{ $t('ibc.upgrade_path') }}:</td>
+                <td class="text-right">
+                  {{ clientState.client_state?.upgrade_path.join(', ') }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Channels Tab -->
+      <h2 v-if="!showClientInfo" class="card-title">{{ $t('ibc.channels') }}</h2>
+      <div v-if="!showClientInfo" class="overflow-auto">
         <table class="table w-full mt-4">
           <thead class="bg-gray-50 dark:bg-gray-800">
             <tr>
@@ -315,7 +331,7 @@ function color(v: string) {
         </table>
       </div>
     </div>
-    <div v-if="channel_id">
+    <div v-if="channel_id && !showClientInfo">
       <h3 class="card-title capitalize">
         Transactions ({{ channel_id }} {{ port_id }} {{ direction }})
       </h3>
