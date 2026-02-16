@@ -46,6 +46,9 @@ onMounted(() => {
     });
     chainStore.rpc.getIBCConnectionsChannels(connId.value).then((x) => {
       channels.value = x.channels;
+      if (x.channels.length > 0) {
+        fetchSendingTxs(x.channels[0].channel_id, x.channels[0].port_id);
+      }
     });
   }
 });
@@ -259,22 +262,24 @@ function color(v: string) {
                 <div class="flex gap-1">
                   <button
                     class="btn btn-xs"
+                    :class="{ 'btn-primary': direction === 'Out' && channel_id === v.channel_id }"
                     @click="fetchSendingTxs(v.channel_id, v.port_id)"
                     :disabled="loading"
                   >
                     <span
-                      v-if="loading"
+                      v-if="loading && direction === 'Out' && channel_id === v.channel_id"
                       class="loading loading-spinner loading-sm"
                     ></span>
                     {{ $t('ibc.btn_out') }}
                   </button>
                   <button
                     class="btn btn-xs"
+                    :class="{ 'btn-primary': direction === 'In' && channel_id === v.channel_id }"
                     @click="fetchRecevingTxs(v.channel_id, v.port_id)"
                     :disabled="loading"
                   >
                     <span
-                      v-if="loading"
+                      v-if="loading && direction === 'In' && channel_id === v.channel_id"
                       class="loading loading-spinner loading-sm"
                     ></span>
                     {{ $t('ibc.btn_in') }}
@@ -282,7 +287,7 @@ function color(v: string) {
                 </div>
               </td>
               <td>
-                <a href="#" @click="loadChannel(v.channel_id, v.port_id)" class="text-primary dark:invert">{{
+                <a href="#" @click="loadChannel(v.channel_id, v.port_id)" style="color: var(--epix-teal)">{{
                   v.channel_id
                 }}</a>
               </td>
@@ -327,7 +332,7 @@ function color(v: string) {
           <tr v-for="resp in txs?.tx_responses" class="hover">
             <td>{{ resp.height }}</td>
             <td>
-              <div class="text-xs truncate text-primary dark:invert">
+              <div class="text-xs truncate" style="color: var(--epix-teal)">
                 <RouterLink
                   :to="`/${chainStore.chainName}/tx/${resp.txhash}`"
                   >{{ resp.txhash }}</RouterLink

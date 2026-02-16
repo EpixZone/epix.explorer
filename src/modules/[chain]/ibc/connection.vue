@@ -25,7 +25,8 @@ function pageload(p: number) {
     list.value = x.connections;
     pageResponse.value = x.pagination;
     if (x.pagination.total && Number(x.pagination.total) > 0) {
-      ibcStore.showConnection(list.value[0].id);
+      const conn1 = list.value.find((c) => c.id === 'connection-1');
+      ibcStore.showConnection(conn1 ? conn1.id : list.value[0].id);
     }
   });
 }
@@ -54,7 +55,8 @@ function pageload(p: number) {
         <div v-show="tab === 'registry'" class="flex flex-wrap gap-1 p-4">
           <span
             v-for="(s, i) in ibcStore.info"
-            class="btn btn-xs btn-link mr-1"
+            class="btn btn-xs mr-1 no-underline hover:underline"
+            style="color: var(--epix-teal)"
             @click="ibcStore.fetchConnection(i)"
             >{{
               s.chain_1.chain_name === ibcStore.chainName
