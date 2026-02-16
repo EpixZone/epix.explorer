@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { Icon } from '@iconify/vue';
 import TxsElement from '@/components/dynamic/TxsElement.vue';
 import DynamicComponent from '@/components/dynamic/DynamicComponent.vue';
@@ -14,21 +14,47 @@ const store = useBaseStore();
 const format = useFormatter();
 const current = ref({} as Block);
 const target = ref(Number(props.height || 0));
+const loading = ref(true);
+const error = ref('');
+const fetching = ref(false);
 
 const height = computed(() => {
   return Number(current.value.block?.header?.height || props.height || 0);
 });
 
-const isFutureBlock = computed({
-  get: () => {
-    const latest = store.latest?.block?.header.height;
-    const isFuture = latest ? target.value > Number(latest) : true;
-    if (!isFuture && !current.value.block_id) store.fetchBlock(target.value).then((x) => (current.value = x));
-    return isFuture;
-  },
-  set: (val) => {
-    console.log(val);
-  },
+const isFutureBlock = computed(() => {
+  const latest = store.latest?.block?.header.height;
+  if (!latest) return false;
+  return target.value > Number(latest);
+});
+
+const blocktimeReady = computed(() => {
+  const earliest = store.earliest?.block?.header?.height;
+  const latest = store.latest?.block?.header?.height;
+  return earliest && latest && earliest !== latest;
+});
+
+watchEffect(() => {
+  const latest = store.latest?.block?.header.height;
+  if (!latest) return; // wait until latest is known
+  const isFuture = target.value > Number(latest);
+  if (!isFuture && !current.value.block_id && !fetching.value && !error.value) {
+    loading.value = true;
+    fetching.value = true;
+    store.fetchBlock(target.value).then((x) => {
+      if (x?.block_id) {
+        current.value = x;
+      } else {
+        error.value = `Block #${target.value} could not be loaded. It may have been pruned from the node.`;
+      }
+      loading.value = false;
+      fetching.value = false;
+    });
+  }
+  if (isFuture) {
+    // Only show countdown once blocktime is calculated from real data
+    loading.value = !blocktimeReady.value;
+  }
 });
 
 const remainingBlocks = computed(() => {
@@ -54,14 +80,33 @@ function updateTarget() {
 
 onBeforeRouteUpdate(async (to, from, next) => {
   if (from.path !== to.path) {
-    store.fetchBlock(String(to.params.height)).then((x) => (current.value = x));
+    loading.value = true;
+    error.value = '';
+    target.value = Number(to.params.height);
+    current.value = {} as Block;
     next();
   }
 });
 </script>
 <template>
   <div>
-    <div v-if="isFutureBlock" class="text-center">
+    <!-- Loading State -->
+    <div v-if="loading" class="modern-card shadow-modern p-8 text-center">
+      <div class="flex items-center justify-center space-x-3">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-epix-primary"></div>
+        <span class="text-gray-600 dark:text-gray-400">Loading block...</span>
+      </div>
+    </div>
+    <div v-else-if="error" class="modern-card shadow-modern p-8 text-center">
+      <div class="text-red-500 mb-4">
+        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Block Not Available</h3>
+        <p class="text-gray-600 dark:text-gray-400">{{ error }}</p>
+      </div>
+    </div>
+    <div v-else-if="isFutureBlock" class="text-center">
       <div v-if="remainingBlocks > 0">
         <div class="text-primary font-bold text-lg my-10">#{{ target }}</div>
         <Countdown :time="estimateTime" css="md:!text-5xl font-sans md:mx-5" />
@@ -80,7 +125,12 @@ onBeforeRouteUpdate(async (to, from, next) => {
             <tbody>
               <tr class="hover:bg-gray-50 dark:hover:bg-epix-gray-light cursor-pointer transition-colors duration-200" @click="edit = !edit">
                 <td class="py-2 px-4 text-gray-900 dark:text-white">{{ $t('block.countdown_for_block') }}:</td>
-                <td class="text-right py-2 px-4 text-gray-900 dark:text-white"><span class="md:!ml-40">{{ target }}</span></td>
+                <td class="text-right py-2 px-4 text-gray-900 dark:text-white">
+                  <span class="md:!ml-40 inline-flex items-center gap-1">
+                    {{ target }}
+                    <Icon icon="mdi:pencil-outline" class="w-4 h-4 text-gray-400" />
+                  </span>
+                </td>
               </tr>
               <tr v-if="edit">
                 <td colspan="2" class="text-center py-4 px-4">
