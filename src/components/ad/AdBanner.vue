@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { useRoute } from 'vue-router'
-const route = useRoute()
+import { useRoute } from 'vue-router';
+const route = useRoute();
 
 const aa = computed(() => {
   const hostname = location.hostname
@@ -10,9 +10,8 @@ const aa = computed(() => {
   } else if (hostname === 'epix.zone') {
     return '2395639'
   } else {
-    return '2396360'
+    return '2396360';
   }
 });
 </script>
-<template>
-</template>
+<template></template>

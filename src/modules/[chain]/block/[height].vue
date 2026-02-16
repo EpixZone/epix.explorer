@@ -11,9 +11,9 @@ import Countdown from '@/components/Countdown.vue';
 const props = defineProps(['height', 'chain']);
 
 const store = useBaseStore();
-const format = useFormatter()
-const current = ref({} as Block)
-const target = ref(Number(props.height || 0))
+const format = useFormatter();
+const current = ref({} as Block);
+const target = ref(Number(props.height || 0));
 
 const height = computed(() => {
   return Number(current.value.block?.header?.height || props.height || 0);
@@ -21,40 +21,40 @@ const height = computed(() => {
 
 const isFutureBlock = computed({
   get: () => {
-    const latest = store.latest?.block?.header.height
-    const isFuture = latest ? target.value > Number(latest) : true
-    if (!isFuture && !current.value.block_id) store.fetchBlock(target.value).then(x => current.value = x)
-    return isFuture
+    const latest = store.latest?.block?.header.height;
+    const isFuture = latest ? target.value > Number(latest) : true;
+    if (!isFuture && !current.value.block_id) store.fetchBlock(target.value).then((x) => (current.value = x));
+    return isFuture;
   },
-  set: val => {
-    console.log(val)
-  }
-})
+  set: (val) => {
+    console.log(val);
+  },
+});
 
 const remainingBlocks = computed(() => {
-  const latest = store.latest?.block?.header.height
-  return latest ? Number(target.value) - Number(latest) : 0
-})
+  const latest = store.latest?.block?.header.height;
+  return latest ? Number(target.value) - Number(latest) : 0;
+});
 
 const estimateTime = computed(() => {
-  const seconds = Number((remainingBlocks.value * store.blocktime).toFixed(2))
-  return seconds
-})
+  const seconds = Number((remainingBlocks.value * store.blocktime).toFixed(2));
+  return seconds;
+});
 
 const estimateDate = computed(() => {
-  return new Date(new Date().getTime() + estimateTime.value)
-})
+  return new Date(new Date().getTime() + estimateTime.value);
+});
 
-const edit = ref(false)
-const newHeight = ref(props.height)
+const edit = ref(false);
+const newHeight = ref(props.height);
 function updateTarget() {
-  target.value = Number(newHeight.value)
-  console.log(target.value)
+  target.value = Number(newHeight.value);
+  console.log(target.value);
 }
 
 onBeforeRouteUpdate(async (to, from, next) => {
   if (from.path !== to.path) {
-    store.fetchBlock(String(to.params.height)).then(x => current.value = x);
+    store.fetchBlock(String(to.params.height)).then((x) => (current.value = x));
     next();
   }
 });
@@ -65,7 +65,9 @@ onBeforeRouteUpdate(async (to, from, next) => {
       <div v-if="remainingBlocks > 0">
         <div class="text-primary font-bold text-lg my-10">#{{ target }}</div>
         <Countdown :time="estimateTime" css="md:!text-5xl font-sans md:mx-5" />
-        <div class="my-5">{{ $t('block.estimated_time') }}: <span class="text-xl font-bold">{{ format.toLocaleDate(estimateDate) }}</span>
+        <div class="my-5">
+          {{ $t('block.estimated_time') }}:
+          <span class="text-xl font-bold">{{ format.toLocaleDate(estimateDate) }}</span>
         </div>
         <div class="pt-10 flex justify-center">
           <table class="w-max rounded-lg modern-card shadow-modern">
@@ -83,12 +85,12 @@ onBeforeRouteUpdate(async (to, from, next) => {
               <tr v-if="edit">
                 <td colspan="2" class="text-center py-4 px-4">
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('block.countdown_for_block_input') }}</h3>
-                  <p class="py-4">
-                  <div class="flex gap-2 justify-center">
-                    <input class="modern-input px-3 py-2" v-model="newHeight" type="number" />
-                    <button class="modern-button px-4 py-2" @click="updateTarget()">{{ $t('block.btn_update') }}</button>
+                  <div class="py-4">
+                    <div class="flex gap-2 justify-center">
+                      <input class="modern-input px-3 py-2" v-model="newHeight" type="number" />
+                      <button class="modern-button px-4 py-2" @click="updateTarget()">{{ $t('block.btn_update') }}</button>
+                    </div>
                   </div>
-                  </p>
                 </td>
               </tr>
               <tr class="hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200">
@@ -106,7 +108,6 @@ onBeforeRouteUpdate(async (to, from, next) => {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
     <div v-else>
@@ -143,5 +144,6 @@ onBeforeRouteUpdate(async (to, from, next) => {
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex flex-row justify-between">{{ $t('block.last_commit') }}</h2>
         <DynamicComponent :value="current.block?.last_commit" />
       </div>
+    </div>
   </div>
-</div></template>
+</template>

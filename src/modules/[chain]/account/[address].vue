@@ -13,13 +13,7 @@ import { computed, ref, onMounted } from 'vue';
 import { Icon } from '@iconify/vue';
 import { getDonutChartConfig } from '@/components/charts/apexChartConfig';
 
-import type {
-  AuthAccount,
-  Delegation,
-  TxResponse,
-  DelegatorRewards,
-  UnbondingResponses,
-} from '@/types';
+import type { AuthAccount, Delegation, TxResponse, DelegatorRewards, UnbondingResponses } from '@/types';
 import type { Coin } from '@cosmjs/amino';
 import Countdown from '@/components/Countdown.vue';
 import { fromBase64 } from '@cosmjs/encoding';
@@ -147,12 +141,11 @@ const totalValue = computed(() => {
   });
   unbonding.value?.forEach((x) => {
     x.entries?.forEach((y) => {
-      value += format.tokenValueNumber({amount: y.balance, denom: stakingStore.params.bond_denom});
+      value += format.tokenValueNumber({ amount: y.balance, denom: stakingStore.params.bond_denom });
     });
   });
   return format.formatNumber(value, '0,0.00');
 });
-
 
 function loadAccount(address: string) {
   // Check if RPC client is ready
@@ -199,7 +192,7 @@ function loadAccount(address: string) {
     });
   });
 
-  const receivedQuery =  `?&pagination.reverse=true&events=coin_received.receiver='${address}'&pagination.limit=5`;
+  const receivedQuery = `?&pagination.reverse=true&events=coin_received.receiver='${address}'&pagination.limit=5`;
   blockchain.rpc.getTxs(receivedQuery, {}).then((x) => {
     recentReceived.value = x.tx_responses;
   });
@@ -547,10 +540,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
               <td class="py-4 text-white font-mono">
                 {{
                   format.formatTokens(
-                    rewards?.rewards?.find(
-                      (x) =>
-                        x.validator_address === v.delegation.validator_address
-                    )?.reward
+                    rewards?.rewards?.find((x) => x.validator_address === v.delegation.validator_address)?.reward
                   )
                 }}
               </td>

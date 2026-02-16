@@ -342,7 +342,6 @@ async function suggest() {
         await addToMetaMaskEVM()
     }
 }
-
 </script>
 
 <template>

@@ -10,24 +10,22 @@ const blockchain = useBlockchain();
 const base = useBaseStore();
 const nodeInfo = ref({} as NodeInfo);
 
-const height = ref(0)
-const hash = ref("")
+const height = ref(0);
+const hash = ref('');
 
 base.$subscribe((m, { latest }) => {
-  let h = Number(latest.block?.header?.height)
-  h = Math.round((h - 2000) / 1000) * 1000
+  let h = Number(latest.block?.header?.height);
+  h = Math.round((h - 2000) / 1000) * 1000;
   if (h > height.value) {
-    height.value = h
-    base.fetchBlock(h).then(res => {
-      hash.value = toHex(fromBase64(res.block_id.hash)).toUpperCase()
-    })
+    height.value = h;
+    base.fetchBlock(h).then((res) => {
+      hash.value = toHex(fromBase64(res.block_id.hash)).toUpperCase();
+    });
   }
-})
+});
 
 const rpcs = computed(() => {
-  return blockchain.current?.endpoints?.rpc
-    ?.map((x) => x.address)
-    .join(',');
+  return blockchain.current?.endpoints?.rpc?.map((x) => x.address).join(',');
 });
 
 const appName = computed(() => {
@@ -97,7 +95,6 @@ onMounted(() => {
         {{ $t('statesync.text_title_3') }}
         <br /><br />
         <div class="bg-gray-900 dark:bg-black rounded-lg p-4 my-4 font-mono text-sm">
-          <div class="text-gray-300"><span class="text-gray-500">></span> [state-sync]</div>
           <div class="text-green-400"><span class="text-gray-500">></span> # snapshot-interval specifies the block interval at which local state sync snapshots are</div>
           <div class="text-green-400"><span class="text-gray-500">></span> # taken (0 to disable). Must be a multiple of pruning-keep-every.</div>
           <div class="text-gray-300"><span class="text-gray-500">></span> snapshot-interval = 1000</div>

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import { useBlockchain } from './useBlockchain';
+import { useBlockchain, useBankStore, useStakingStore, useDashboard } from '@/stores';
 import numeral from 'numeral';
 
 /** Truncates (not rounds) a number to 2 significant digits after leading zeros.
- *  e.g. 1.259 → "1.25", 0.00209 → "0.0020", 0.0000932 → "0.000093" */
+ *  e.g. 1.259 -> "1.25", 0.00209 -> "0.0020", 0.0000932 -> "0.000093" */
 export function formatSmallPrice(value: number): string {
   if (value >= 1) return value.toFixed(2);
   if (value <= 0) return '0';
@@ -19,13 +19,10 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import utc from 'dayjs/plugin/utc';
 import localeData from 'dayjs/plugin/localeData';
-import { useStakingStore } from './useStakingStore';
-import { fromBase64, fromBech32, fromHex, toHex } from '@cosmjs/encoding';
+import { fromBase64, fromHex, toHex } from '@cosmjs/encoding';
 import { consensusPubkeyToHexAddress, get } from '@/libs';
-import { useBankStore } from './useBankStore';
 import type { Coin, DenomTrace } from '@/types';
-import { useDashboard } from './useDashboard';
-import type { Asset } from '@ping-pub/chain-registry-client/dist/types'
+import type { Asset } from '@/types/chaindata';
 
 dayjs.extend(localeData);
 dayjs.extend(duration);
@@ -77,40 +74,39 @@ export const useFormatter = defineStore('formatter', {
       const hash = denom.replace('ibc/', '');
       let trace = this.ibcDenoms[hash];
       if (!trace) {
-        trace = (await this.blockchain.rpc.getIBCAppTransferDenom(hash))
-          .denom_trace;
+        trace = (await this.blockchain.rpc.getIBCAppTransferDenom(hash)).denom_trace;
         this.ibcDenoms[hash] = trace;
       }
       return trace;
     },
     async fetchDenomMetadata(denom: string) {
-      if (this.loading.includes(denom)) return
-      this.loading.push(denom)
-      const asset = await get(`https://metadata.epix.zone/metadata/${denom}`) as Asset
-      this.ibcMetadata[denom] = asset
+      if (this.loading.includes(denom)) return;
+      this.loading.push(denom);
+      const asset = (await get(`https://metadata.epix.zone/metadata/${denom}`)) as Asset;
+      this.ibcMetadata[denom] = asset;
     },
     priceInfo(denom: string) {
-      const id = this.dashboard.coingecko[denom]?.coinId || "";
+      const id = this.dashboard.coingecko[denom]?.coinId || '';
       const prices = this.dashboard.prices[id];
       return prices;
     },
     color(change?: number) {
-      if (!change) return ""
+      if (!change) return '';
       switch (true) {
         case change > 0:
-          return "text-success"
+          return 'text-success';
         case change < 0:
-          return "text-error"
+          return 'text-error';
         default:
-          return ""
+          return '';
       }
     },
-    priceColor(denom: string, currency = "usd") {
-      const change = this.priceChanges(denom, currency)
-      return this.color(change)
+    priceColor(denom: string, currency = 'usd') {
+      const change = this.priceChanges(denom, currency);
+      return this.color(change);
     },
-    price(denom: string, currency = "usd") {
-      if (!denom || denom.length < 2) return 0
+    price(denom: string, currency = 'usd') {
+      if (!denom || denom.length < 2) return 0;
       const info = this.priceInfo(denom);
       return info ? info[currency] || 0 : 0;
     },
@@ -119,40 +115,43 @@ export const useFormatter = defineStore('formatter', {
       return info ? info[`${currency}_24h_change`] || 0 : 0;
     },
     showChanges(v?: number) {
-      return v !== 0 ? numeral(v).format("+0,0") : ""
+      return v !== 0 ? numeral(v).format('+0,0') : '';
     },
     tokenValue(token?: Coin) {
       if (token) {
         const val = this.tokenValueNumber(token);
         return formatSmallPrice(val);
       }
-      return ""
+      return '';
     },
     specialDenom(denom: string) {
       switch (true) {
-        case denom.startsWith('u'): return 6
-        case denom.startsWith("a"): return 18
-        case denom === 'inj': return 18
+        case denom.startsWith('u'):
+          return 6;
+        case denom.startsWith('a'):
+          return 18;
+        case denom === 'inj':
+          return 18;
       }
-      return this.exponentForDenom(denom)
+      return this.exponentForDenom(denom);
     },
     tokenAmountNumber(token?: Coin) {
-      if (!token || !token.denom) return 0
+      if (!token || !token.denom) return 0;
 
       // find the symbol
-      const symbol = this.dashboard.coingecko[token.denom]?.symbol || token.denom
+      const symbol = this.dashboard.coingecko[token.denom]?.symbol || token.denom;
       // convert denomination to symbol
       const exponent = this.dashboard.coingecko[symbol?.toLowerCase()]?.exponent || this.specialDenom(token.denom);
       // caculate amount of symbol
-      const amount = Number(token.amount) / (10 ** exponent)
-      return amount
+      const amount = Number(token.amount) / 10 ** exponent;
+      return amount;
     },
     tokenValueNumber(token?: Coin) {
-      if (!token || !token.denom) return 0
+      if (!token || !token.denom) return 0;
 
-      const amount = this.tokenAmountNumber(token)
-      const value = amount * this.price(token.denom)
-      return value
+      const amount = this.tokenAmountNumber(token);
+      const value = amount * this.price(token.denom);
+      return value;
     },
     formatTokenAmount(token: { denom: string; amount: string }) {
       return this.formatToken(token, false);
@@ -162,18 +161,18 @@ export const useFormatter = defineStore('formatter', {
     },
 
     findGlobalAssetConfig(denom: string) {
-      const chains = Object.values(this.dashboard.chains)
+      const chains = Object.values(this.dashboard.chains);
       for (let i = 0; i < chains.length; i++) {
-        const assets = chains[i].assets
-        const conf = assets.find(a => a.base === denom)
+        const assets = chains[i].assets;
+        const conf = assets.find((a) => a.base === denom);
         if (conf) {
-          return conf
+          return conf;
         }
       }
-      return undefined
+      return undefined;
     },
     exponentForDenom(denom: string) {
-      const asset: Asset | undefined = this.findGlobalAssetConfig(denom)
+      const asset: Asset | undefined = this.findGlobalAssetConfig(denom);
       let exponent = 0;
       if (asset) {
         // find the max exponent for display
@@ -190,17 +189,16 @@ export const useFormatter = defineStore('formatter', {
       if (denom) {
         let asset: Asset | undefined;
         if (denom && denom.startsWith('ibc/')) {
-          const ibcDenom = denom.replace('ibc/', '')
+          const ibcDenom = denom.replace('ibc/', '');
           asset = this.ibcMetadata[ibcDenom];
           if (!asset) {
             // update ibc metadata if not exits in local cache
-            this.fetchDenomMetadata(ibcDenom)
+            this.fetchDenomMetadata(ibcDenom);
           } else {
-            console.log("ibc metadata", asset)
+            console.log('ibc metadata', asset);
           }
-
         } else {
-          asset = this.findGlobalAssetConfig(denom)
+          asset = this.findGlobalAssetConfig(denom);
         }
 
         if (asset) {
@@ -216,23 +214,23 @@ export const useFormatter = defineStore('formatter', {
         return denom;
       }
     },
-    tokenDisplayNumber(
-      token?: { denom: string; amount: string },
-      mode = 'all'
-    ) {
+    tokenDisplayNumber(token?: { denom: string; amount: string }, mode = 'all') {
       if (token && token.amount && token?.denom) {
         let amount = Number(token.amount);
         let denom = token.denom;
 
-        let conf = mode === 'local' ? this.blockchain.current?.assets?.find(
-          // @ts-ignore
-          (x) => x.base === token.denom || x.base.denom === token.denom
-        ) : this.findGlobalAssetConfig(token.denom)
+        let conf =
+          mode === 'local'
+            ? this.blockchain.current?.assets?.find(
+                // @ts-ignore
+                (x) => x.base === token.denom || x.base.denom === token.denom
+              )
+            : this.findGlobalAssetConfig(token.denom);
 
         if (denom && denom.startsWith('ibc/')) {
           conf = this.ibcMetadata[denom.replace('ibc/', '')];
           if (!conf) {
-            this.fetchDenomMetadata(denom.replace('ibc/', ''))
+            this.fetchDenomMetadata(denom.replace('ibc/', ''));
           }
         }
 
@@ -252,25 +250,23 @@ export const useFormatter = defineStore('formatter', {
       }
       return 0;
     },
-    formatToken(
-      token?: { denom: string; amount: string },
-      withDenom = true,
-      fmt = '0,0.[0]',
-      mode = 'local'
-    ): string {
+    formatToken(token?: { denom: string; amount: string }, withDenom = true, fmt = '0,0.[0]', mode = 'local'): string {
       if (token && token.amount && token?.denom) {
         let amount = Number(token.amount);
         let denom = token.denom;
 
-        let conf = mode === 'local' ? this.blockchain.current?.assets?.find(
-          // @ts-ignore
-          (x) => x.base === token.denom || x.base.denom === token.denom
-        ) : this.findGlobalAssetConfig(token.denom)
+        let conf =
+          mode === 'local'
+            ? this.blockchain.current?.assets?.find(
+                // @ts-ignore
+                (x) => x.base === token.denom || x.base.denom === token.denom
+              )
+            : this.findGlobalAssetConfig(token.denom);
 
         if (denom && denom.startsWith('ibc/')) {
           conf = this.ibcMetadata[denom.replace('ibc/', '')];
           if (!conf) {
-            this.fetchDenomMetadata(denom.replace('ibc/', ''))
+            this.fetchDenomMetadata(denom.replace('ibc/', ''));
           }
         }
 
@@ -298,28 +294,21 @@ export const useFormatter = defineStore('formatter', {
           formattedAmount = numeral(originalAmount).format('0,0');
           denom = token.denom.toUpperCase();
         } else if (amount < 0.01) {
-          fmt = '0.[000000000000000000]'
+          fmt = '0.[000000000000000000]';
           formattedAmount = numeral(amount).format(fmt);
         } else {
           formattedAmount = numeral(amount).format(fmt);
         }
 
-        return `${formattedAmount} ${withDenom ? denom.substring(0, 10) : ''
-          }`;
+        return `${formattedAmount} ${withDenom ? denom.substring(0, 10) : ''}`;
       }
       return '-';
     },
-    formatTokens(
-      tokens?: { denom: string; amount: string }[],
-      withDenom = true,
-      fmt = '0.0a'
-    ): string {
+    formatTokens(tokens?: { denom: string; amount: string }[], withDenom = true, fmt = '0.0a'): string {
       if (!tokens) return '';
       return tokens.map((x) => this.formatToken(x, withDenom, fmt)).join(', ');
     },
-    calculateBondedRatio(
-      pool: { bonded_tokens: string; not_bonded_tokens: string } | undefined
-    ) {
+    calculateBondedRatio(pool: { bonded_tokens: string; not_bonded_tokens: string } | undefined) {
       if (pool && pool.bonded_tokens) {
         const b = Number(pool.bonded_tokens);
         const nb = Number(pool.not_bonded_tokens);
@@ -332,17 +321,13 @@ export const useFormatter = defineStore('formatter', {
       if (!address) return address;
 
       const txt = toHex(fromBase64(address)).toUpperCase();
-      const validator = this.staking.validators.find(
-        (x) => consensusPubkeyToHexAddress(x.consensus_pubkey) === txt
-      );
+      const validator = this.staking.validators.find((x) => consensusPubkeyToHexAddress(x.consensus_pubkey) === txt);
       return validator?.description?.moniker;
     },
     // find validator by operator address
     validatorFromBech32(address: string) {
       if (!address) return address;
-      const validator = this.staking.validators.find(
-        (x) => x.operator_address === address
-      );
+      const validator = this.staking.validators.find((x) => x.operator_address === address);
       return validator?.description?.moniker;
     },
     calculatePercent(input?: string | number, total?: string | number) {
@@ -369,15 +354,15 @@ export const useFormatter = defineStore('formatter', {
       return decimal ? numeral(decimal).format('0.[00]%') : '-';
     },
     formatNumber(input?: number, fmt = '0.[00]') {
-      if (!input) return ""
-      return numeral(input).format(fmt)
+      if (!input) return '';
+      return numeral(input).format(fmt);
     },
     numberAndSign(input: number, fmt = '+0,0') {
       return numeral(input).format(fmt);
     },
     toLocaleDate(time?: string | number | Date) {
-      if (!time) return ""
-      return new Date(time).toLocaleString(navigator.language)
+      if (!time) return '';
+      return new Date(time).toLocaleString(navigator.language);
     },
     toDay(time?: string | number | Date, format = 'long') {
       if (!time) return '';
@@ -403,9 +388,7 @@ export const useFormatter = defineStore('formatter', {
         const sum: Record<string, number> = msgs
           .map((msg) => {
             const msgType = msg['@type'] || msg.typeUrl || 'unknown';
-            return msgType
-              .substring(msgType.lastIndexOf('.') + 1)
-              .replace('Msg', '');
+            return msgType.substring(msgType.lastIndexOf('.') + 1).replace('Msg', '');
           })
           .reduce((s, c) => {
             const sh: Record<string, number> = s;
@@ -418,7 +401,7 @@ export const useFormatter = defineStore('formatter', {
           }, {});
         const output: string[] = [];
         Object.keys(sum).forEach((k) => {
-          output.push(sum[k] > 1 ? `${k}×${sum[k]}` : k);
+          output.push(sum[k] > 1 ? `${k}x${sum[k]}` : k);
         });
         return output.join(', ');
       }

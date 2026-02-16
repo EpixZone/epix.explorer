@@ -14,24 +14,19 @@ import {
 import AdBanner from '@/components/ad/AdBanner.vue';
 
 const dashboard = useDashboard();
-const chainStore = useBlockchain()
+const chainStore = useBlockchain();
 const format = useFormatter();
 const sourceAddress = ref(''); //
 const sourceHdPath = ref("m/44/118/0'/0/0"); //
 const selectedSource = ref({} as LocalKey); //
-const importStep = ref('step1')
+const importStep = ref('step1');
 
-const conf = ref(
-  JSON.parse(localStorage.getItem('imported-addresses') || '{}') as Record<
-    string,
-    AccountEntry[]
-  >
-);
+const conf = ref(JSON.parse(localStorage.getItem('imported-addresses') || '{}') as Record<string, AccountEntry[]>);
 const balances = ref({} as Record<string, CoinWithPrice[]>);
 const delegations = ref({} as Record<string, Delegation[]>);
 
-// initial loading queue 
-// load balances 
+// initial loading queue
+// load balances
 Object.values(conf.value).forEach((imported) => {
   let promise = Promise.resolve();
   for (let i = 0; i < imported.length; i++) {
@@ -40,11 +35,9 @@ Object.values(conf.value).forEach((imported) => {
         new Promise((resolve) => {
           // continue only if the page is living
           if (imported[i].endpoint) {
-            loadBalances(
-              imported[i].chainName,
-              imported[i].endpoint || '',
-              imported[i].address
-            ).finally(() => resolve());
+            loadBalances(imported[i].chainName, imported[i].endpoint || '', imported[i].address).finally(() =>
+              resolve()
+            );
           } else {
             resolve();
           }
@@ -55,79 +48,78 @@ Object.values(conf.value).forEach((imported) => {
 
 const accounts = computed(() => {
   let a = [] as {
-    key: string,
+    key: string;
     subaccounts: {
       account: AccountEntry;
       delegation: CoinWithPrice;
       balances: CoinWithPrice[];
-    }[]
+    }[];
   }[];
   Object.values(conf.value).forEach((x) => {
     const composition = x.map((entry) => {
       const d = delegations.value[entry.address];
-      let delegation = {} as CoinWithPrice
+      let delegation = {} as CoinWithPrice;
       if (d && d.length > 0) {
         d.forEach((b) => {
-          delegation.amount = (Number(b.balance.amount) + Number(delegation.amount || 0)).toFixed()
+          delegation.amount = (Number(b.balance.amount) + Number(delegation.amount || 0)).toFixed();
           delegation.denom = b.balance.denom;
         });
-        delegation.value = format.tokenValueNumber(delegation)
-        delegation.change24h = format.priceChanges(delegation.denom)
+        delegation.value = format.tokenValueNumber(delegation);
+        delegation.change24h = format.priceChanges(delegation.denom);
       }
       return {
         account: entry,
         delegation,
         balances: balances.value[entry.address]
-          ? balances.value[entry.address].map(x => {
-            const value = format.tokenValueNumber(x)
-            return {
-              amount: x.amount,
-              denom: x.denom,
-              value,
-              change24h: format.priceChanges(x.denom)
-            }
-          })
-          : []
-      }
+          ? balances.value[entry.address].map((x) => {
+              const value = format.tokenValueNumber(x);
+              return {
+                amount: x.amount,
+                denom: x.denom,
+                value,
+                change24h: format.priceChanges(x.denom),
+              };
+            })
+          : [],
+      };
     });
-    if (x.at(0)) a.push({ key: x.at(0)?.address || " ", subaccounts: composition });
+    if (x.at(0)) a.push({ key: x.at(0)?.address || ' ', subaccounts: composition });
   });
   return a;
 });
 
 const addresses = computed(() => {
-  return accounts.value.flatMap(x => x.subaccounts.map(a => a.account.address))
-  // const temp = [] as string[]
-  // accounts.value.forEach((x) => x.accounts.forEach(a => {
-  //   temp.push(a.account.address)
-  // }));
-  // return temp
+  return accounts.value.flatMap((x) => x.subaccounts.map((a) => a.account.address));
 });
 
 const totalValue = computed(() => {
-  return accounts.value.flatMap(x => x.subaccounts).reduce((s, e) => {
-    s += e.delegation.value || 0
-    e.balances.forEach(b => {
-      s += b.value || 0
-    })
-    return s
-  }, 0)
-})
+  return accounts.value
+    .flatMap((x) => x.subaccounts)
+    .reduce((s, e) => {
+      s += e.delegation.value || 0;
+      e.balances.forEach((b) => {
+        s += b.value || 0;
+      });
+      return s;
+    }, 0);
+});
 
 const totalChange = computed(() => {
-  return accounts.value.flatMap(x => x.subaccounts).reduce((s, e) => {
-    s += (e.delegation.change24h || 0) * (e.delegation.value || 0) / 100
-    e.balances.forEach(b => {
-      s += (b.change24h || 0) * (b.value || 0) / 100
-    })
-    return s
-  }, 0)
-})
+  return accounts.value
+    .flatMap((x) => x.subaccounts)
+    .reduce((s, e) => {
+      s += ((e.delegation.change24h || 0) * (e.delegation.value || 0)) / 100;
+      e.balances.forEach((b) => {
+        s += ((b.change24h || 0) * (b.value || 0)) / 100;
+      });
+      return s;
+    }, 0);
+});
 
 // Adding Model Boxes
 const availableAccount = computed(() => {
   if (sourceAddress.value) {
-    return scanCompatibleAccounts([{cosmosAddress: sourceAddress.value, hdPath: sourceHdPath.value }]).filter(
+    return scanCompatibleAccounts([{ cosmosAddress: sourceAddress.value, hdPath: sourceHdPath.value }]).filter(
       (x) => !addresses.value.includes(x.address)
     );
   }
@@ -164,10 +156,7 @@ async function addAddress(acc: AccountEntry) {
   // also add chain to favorite
   if (!dashboard?.favoriteMap?.[acc.chainName]) {
     dashboard.favoriteMap[acc.chainName] = true;
-    window.localStorage.setItem(
-      'favoriteMap',
-      JSON.stringify(dashboard.favoriteMap)
-    );
+    window.localStorage.setItem('favoriteMap', JSON.stringify(dashboard.favoriteMap));
   }
 
   if (acc.endpoint) {
@@ -179,8 +168,7 @@ async function addAddress(acc: AccountEntry) {
 
 // load balances for an address
 async function loadBalances(chainName: string, endpoint: string, address: string) {
-  
-  const endpointObj = chainStore.randomEndpoint(chainName)
+  const endpointObj = chainStore.randomEndpoint(chainName);
   const client = CosmosRestClient.newDefault(endpointObj?.address || endpoint);
   await client.getBankBalances(address).then((res) => {
     balances.value[address] = res.balances.filter((x) => x.denom.length < 10);
@@ -216,7 +204,12 @@ async function loadBalances(chainName: string, endpoint: string, address: string
       </div>
     </div>
 
-    <AdBanner id="account-banner-ad" unit="banner" width="970px" height="90px" />
+    <AdBanner
+      id="account-banner-ad"
+      unit="banner"
+      width="970px"
+      height="90px"
+    />
 
     <div class="overflow-x-auto">
       <div v-for="{ key, subaccounts } in accounts" class="modern-card shadow-modern my-6 p-6">
@@ -331,7 +324,7 @@ async function loadBalances(chainName: string, endpoint: string, address: string
     <!-- Import Address Modal -->
     <div class="modal" id="address-modal">
       <div class="modal-box modern-card shadow-modern max-w-2xl">
-        <a href="#" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 hover:bg-gray-100 dark:hover:bg-gray-800">✕</a>
+        <a href="#" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 hover:bg-gray-100 dark:hover:bg-gray-800">&#x2715;</a>
         <h3 class="font-bold text-xl mb-4 text-gray-900 dark:text-white">Derive Account From Address</h3>
         <div class="space-y-4">
           <div>

@@ -1,15 +1,14 @@
 <script lang="ts" setup>
 import fetch from 'cross-fetch';
 import { onMounted, ref, computed, onUnmounted } from 'vue';
-import { useBlockchain, useFormatter, useStakingStore } from '@/stores';
+import { useBlockchain, useFormatter, useStakingStore, useBaseStore } from '@/stores';
 import { consensusPubkeyToHexAddress } from '@/libs';
 
 const format = useFormatter();
 const chainStore = useBlockchain();
 const stakingStore = useStakingStore();
-const rpcList = ref(
-  chainStore.current?.endpoints?.rpc || [{ address: '', provider: '' }]
-);
+const baseStore = useBaseStore();
+const rpcList = ref(chainStore.current?.endpoints?.rpc || [{ address: '', provider: '' }]);
 let rpc = ref('');
 const validators = ref(stakingStore.validators);
 
@@ -30,7 +29,7 @@ onMounted(async () => {
   rpc.value = rpcList.value[0].address + '/consensus_state';
   await fetchPosition();
   update();
-  clearTime()
+  clearTime();
   timer = setInterval(() => {
     update();
   }, 1000);
@@ -80,7 +79,7 @@ function color(i: number, txt: string) {
   }
   return txt === 'nil-Vote' ? 'gray-700' : 'success';
 }
-async function onChange () {
+async function onChange() {
   httpstatus.value = 200;
   httpStatusText.value = '';
   roundState.value = {};
@@ -135,11 +134,7 @@ async function update() {
 
         // find the highest onboard rate
         roundState.value?.height_vote_set?.forEach((element: any) => {
-          const rates = Number(
-            element.prevotes_bit_array.substring(
-              element.prevotes_bit_array.length - 4
-            )
-          );
+          const rates = Number(element.prevotes_bit_array.substring(element.prevotes_bit_array.length - 4));
           if (rates > 0) {
             rate.value = `${(rates * 100).toFixed()}%`;
           }

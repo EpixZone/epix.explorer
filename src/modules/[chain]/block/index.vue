@@ -7,22 +7,22 @@ const props = defineProps(['chain']);
 
 const tab = ref('blocks');
 
-const base = useBaseStore()
+const base = useBaseStore();
 
 const format = useFormatter();
 
 const list = computed(() => {
-    // const recents = base.recents
-    // return recents.sort((a, b) => (Number(b.block.header.height) - Number(a.block.header.height)))
-    return base.recents
-})
+  // const recents = base.recents
+  // return recents.sort((a, b) => (Number(b.block.header.height) - Number(a.block.header.height)))
+  return base.recents;
+});
 </script>
 <template>
     <div>
         <div class="tabs tabs-boxed bg-transparent mb-4">
             <a class="tab text-gray-400 uppercase" :class="{ 'tab-active': tab === 'blocks' }"
                 @click="tab = 'blocks'">{{ $t('block.recent') }}</a>
-            <RouterLink class="tab text-gray-400 uppercase" 
+            <RouterLink class="tab text-gray-400 uppercase"
                 :to="`/${chain}/block/${Number(base.latest?.block?.header.height||0) + 10000}`"
                 >{{ $t('block.future') }}</RouterLink>
         </div>

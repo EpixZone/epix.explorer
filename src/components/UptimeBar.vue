@@ -2,7 +2,7 @@
 import type { PropType } from 'vue';
 
 const props = defineProps({
-  blocks: { type: Array as PropType<{height:string, color: string}[]> },
+  blocks: { type: Array as PropType<{ height: string; color: string }[]> },
 });
 
 // Convert old color classes to matrix-style colors

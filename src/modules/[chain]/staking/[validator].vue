@@ -12,12 +12,15 @@ import {
 import { onMounted, computed, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import CommissionRate from '@/components/ValidatorCommissionRate.vue';
+import { consensusPubkeyToHexAddress, operatorAddressToAccount, pubKeyToValcons } from '@/libs';
 import {
-  consensusPubkeyToHexAddress,
-  operatorAddressToAccount,
-  pubKeyToValcons,
-} from '@/libs';
-import { PageRequest, type Coin, type Delegation, type PaginatedDelegations, type PaginatedTxs, type Validator } from '@/types';
+  PageRequest,
+  type Coin,
+  type Delegation,
+  type PaginatedDelegations,
+  type PaginatedTxs,
+  type Validator,
+} from '@/types';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { stringToUint8Array, uint8ArrayToString } from '@/libs/utils';
@@ -38,7 +41,7 @@ const avatars = ref(cache || {});
 const identity = ref('');
 const rewards = ref([] as Coin[] | undefined);
 const commission = ref([] as Coin[] | undefined);
-const delegations = ref({} as PaginatedDelegations)
+const delegations = ref({} as PaginatedDelegations);
 const addresses = ref(
   {} as {
     account: string;
@@ -51,13 +54,11 @@ const selfBonded = ref({} as Delegation);
 
 addresses.value.account = operatorAddressToAccount(validator);
 // load self bond
-staking
-  .fetchValidatorDelegation(validator, addresses.value.account)
-  .then((x) => {
-    if (x) {
-      selfBonded.value = x.delegation_response;
-    }
-  });
+staking.fetchValidatorDelegation(validator, addresses.value.account).then((x) => {
+  if (x) {
+    selfBonded.value = x.delegation_response;
+  }
+});
 
 const txs = ref({} as PaginatedTxs);
 
@@ -69,7 +70,8 @@ const apr = computed(() => {
   const rate = Number(v.value.commission?.commission_rates.rate || 0);
   const inflation = useMintStore().inflation;
   const communityTax = Number(useDistributionStore().params.community_tax);
-  const bondedRatio = Number(staking.pool.bonded_tokens) / Number(useBankStore().supply.amount);
+  const bondedRatio =
+    Number(staking.pool.bonded_tokens) / Number(useBankStore().supply.amount);
 
   const aprValue = (1 - communityTax) * (1 - rate) * Number(inflation) / bondedRatio;
   return format.formatDecimalToPercent(aprValue.toString());
@@ -77,10 +79,7 @@ const apr = computed(() => {
 
 const selfRate = computed(() => {
   if (selfBonded.value.balance?.amount) {
-    return format.calculatePercent(
-      selfBonded.value.balance.amount,
-      v.value.tokens
-    );
+    return format.calculatePercent(selfBonded.value.balance.amount, v.value.tokens);
   }
   return '-';
 });
@@ -88,9 +87,7 @@ const selfRate = computed(() => {
 const logo = (identity?: string) => {
   if (!identity) return '';
   const url = avatars.value[identity] || '';
-  return url.startsWith('http')
-    ? url
-    : `https://s3.amazonaws.com/keybase_processed_uploads/${url}`;
+  return url.startsWith('http') ? url : `https://s3.amazonaws.com/keybase_processed_uploads/${url}`;
 };
 
 const fetchAvatar = (identity: string) => {
@@ -128,32 +125,25 @@ onMounted(() => {
     staking.fetchValidator(validator).then((res) => {
       v.value = res.validator;
       identity.value = res.validator?.description?.identity || '';
-      if (identity.value && !avatars.value[identity.value]) loadAvatar(identity.value);
+      if (identity.value && !avatars.value[identity.value])
+        loadAvatar(identity.value);
 
-      addresses.value.hex = consensusPubkeyToHexAddress(
-        v.value.consensus_pubkey
-      );
+      addresses.value.hex = consensusPubkeyToHexAddress(v.value.consensus_pubkey);
       addresses.value.valCons = pubKeyToValcons(
         v.value.consensus_pubkey,
-        blockchain.current?.bech32ConsensusPrefix || "",
+        blockchain.current?.bech32ConsensusPrefix || ''
       );
     });
-    blockchain.rpc
-      .getDistributionValidatorOutstandingRewards(validator)
-      .then((res) => {
-        rewards.value = res.rewards?.rewards?.sort(
-          (a, b) => Number(b.amount) - Number(a.amount)
-        );
-        res.rewards?.rewards?.forEach((x) => {
-          if (x.denom.startsWith('ibc/')) {
-            format.fetchDenomTrace(x.denom);
-          }
-        });
+    blockchain.rpc.getDistributionValidatorOutstandingRewards(validator).then((res) => {
+      rewards.value = res.rewards?.rewards?.sort((a, b) => Number(b.amount) - Number(a.amount));
+      res.rewards?.rewards?.forEach((x) => {
+        if (x.denom.startsWith('ibc/')) {
+          format.fetchDenomTrace(x.denom);
+        }
       });
+    });
     blockchain.rpc.getDistributionValidatorCommission(validator).then((res) => {
-      commission.value = res.commission?.commission?.sort(
-        (a, b) => Number(b.amount) - Number(a.amount)
-      );
+      commission.value = res.commission?.commission?.sort((a, b) => Number(b.amount) - Number(a.amount));
       res.commission?.commission?.forEach((x) => {
         if (x.denom.startsWith('ibc/')) {
           format.fetchDenomTrace(x.denom);
@@ -164,7 +154,6 @@ onMounted(() => {
     // Disable delegations due to its bad performance
     // Comment out the following code if you want to enable it
     // pageload(1)
-
   }
 });
 let showCopyToast = ref(0);
@@ -205,52 +194,59 @@ function pageload(p: number) {
   page.setPage(p);
   page.limit = 10;
 
-  blockchain.rpc.getStakingValidatorsDelegations(validator, page).then(res => {
-      delegations.value = res
-  }) 
+  blockchain.rpc.getStakingValidatorsDelegations(validator, page).then((res) => {
+    delegations.value = res;
+  });
 }
 
-const events = ref({} as PaginatedTxs)
+const events = ref({} as PaginatedTxs);
 
 enum EventType {
   Delegate = 'delegate',
   Unbond = 'unbond',
 }
 
-const selectedEventType = ref(EventType.Delegate)
+const selectedEventType = ref(EventType.Delegate);
 
 function loadPowerEvents(p: number, type: EventType) {
-  selectedEventType.value = type
+  selectedEventType.value = type;
   page.setPage(p);
   page.setPageSize(5);
-  blockchain.rpc.getTxs("?order_by=2&events={type}.validator='{validator}'", { type: selectedEventType.value, validator }, page).then(res => {
-    events.value = res
-  })
+  blockchain.rpc
+    .getTxs("?order_by=2&events={type}.validator='{validator}'", { type: selectedEventType.value, validator }, page)
+    .then((res) => {
+      events.value = res;
+    });
 }
 
 function pagePowerEvents(page: number) {
-    loadPowerEvents(page, selectedEventType.value)
+  loadPowerEvents(page, selectedEventType.value);
 }
 
-pagePowerEvents(1)
+pagePowerEvents(1);
 
-function mapEvents(events: {type: string, attributes: {key: string, value: string}[]}[]) {
+function mapEvents(events: { type: string; attributes: { key: string; value: string }[] }[]) {
   const attributes = events
-    .filter(x => x.type === selectedEventType.value)
-    .filter(x => x.attributes.findIndex(attr => attr.value === validator || attr.value === toBase64(stringToUint8Array(validator))) > -1)
-    .map(x => {
+    .filter((x) => x.type === selectedEventType.value)
+    .filter(
+      (x) =>
+        x.attributes.findIndex(
+          (attr) => attr.value === validator || attr.value === toBase64(stringToUint8Array(validator))
+        ) > -1
+    )
+    .map((x) => {
       // check if attributes need to decode
-      const output = {} as {[key: string]: string }
+      const output = {} as { [key: string]: string };
 
-      if (x.attributes.findIndex(a => a.key === `amount`) > -1) {
-        x.attributes.forEach(attr => {
-          output[attr.key] = attr.value
-        })
+      if (x.attributes.findIndex((a) => a.key === `amount`) > -1) {
+        x.attributes.forEach((attr) => {
+          output[attr.key] = attr.value;
+        });
       } else {
-        x.attributes.forEach(attr => {
-          output[uint8ArrayToString(fromBase64(attr.key))] = uint8ArrayToString(fromBase64(attr.value))
-        })
-      };
+        x.attributes.forEach((attr) => {
+          output[uint8ArrayToString(fromBase64(attr.key))] = uint8ArrayToString(fromBase64(attr.value));
+        });
+      }
 
       return output;
     });
@@ -258,14 +254,13 @@ function mapEvents(events: {type: string, attributes: {key: string, value: strin
   const coinsAsString = attributes.map((x: any) => x.amount).join(',');
   const coins = parseCoins(coinsAsString);
 
-  return coins.map(coin => format.formatToken(coin)).join(', ');
+  return coins.map((coin) => format.formatToken(coin)).join(', ');
 }
 
 function mapDelegators(messages: any[]) {
-  if(!messages) return []
-  return Array.from(new Set(messages.map(x => x.delegator_address || x.grantee)))
+  if (!messages) return [];
+  return Array.from(new Set(messages.map((x) => x.delegator_address || x.grantee)));
 }
-
 </script>
 <template>
   <div>
@@ -601,7 +596,7 @@ function mapDelegators(messages: any[]) {
             </tr>
           </tbody>
         </table>
-        <PaginationBar :total="delegations.pagination?.total" :limit="page.limit" :callback="pageload"/>
+        <PaginationBar :total="delegations.pagination?.total" :limit="page.limit" :callback="pageload" />
       </div>
     </div>
 
@@ -689,9 +684,8 @@ function mapDelegators(messages: any[]) {
                 }">
                   <RouterLink :to="`/${props.chain}/tx/${item.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
                     <span class="mr-2">
-                      {{ (selectedEventType === EventType.Delegate ? '+' : '-')}} {{
-                      mapEvents(item.events)
-                    }}</span>
+                      {{ selectedEventType === EventType.Delegate ? '+' : '-' }} {{ mapEvents(item.events) }}</span
+                    >
                   </RouterLink>
                   <Icon
                     v-if="item.code === 0"
@@ -710,7 +704,7 @@ function mapDelegators(messages: any[]) {
             </tr>
           </tbody>
         </table>
-        <PaginationBar :total="events.pagination?.total" :limit="page.limit" :callback="pagePowerEvents"/>
+        <PaginationBar :total="events.pagination?.total" :limit="page.limit" :callback="pagePowerEvents" />
       </div>
     </div>
     <!-- end -->

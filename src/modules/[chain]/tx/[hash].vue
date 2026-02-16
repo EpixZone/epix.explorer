@@ -4,9 +4,9 @@ import DynamicComponent from '@/components/dynamic/DynamicComponent.vue';
 import { computed, ref } from 'vue';
 import type { Tx, TxResponse } from '@/types';
 
-import { JsonViewer } from "vue3-json-viewer"
+import { JsonViewer } from 'vue3-json-viewer';
 // if you used v1.0.5 or latster ,you should add import "vue3-json-viewer/dist/index.css"
-import "vue3-json-viewer/dist/index.css";
+import 'vue3-json-viewer/dist/index.css';
 
 const props = defineProps(['hash', 'chain']);
 
@@ -14,10 +14,10 @@ const blockchain = useBlockchain();
 const baseStore = useBaseStore();
 const format = useFormatter();
 const tx = ref(
-    {} as {
-        tx: Tx;
-        tx_response: TxResponse;
-    }
+  {} as {
+    tx: Tx;
+    tx_response: TxResponse;
+  }
 );
 const loading = ref(true);
 const error = ref('');
@@ -71,13 +71,15 @@ if (props.hash) {
     }, 30000); // 30 second timeout
 }
 const messages = computed(() => {
-    return tx.value.tx?.body?.messages.map(x=> {
-        if(x.packet?.data) {
-            // @ts-ignore
-            x.message = format.base64ToString(x.packet.data)
-        }
-        return x
-    }) || [];
+  return (
+    tx.value.tx?.body?.messages.map((x) => {
+      if (x.packet?.data) {
+        // @ts-ignore
+        x.message = format.base64ToString(x.packet.data);
+      }
+      return x;
+    }) || []
+  );
 });
 
 const feeTooltip = computed(() => {

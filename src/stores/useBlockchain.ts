@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia';
-import {
-  useDashboard,
-  type ChainConfig,
-  type Endpoint,
-  EndpointType,
-} from './useDashboard';
+import type { ChainConfig, Endpoint } from '@/types/chaindata';
+import { useDashboard } from './useDashboard';
 import type {
   VerticalNavItems,
 } from '@/layouts/types';
@@ -17,7 +13,7 @@ import {
   useGovStore,
   useMintStore,
   useStakingStore,
-  useWalletStore
+  useWalletStore,
 } from '.';
 import { useBlockModule } from '@/modules/[chain]/block/block';
 import { DEFAULT } from '@/libs';
@@ -29,20 +25,16 @@ export const useBlockchain = defineStore('blockchain', {
       status: {} as Record<string, string>,
       rest: '',
       chainName: '',
-      endpoint: {} as {
-        type?: EndpointType;
-        address: string;
-        provider: string;
-      },
+      endpoint: {} as Endpoint,
       connErr: '',
       rpc: null as any,
     };
   },
   getters: {
     current(): ChainConfig | undefined {
-      const chain = this.dashboard.chains[this.chainName]
+      const chain = this.dashboard.chains[this.chainName];
       // update chain config with dynamic updated sdk version
-      const sdkversion = localStorage.getItem(`sdk_version_${this.chainName}`)
+      const sdkversion = localStorage.getItem(`sdk_version_${this.chainName}`);
       if (sdkversion && chain?.versions) {
         chain.versions.cosmosSdk = sdkversion;
       }
@@ -164,7 +156,7 @@ export const useBlockchain = defineStore('blockchain', {
     },
 
     async randomSetupEndpoint() {
-      const endpoint = this.randomEndpoint(this.chainName)
+      const endpoint = this.randomEndpoint(this.chainName);
       if (endpoint) await this.setRestEndpoint(endpoint);
     },
 
@@ -172,10 +164,7 @@ export const useBlockchain = defineStore('blockchain', {
       this.connErr = '';
       this.endpoint = endpoint;
       this.rpc = CosmosRestClient.newStrategy(endpoint.address, this.current);
-      localStorage.setItem(
-        `endpoint-${this.chainName}`,
-        JSON.stringify(endpoint)
-      );
+      localStorage.setItem(`endpoint-${this.chainName}`, JSON.stringify(endpoint));
     },
     async setCurrent(name: string) {
       // Ensure chains are loaded due to asynchronous calls.
@@ -185,8 +174,7 @@ export const useBlockchain = defineStore('blockchain', {
 
       // Find the case-sensitive name for the chainName, else simply use the parameter-value.
       const caseSensitiveName =
-        Object.keys(this.dashboard.chains).find((x) => x.toLowerCase() === name.toLowerCase())
-        || name;
+        Object.keys(this.dashboard.chains).find((x) => x.toLowerCase() === name.toLowerCase()) || name;
 
       // Update chainName if needed
       if (caseSensitiveName !== this.chainName) {

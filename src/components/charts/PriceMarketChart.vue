@@ -8,23 +8,21 @@ import { useBaseStore } from '@/stores';
 const store = useIndexModule();
 const baseStore = useBaseStore();
 const chartConfig = computed(() => {
-    const theme = baseStore.theme;
-    const labels = store.marketData.prices.map((item: any) => item[0]);
-    return getMarketPriceChartConfig(theme, labels);
+  const theme = baseStore.theme;
+  const labels = store.marketData.prices.map((item: any) => item[0]);
+  return getMarketPriceChartConfig(theme, labels);
 });
 const kind = ref('price');
 const series = computed(() => {
-    return [
-        {
-            name: kind.value === 'price' ? 'Price' : 'Volume',
-            data:
-                kind.value === 'price'
-                    ? store.marketData.prices.map((item: any) => item[1])
-                    : store.marketData.total_volumes.map(
-                          (item: any) => item[1]
-                      ),
-        },
-    ];
+  return [
+    {
+      name: kind.value === 'price' ? 'Price' : 'Volume',
+      data:
+        kind.value === 'price'
+          ? store.marketData.prices.map((item: any) => item[1])
+          : store.marketData.total_volumes.map((item: any) => item[1]),
+    },
+  ];
 });
 
 const timeframes = [
@@ -37,7 +35,7 @@ const timeframes = [
 ];
 
 function changeChart(type: string) {
-    kind.value = type;
+  kind.value = type;
 }
 
 function changeTimeframe(days: number) {

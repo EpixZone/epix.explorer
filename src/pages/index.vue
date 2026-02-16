@@ -1,10 +1,7 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue';
-import {
-  useDashboard,
-  LoadingStatus,
-  type ChainConfig,
-} from '@/stores/useDashboard';
+import { useDashboard, LoadingStatus } from '@/stores';
+import type { ChainConfig } from '@/types/chaindata';
 import ChainSummary from '@/components/ChainSummary.vue';
 
 import { computed, onMounted, ref } from 'vue';
@@ -28,8 +25,9 @@ const chains = computed(() => {
     const lowercaseKeywords = keywords.value.toLowerCase();
 
     return Object.values(dashboard.chains).filter(
-      (x: ChainConfig) => x.chainName.toLowerCase().indexOf(lowercaseKeywords) > -1
-      || x.prettyName.toLowerCase().indexOf(lowercaseKeywords) > -1
+      (x: ChainConfig) =>
+        x.chainName.toLowerCase().indexOf(lowercaseKeywords) > -1 ||
+        x.prettyName.toLowerCase().indexOf(lowercaseKeywords) > -1
     );
   } else {
     return Object.values(dashboard.chains);
@@ -37,14 +35,13 @@ const chains = computed(() => {
 });
 
 const featured = computed(() => {
-  const names = ["cosmos", "osmosis", "akash", "celestia", "evmos", "injective", "dydx", "noble"];
+  const names = ['cosmos', 'osmosis', 'akash', 'celestia', 'evmos', 'injective', 'dydx', 'noble'];
   return chains.value
-    .filter(x => names.includes(x.chainName))
-    .sort((a, b)=> (names.indexOf(a.chainName) - names.indexOf(b.chainName)))
-})
+    .filter((x) => names.includes(x.chainName))
+    .sort((a, b) => names.indexOf(a.chainName) - names.indexOf(b.chainName));
+});
 
-const chainStore = useBlockchain()
-
+const chainStore = useBlockchain();
 </script>
 <template>
   <div class="min-h-screen">
@@ -152,7 +149,7 @@ const chainStore = useBlockchain()
 </template>
 
 <style scoped>
- .logo path{
+.logo path {
   fill: #171d30;
 }
 </style>

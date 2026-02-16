@@ -9,12 +9,18 @@ import NavbarSearch from '@/layouts/components/NavbarSearch.vue';
 import ChainProfile from '@/layouts/components/ChainProfile.vue';
 import Sponsors from '@/layouts/components/Sponsors.vue';
 
-import { NetworkType, useDashboard } from '@/stores/useDashboard';
+import { useDashboard } from '@/stores/useDashboard';
+import { NetworkType } from '@/types/chaindata';
 import { useBaseStore, useBlockchain } from '@/stores';
 
 import NavBarI18n from './NavBarI18n.vue';
 import NavBarWallet from './NavBarWallet.vue';
-import type { NavGroup, NavLink, NavSectionTitle, VerticalNavItems } from '../types';
+import type {
+  NavGroup,
+  NavLink,
+  NavSectionTitle,
+  VerticalNavItems,
+} from '../types';
 import dayjs from 'dayjs';
 import AdBanner from '@/components/ad/AdBanner.vue';
 
@@ -25,10 +31,10 @@ blockchain.randomSetupEndpoint();
 const baseStore = useBaseStore();
 
 const current = ref(''); // the current chain
-const temp = ref('')
+const temp = ref('');
 blockchain.$subscribe((m, s) => {
   if (current.value === s.chainName && temp.value != s.endpoint.address) {
-    temp.value = s.endpoint.address
+    temp.value = s.endpoint.address;
     blockchain.initial();
   }
   if (current.value != s.chainName) {
@@ -71,24 +77,24 @@ function isNavTitle(nav: VerticalNavItems | any): nav is NavSectionTitle {
   return (<NavSectionTitle>nav).heading !== undefined;
 }
 function selected(route: any, nav: NavLink) {
-  const b = route.path === nav.to?.path || route.path.startsWith(nav.to?.path) && nav.title.indexOf('dashboard') === -1
-  return b
+  const b =
+    route.path === nav.to?.path || (route.path.startsWith(nav.to?.path) && nav.title.indexOf('dashboard') === -1);
+  return b;
 }
 const blocktime = computed(() => {
-  return dayjs(baseStore.latest?.block?.header?.time)
+  return dayjs(baseStore.latest?.block?.header?.time);
 });
 
 const behind = computed(() => {
-  const current = dayjs().subtract(10, 'minute')
-  return blocktime.value.isBefore(current)
+  const current = dayjs().subtract(10, 'minute');
+  return blocktime.value.isBefore(current);
 });
 
-dayjs()
+dayjs();
 
 const show_ad = computed(() => {
-  return location.hostname.indexOf('ping.pub') > -1
-})
-
+  return location.hostname.indexOf('ping.pub') > -1;
+});
 </script>
 
 <template>
@@ -240,7 +246,7 @@ const show_ad = computed(() => {
         </div>
       </div>
 
-      <!-- 👉 Pages -->
+      <!-- Pages -->
       <div class="flex-1 pb-8">
         <div v-if="behind" class="modern-card mb-6 p-4 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
           <div class="flex gap-3 items-center">

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useDashboard } from '@/stores/useDashboard';
+import { useDashboard } from '@/stores';
 import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 
@@ -16,12 +16,8 @@ const conf = computed(() => dashboardStore.chains[props.name] || {});
 const addFavor = (e: Event) => {
   e.stopPropagation();
   e.preventDefault();
-  dashboardStore.favoriteMap[props.name] =
-    !dashboardStore?.favoriteMap?.[props.name];
-  window.localStorage.setItem(
-    'favoriteMap',
-    JSON.stringify(dashboardStore.favoriteMap)
-  );
+  dashboardStore.favoriteMap[props.name] = !dashboardStore?.favoriteMap?.[props.name];
+  window.localStorage.setItem('favoriteMap', JSON.stringify(dashboardStore.favoriteMap));
 };
 </script>
 <template>

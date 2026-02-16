@@ -1,12 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
 import { fromHex, toBase64, fromBase64, toHex } from '@cosmjs/encoding';
-import {
-  useStakingStore,
-  useBaseStore,
-  useBlockchain,
-  useFormatter,
-} from '@/stores';
+import { useStakingStore, useBaseStore, useBlockchain, useFormatter } from '@/stores';
 import UptimeBar from '@/components/UptimeBar.vue';
 import type { SlashingParam, SigningInfo, Block } from '@/types';
 import { consensusPubkeyToHexAddress, valconsToBase64 } from '@/libs';
@@ -22,7 +17,7 @@ const keyword = ref('');
 const live = ref(true);
 const slashingParam = ref({} as SlashingParam);
 const signingInfo = ref({} as Record<string, SigningInfo>);
-const consumerValidators = ref([] as {moniker: string, base64: string}[]);
+const consumerValidators = ref([] as { moniker: string; base64: string }[]);
 
 // Avatar functionality
 const cache = JSON.parse(localStorage.getItem('avatars') || '{}');
@@ -43,26 +38,30 @@ interface ValidatorUnit {
 }
 
 function padding(blocks: BlockColor[] = []) {
-  const raw = Array(50).fill({ height: "0", color: 'bg-secondary' } as BlockColor).concat(blocks)
+  const raw = Array(50)
+    .fill({ height: '0', color: 'bg-secondary' } as BlockColor)
+    .concat(blocks);
   return raw.slice(raw.length - 50);
 }
 
 const validatorSet = computed(() => {
   if (chainStore.isConsumerChain) {
     return consumerValidators.value.map((v) => {
-      const b64 = valconsToBase64(v.moniker)
-      const moniker = stakingStore.validators.find((x) => toBase64(fromHex(consensusPubkeyToHexAddress(x.consensus_pubkey))) === b64)?.description.moniker;
+      const b64 = valconsToBase64(v.moniker);
+      const moniker = stakingStore.validators.find(
+        (x) => toBase64(fromHex(consensusPubkeyToHexAddress(x.consensus_pubkey))) === b64
+      )?.description.moniker;
       return {
         moniker: moniker || v.moniker,
-        base64: v.base64
+        base64: v.base64,
       };
     });
-  }; 
+  }
   return stakingStore.validators.map((v) => {
-    const hex = consensusPubkeyToHexAddress(v.consensus_pubkey)
+    const hex = consensusPubkeyToHexAddress(v.consensus_pubkey);
     return {
       moniker: v.description.moniker,
-      base64: toBase64(fromHex(hex))
+      base64: toBase64(fromHex(hex)),
     };
   });
 });
@@ -70,34 +69,33 @@ const validatorSet = computed(() => {
 const blockColors = ref({} as Record<string, BlockColor[]>);
 
 const grid = computed(() => {
-
-  const validators = keyword.value.length === 0 ? validatorSet.value :
-    validatorSet.value.filter((v) => v.moniker.toLowerCase().includes(keyword.value.toLowerCase()));
+  const validators =
+    keyword.value.length === 0
+      ? validatorSet.value
+      : validatorSet.value.filter((v) => v.moniker.toLowerCase().includes(keyword.value.toLowerCase()));
 
   const window = Number(slashingParam.value.signed_blocks_window || 0);
   return validators.map((v) => {
     const signing = signingInfo.value[v.base64];
-    const uptime = signing && window > 0
-      ? (window - Number(signing.missed_blocks_counter)) / window
-      : undefined
+    const uptime = signing && window > 0 ? (window - Number(signing.missed_blocks_counter)) / window : undefined;
     return {
       moniker: v.moniker,
       base64: v.base64,
       blocks: padding(blockColors.value[v.base64] || []),
       uptime,
       missed_blocks_counter: signing?.missed_blocks_counter,
-      signing
+      signing,
     } as ValidatorUnit;
-  })
+  });
 });
 
 const preload = ref(false);
 baseStore.$subscribe((_, state) => {
-  const newHeight = Number(state.latest?.block?.header?.height || 0)
+  const newHeight = Number(state.latest?.block?.header?.height || 0);
   if (newHeight > latest.value) {
     latest.value = newHeight;
     // initialize if it's the first time
-    if(!preload.value) {
+    if (!preload.value) {
       preFill();
       preload.value = true;
     }
@@ -105,18 +103,23 @@ baseStore.$subscribe((_, state) => {
     // reset the consumer validators
     if (newHeight > 0 && consumerValidators.value.length === 0) {
       const chain_id = state.latest.block.header.chain_id;
-      Promise.resolve().then(async () =>{
+      Promise.resolve().then(async () => {
         await stakingStore.getConsumerValidators(chain_id).then((x) => {
-        x.validators.sort((a,b) => Number(b.power)-Number(a.power)).forEach(v => {
-          const base64 = toBase64(fromHex(consensusPubkeyToHexAddress({"@type": "/cosmos.crypto.ed25519.PubKey", key: v.consumer_key.ed25519 })));
-          const moniker = v.provider_address;
-          consumerValidators.value.push({ moniker, base64});
+          x.validators
+            .sort((a, b) => Number(b.power) - Number(a.power))
+            .forEach((v) => {
+              const base64 = toBase64(
+                fromHex(
+                  consensusPubkeyToHexAddress({ '@type': '/cosmos.crypto.ed25519.PubKey', key: v.consumer_key.ed25519 })
+                )
+              );
+              const moniker = v.provider_address;
+              consumerValidators.value.push({ moniker, base64 });
+            });
         });
-
       });
-      }) 
     }
-    
+
     if (Number(state.latest.block.header.height) % 7 === 0) updateTotalSigningInfo();
     fillblock(state.latest);
   }
@@ -138,38 +141,38 @@ onMounted(() => {
 });
 
 function preFill() {
-
-  if(latest.value > 50 && baseStore.recents.length >= 49 ) return
+  if (latest.value > 50 && baseStore.recents.length >= 49) return;
   // preload 50 blocks if recent blocks are not enough
   let promise = Promise.resolve();
   for (let i = latest.value - baseStore.recents.length; i > latest.value - 50 && i > 1; i -= 1) {
-    promise = promise.then(() =>
-      new Promise((resolve) => {
-        if (live.value) {
-          // continue only if the page is living
-          if (i > latest.value - 50)
-            baseStore.fetchBlock(i).then((x) => {
-              fillblock(x, 'start');
-              resolve();
-            });
-        }
-      })
+    promise = promise.then(
+      () =>
+        new Promise((resolve) => {
+          if (live.value) {
+            // continue only if the page is living
+            if (i > latest.value - 50)
+              baseStore.fetchBlock(i).then((x) => {
+                fillblock(x, 'start');
+                resolve();
+              });
+          }
+        })
     );
   }
 }
 function fillblock(b: Block, direction: string = 'end') {
   validatorSet.value.forEach((v) => {
-    const sig = b.block.last_commit?.signatures.find((s) => s.validator_address === v.base64)
+    const sig = b.block.last_commit?.signatures.find((s) => s.validator_address === v.base64);
     const block = blockColors.value[v.base64] || [];
     let color = {
       height: b.block.header.height,
-      color: 'bg-red-500'
-    }
+      color: 'bg-red-500',
+    };
     if (sig) {
       color = {
         height: b.block.header.height,
-        color: sig.block_id_flag === 'BLOCK_ID_FLAG_COMMIT' ? 'bg-green-500' : 'bg-yellow-500'
-      }
+        color: sig.block_id_flag === 'BLOCK_ID_FLAG_COMMIT' ? 'bg-green-500' : 'bg-yellow-500',
+      };
     }
     if (direction === 'end') {
       block.push(color);
@@ -266,9 +269,11 @@ const getValidatorIdentity = (moniker: string) => {
   <div>
     <div class="tabs tabs-boxed bg-transparent mb-4">
       <a class="tab text-gray-400 capitalize" :class="{ 'tab-active': tab === '3' }" @click="changeTab('3')">{{
-        $t('uptime.overall') }}</a>
+        $t('uptime.overall')
+      }}</a>
       <a class="tab text-gray-400 capitalize" :class="{ 'tab-active': tab === '2' }" @click="changeTab('2')">{{
-        $t('module.blocks') }}</a>
+        $t('module.blocks')
+      }}</a>
       <RouterLink :to="`/${chain}/uptime/customize`">
         <a class="tab text-gray-400 capitalize">{{ $t('uptime.customize') }}</a>
       </RouterLink>

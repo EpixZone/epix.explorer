@@ -5,13 +5,12 @@ import {
   useBankStore,
   useFormatter,
   useGovStore,
+  useDistributionStore,
+  useMintStore,
+  useStakingStore,
 } from '@/stores';
-import { useDistributionStore } from '@/stores/useDistributionStore';
-import { useMintStore } from '@/stores/useMintStore';
-import { useStakingStore } from '@/stores/useStakingStore';
 import type { Coin, Tally } from '@/types';
 import numeral from 'numeral';
-import { nextTick } from 'vue';
 import { defineStore } from 'pinia';
 
 export function colorMap(color: string) {
@@ -26,11 +25,10 @@ export function colorMap(color: string) {
 }
 
 const CODEMAP: Record<string, string[]> = {
-  "binance.com": ["ref", "CPA_004JZGRX6A"],
-  "gate.com": ["ref", "U1gVBl9a"],
-  "bybit": ["affiliate_id", "JKRRZX9"],
-
-}
+  'binance.com': ['ref', 'CPA_004JZGRX6A'],
+  'gate.com': ['ref', 'U1gVBl9a'],
+  bybit: ['affiliate_id', 'JKRRZX9'],
+};
 
 export const useIndexModule = defineStore('module-index', {
   state: () => {
@@ -96,35 +94,33 @@ export const useIndexModule = defineStore('module-index', {
       return useBankStore();
     },
     twitter(): string {
-      if (!this.coinInfo?.links?.twitter_screen_name) return ""
+      if (!this.coinInfo?.links?.twitter_screen_name) return '';
       return `https://twitter.com/${this.coinInfo?.links.twitter_screen_name}`;
     },
     homepage(): string {
-      if (!this.coinInfo?.links?.homepage) return ""
+      if (!this.coinInfo?.links?.homepage) return '';
       const [page1, page2, page3] = this.coinInfo?.links?.homepage;
       return page1 || page2 || page3;
     },
     github(): string {
-      if (!this.coinInfo?.links?.repos_url) return ""
+      if (!this.coinInfo?.links?.repos_url) return '';
       const [page1, page2, page3] = this.coinInfo?.links?.repos_url?.github;
       return page1 || page2 || page3;
     },
     telegram(): string {
-      if (!this.coinInfo?.links?.homepage) return ""
+      if (!this.coinInfo?.links?.homepage) return '';
       return `https://t.me/${this.coinInfo?.links.telegram_channel_identifier}`;
     },
 
     priceChange(): string {
-      if (!this.coinInfo?.market_data?.price_change_percentage_24h) return ""
-      const change =
-        this.coinInfo?.market_data?.price_change_percentage_24h || 0;
+      if (!this.coinInfo?.market_data?.price_change_percentage_24h) return '';
+      const change = this.coinInfo?.market_data?.price_change_percentage_24h || 0;
       return numeral(change).format('+0.[00]');
     },
 
     priceColor(): string {
-      if (!this.coinInfo?.market_data?.price_change_percentage_24h) return ""
-      const change =
-        this.coinInfo?.market_data?.price_change_percentage_24h || 0;
+      if (!this.coinInfo?.market_data?.price_change_percentage_24h) return '';
+      const change = this.coinInfo?.market_data?.price_change_percentage_24h || 0;
       switch (true) {
         case change > 0:
           return 'text-success';
@@ -135,7 +131,7 @@ export const useIndexModule = defineStore('module-index', {
       }
     },
     trustColor(): string {
-      if (!this.coinInfo?.tickers) return ""
+      if (!this.coinInfo?.tickers) return '';
       const change = this.coinInfo?.tickers[this.tickerIndex]?.trust_score;
       return change;
     },
@@ -146,8 +142,8 @@ export const useIndexModule = defineStore('module-index', {
     },
 
     proposals() {
-      const gov = useGovStore()
-      return gov.proposals['2']
+      const gov = useGovStore();
+      return gov.proposals['2'];
     },
 
     stats() {
@@ -230,7 +226,7 @@ export const useIndexModule = defineStore('module-index', {
         return `osmosis-${(firstAsset as any).osmosis_symbol.toLowerCase()}`;
       }
       return '';
-    }
+    },
   },
   actions: {
     async loadDashboard() {
@@ -337,12 +333,12 @@ export const useIndexModule = defineStore('module-index', {
       } else if (osmosisSymbol) {
         // Map days to Osmosis tf (minutes): pick a resolution that gives a reasonable number of data points
         let tf = 60;
-        if (this.days <= 1/24) tf = 5;        // 1H → 5min candles
-        else if (this.days <= 1) tf = 15;      // 1D → 15min candles
-        else if (this.days <= 7) tf = 60;      // 7D → 1h candles
-        else if (this.days <= 30) tf = 240;    // 30D → 4h candles
-        else if (this.days <= 365) tf = 1440;  // 1Y → 1d candles
-        else tf = 10080;                        // ALL → 1w candles
+        if (this.days <= 1/24) tf = 5;        // 1H -> 5min candles
+        else if (this.days <= 1) tf = 15;      // 1D -> 15min candles
+        else if (this.days <= 7) tf = 60;      // 7D -> 1h candles
+        else if (this.days <= 30) tf = 240;    // 30D -> 4h candles
+        else if (this.days <= 365) tf = 1440;  // 1Y -> 1d candles
+        else tf = 10080;                        // ALL -> 1w candles
 
         this.coingecko.getOsmosisMarketChart(osmosisSymbol, tf).then((x: any) => {
           // Filter data to the requested time window (Osmosis API returns full history)
@@ -364,7 +360,7 @@ export const useIndexModule = defineStore('module-index', {
     },
     selectTicker(i: number) {
       this.tickerIndex = i;
-    }
+    },
   },
 });
 
@@ -386,13 +382,12 @@ export function addOrReplaceUrlParam(url: string, param: string, value: string):
   return urlObj.toString();
 }
 
-
 export function tickerUrl(url: string) {
   for (const domain of Object.keys(CODEMAP)) {
     if (url.indexOf(domain) > -1) {
       const v = CODEMAP[domain];
-      return addOrReplaceUrlParam(url, v[0], v[1])
+      return addOrReplaceUrlParam(url, v[0], v[1]);
     }
   }
-  return url
+  return url;
 }

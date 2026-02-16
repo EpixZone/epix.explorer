@@ -7,7 +7,7 @@ import { createPinia } from 'pinia';
 import LazyLoad from 'lazy-load-vue3';
 
 import router from './router';
-import { useBaseStore } from './stores/useBaseStore';
+import { useBaseStore } from '@/stores';
 
 // Create vue app
 const app = createApp(App);
@@ -19,7 +19,9 @@ app.use(LazyLoad, { component: true });
 // Mount vue app
 app.mount('#app');
 
-// fetch latest block every 1s
+const REFRESH_INTERVAL = import.meta.env.VITE_REFRESH_INTERVAL || 6000; // 6 seconds
+
+// fetch latest block every 6s
 const blockStore = useBaseStore();
 const requestCounter = ref(0);
 setInterval(() => {
@@ -28,4 +30,4 @@ setInterval(() => {
     // max allowed request
     blockStore.fetchLatest().finally(() => (requestCounter.value -= 1));
   }
-}, 1000);
+}, REFRESH_INTERVAL);

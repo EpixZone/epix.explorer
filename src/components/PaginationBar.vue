@@ -29,12 +29,11 @@ const pages = computed(() => {
         }
     }
     return pages
-})
+});
 
 function gotoPage(pageNum: number) {
     props.callback(pageNum)
 }
-
 </script>
 <template>
     <div class="my-5 text-center">

@@ -1,7 +1,16 @@
 <script lang="ts" setup>
 import PaginationBar from '@/components/PaginationBar.vue';
-import { useBaseStore, useBlockchain, useFormatter, useTxDialog } from '@/stores';
-import { PageRequest, type PaginatedBalances, type PaginatedTxs } from '@/types';
+import {
+  useBaseStore,
+  useBlockchain,
+  useFormatter,
+  useTxDialog,
+} from '@/stores';
+import {
+  PageRequest,
+  type PaginatedBalances,
+  type PaginatedTxs,
+} from '@/types';
 import { Icon } from '@iconify/vue';
 import { onMounted, ref } from 'vue';
 import { useWasmStore } from '../WasmStore';
@@ -9,137 +18,136 @@ import DynamicComponent from '@/components/dynamic/DynamicComponent.vue';
 import { useRoute } from 'vue-router';
 import type { ContractInfo, PaginabledContractStates } from '../types';
 
-import { JsonViewer } from "vue3-json-viewer"
+import { JsonViewer } from 'vue3-json-viewer';
 // if you used v1.0.5 or latster ,you should add import "vue3-json-viewer/dist/index.css"
-import "vue3-json-viewer/dist/index.css";
+import 'vue3-json-viewer/dist/index.css';
 
 const chainStore = useBlockchain();
 const baseStore = useBaseStore();
 const format = useFormatter();
 const wasmStore = useWasmStore();
 
-const route = useRoute()
-const page = ref(new PageRequest())
+const route = useRoute();
+const page = ref(new PageRequest());
 const pageRequest = ref(new PageRequest());
 
-const txs = ref<PaginatedTxs>({ txs: [], tx_responses: [], pagination: { total: "0" } });
+const txs = ref<PaginatedTxs>({ txs: [], tx_responses: [], pagination: { total: '0' } });
 
 const dialog = useTxDialog();
 const info = ref({} as ContractInfo);
 const state = ref({} as PaginabledContractStates);
 const selected = ref('');
-const balances = ref({} as PaginatedBalances)
+const balances = ref({} as PaginatedBalances);
 
-const contractAddress = String(route.query.contract)
+const contractAddress = String(route.query.contract);
 
-const history = JSON.parse(localStorage.getItem("contract_history") || "{}")
+const history = JSON.parse(localStorage.getItem('contract_history') || '{}');
 
 if (history[chainStore.chainName]) {
-    if (!history[chainStore.chainName].includes(contractAddress)) {
-        history[chainStore.chainName].push(contractAddress)
-        if (history[chainStore.chainName].length > 10) {
-            history[chainStore.chainName].shift()
-        }
+  if (!history[chainStore.chainName].includes(contractAddress)) {
+    history[chainStore.chainName].push(contractAddress);
+    if (history[chainStore.chainName].length > 10) {
+      history[chainStore.chainName].shift();
     }
+  }
 } else {
-    history[chainStore.chainName] = [contractAddress]
+  history[chainStore.chainName] = [contractAddress];
 }
-localStorage.setItem("contract_history", JSON.stringify(history))
+localStorage.setItem('contract_history', JSON.stringify(history));
 
 onMounted(() => {
-    const address = contractAddress
-    wasmStore.wasmClient.getWasmContracts(address).then((x) => {
-        info.value = x.contract_info;
+  const address = contractAddress;
+  wasmStore.wasmClient.getWasmContracts(address).then((x) => {
+    info.value = x.contract_info;
+  });
+  chainStore.rpc
+    .getTxs("?order_by=2&events=execute._contract_address='{address}'", { address }, page.value)
+    .then((res) => {
+      txs.value = res;
     });
-    chainStore.rpc.getTxs("?order_by=2&events=execute._contract_address='{address}'", { address }, page.value).then(res => {
-        txs.value = res
-    })
 
-    wasmStore.wasmClient.getWasmContractQueries(contractAddress).then(res => {
-        console.log("queries: ", res)
-        queries.value = res
-        if (res && res.length > 0) {
-            selectQuery(res[0])
-        }
-    })
+  wasmStore.wasmClient.getWasmContractQueries(contractAddress).then((res) => {
+    console.log('queries: ', res);
+    queries.value = res;
+    if (res && res.length > 0) {
+      selectQuery(res[0]);
+    }
+  });
 
-    showFunds()
-    showState()
-
-})
+  showFunds();
+  showState();
+});
 
 function pageload(pageNum: number) {
-    page.value.setPage(pageNum)
-    const address = String(route.query.contract)
-    chainStore.rpc.getTxs("?order_by=2&events=execute._contract_address='{address}'", { address }, page.value).then(res => {
-        txs.value = res
-    })
+  page.value.setPage(pageNum);
+  const address = String(route.query.contract);
+  chainStore.rpc
+    .getTxs("?order_by=2&events=execute._contract_address='{address}'", { address }, page.value)
+    .then((res) => {
+      txs.value = res;
+    });
 }
-
 
 function showFunds() {
-
-    const address = String(route.query.contract)
-    chainStore.rpc.getBankBalances(address).then(res => {
-        balances.value = res
-    })
+  const address = String(route.query.contract);
+  chainStore.rpc.getBankBalances(address).then((res) => {
+    balances.value = res;
+  });
 }
 function showState() {
-    const address = String(route.query.contract)
-    selected.value = address;
-    pageloadState(1);
+  const address = String(route.query.contract);
+  selected.value = address;
+  pageloadState(1);
 }
 
 function pageloadState(p: number) {
-    pageRequest.value.setPage(p);
-    wasmStore.wasmClient
-        .getWasmContractStates(selected.value, pageRequest.value)
-        .then((x) => {
-            state.value = x;
-        });
+  pageRequest.value.setPage(p);
+  wasmStore.wasmClient.getWasmContractStates(selected.value, pageRequest.value).then((x) => {
+    state.value = x;
+  });
 }
 
 function showQuery() {
-    query.value = '';
-    result.value = '';
+  query.value = '';
+  result.value = '';
 }
 
 function selectQuery(method: string) {
-    query.value = `{"${method}":{}}`
+  query.value = `{"${method}":{}}`;
 }
 
 function queryContract() {
-    try {
-        if (selectedRadio.value === 'raw') {
-            wasmStore.wasmClient
-                .getWasmContractRawQuery(contractAddress, query.value)
-                .then((x) => {
-                    result.value = x;
-                })
-                .catch((err) => {
-                    result.value = err;
-                });
-        } else {
-            wasmStore.wasmClient
-                .getWasmContractSmartQuery(contractAddress, query.value)
-                .then((x) => {
-                    result.value = x;
-                })
-                .catch((err) => {
-                    result.value = err;
-                });
-        }
-    } catch (err) {
-        result.value = JSON.stringify(err); // not works for now
+  try {
+    if (selectedRadio.value === 'raw') {
+      wasmStore.wasmClient
+        .getWasmContractRawQuery(contractAddress, query.value)
+        .then((x) => {
+          result.value = x;
+        })
+        .catch((err) => {
+          result.value = err;
+        });
+    } else {
+      wasmStore.wasmClient
+        .getWasmContractSmartQuery(contractAddress, query.value)
+        .then((x) => {
+          result.value = x;
+        })
+        .catch((err) => {
+          result.value = err;
+        });
     }
-    // TODO, show error in the result.
+  } catch (err) {
+    result.value = JSON.stringify(err); // not works for now
+  }
+  // TODO, show error in the result.
 }
 
 const selectedRadio = ref('smart');
 const query = ref('');
 const result = ref({});
-const queries = ref<string[]>([])
-const tab = ref('detail')
+const queries = ref<string[]>([]);
+const tab = ref('detail');
 </script>
 <template>
     <div>

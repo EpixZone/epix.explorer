@@ -17,7 +17,7 @@ import { useIndexModule, colorMap, tickerUrl } from './indexStore';
 
 import CardStatisticsVertical from '@/components/CardStatisticsVertical.vue';
 import ProposalListItem from '@/components/ProposalListItem.vue';
-import ArrayObjectElement from '@/components/dynamic/ArrayObjectElement.vue'
+import ArrayObjectElement from '@/components/dynamic/ArrayObjectElement.vue';
 
 const props = defineProps(['chain']);
 
@@ -27,7 +27,7 @@ const walletStore = useWalletStore();
 const format = useFormatter();
 const dialog = useTxDialog();
 const stakingStore = useStakingStore();
-const paramStore = useParamStore()
+const paramStore = useParamStore();
 const coinInfo = computed(() => {
   return store.coinInfo;
 });
@@ -35,7 +35,7 @@ const coinInfo = computed(() => {
 onMounted(() => {
   store.loadDashboard();
   walletStore.loadMyAsset();
-  paramStore.handleAbciInfo()
+  paramStore.handleAbciInfo();
 });
 const ticker = computed(() => store.coinInfo.tickers?.[store.tickerIndex]);
 
@@ -44,10 +44,10 @@ let isActive = true;
 const unsubscribe = blockchain.$subscribe((m, s) => {
   if (!isActive) return;
   if (s.chainName !== currName.value) {
-    currName.value = s.chainName
+    currName.value = s.chainName;
     store.loadDashboard();
     walletStore.loadMyAsset();
-    paramStore.handleAbciInfo()
+    paramStore.handleAbciInfo();
   }
 });
 onUnmounted(() => {
@@ -55,10 +55,7 @@ onUnmounted(() => {
   unsubscribe();
 });
 function shortName(name: string, id: string) {
-  return name.toLowerCase().startsWith('ibc/') ||
-    name.toLowerCase().startsWith('0x')
-    ? id
-    : name;
+  return name.toLowerCase().startsWith('ibc/') || name.toLowerCase().startsWith('0x') ? id : name;
 }
 
 function formatPrice(value: number | undefined): string {
@@ -83,22 +80,22 @@ const color = computed(() => {
 });
 
 function updateState() {
-  walletStore.loadMyAsset()
+  walletStore.loadMyAsset();
 }
 
 function trustColor(v: string) {
-  return `text-${colorMap(v)}`
+  return `text-${colorMap(v)}`;
 }
 
-const quantity = ref(100)
+const quantity = ref(100);
 const qty = computed({
   get: () => {
-    return parseFloat(quantity.value.toFixed(6))
+    return parseFloat(quantity.value.toFixed(6));
   },
-  set: val => {
-    quantity.value = val
-  }
-})
+  set: (val) => {
+    quantity.value = val;
+  },
+});
 const amount = computed({
   get: () => {
     return quantity.value * (ticker.value?.converted_last?.usd || 0)
@@ -141,9 +138,7 @@ const amount = computed({
                     <div class="text-xl font-semibold text-gray-900 dark:text-white">
                       ${{ formatPrice(ticker?.converted_last?.usd) }}
                     </div>
-                    <div class="text-sm" :class="store.priceColor">
-                      {{ store.priceChange }}%
-                    </div>
+                    <div class="text-sm" :class="store.priceColor">{{ store.priceChange }}%</div>
                   </div>
                 </div>
               </label>
@@ -181,29 +176,47 @@ const amount = computed({
               <input type="checkbox" id="calculator" class="modal-toggle" />
               <div class="modal">
                 <div class="modal-box">
-                  <label for="calculator" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</label>
+                  <label for="calculator" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">&#10005;</label>
                   <h3 class="text-lg font-bold">{{ $t('index.price_calculator') }}</h3>
                   <div class="flex flex-col w-full mt-5">
-                    <div class="grid h-20 flex-grow card rounded-box place-items-center">
+                    <div
+                      class="grid h-20 flex-grow card rounded-box place-items-center"
+                    >
                       <div class="join w-full">
                         <label class="join-item btn">
                           <span class="uppercase">{{ coinInfo.symbol }}</span>
                         </label>
-                        <input type="number" v-model="qty" min="0" placeholder="Input a number" class="input grow input-bordered join-item" />
+                        <input
+                          type="number"
+                          v-model="qty"
+                          min="0"
+                          placeholder="Input a number"
+                          class="input grow input-bordered join-item"
+                        />
                       </div>
                     </div>
                     <div class="divider">=</div>
-                    <div class="grid h-20 flex-grow card rounded-box place-items-center">
+                    <div
+                      class="grid h-20 flex-grow card rounded-box place-items-center"
+                    >
                       <div class="join w-full">
                         <label class="join-item btn">
                           <span>USD</span>
                         </label>
-                        <input type="number" v-model="amount" min="0" placeholder="Input amount" class="join-item grow input input-bordered" />
+                        <input
+                          type="number"
+                          v-model="amount"
+                          min="0"
+                          placeholder="Input amount"
+                          class="join-item grow input input-bordered"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
-                <label class="modal-backdrop" for="calculator">{{ $t('index.close') }}</label>
+                <label class="modal-backdrop" for="calculator">{{
+                  $t('index.close')
+                }}</label>
               </div>
               <a class="my-5 !text-white modern-button grow px-4 py-2 text-center" :href="tickerUrl(ticker.trade_url)"
                 target="_blank">
@@ -219,11 +232,16 @@ const amount = computed({
       </div>
       <div class="h-[1px] w-full bg-gray-100 dark:bg-[#384059]"></div>
       <div class="max-h-[250px] overflow-auto p-4 text-sm">
-        <MdEditor :model-value="coinInfo.description?.en" previewOnly></MdEditor>
+        <MdEditor
+          :model-value="coinInfo.description?.en"
+          previewOnly
+        ></MdEditor>
       </div>
       <div class="mx-4 flex flex-wrap items-center">
-        <div v-for="tag in coinInfo.categories"
-          class="mr-2 mb-4 text-xs bg-gray-100 dark:bg-[#384059] px-3 rounded-full py-1">
+        <div
+          v-for="tag in coinInfo.categories"
+          class="mr-2 mb-4 text-xs bg-gray-100 dark:bg-[#384059] px-3 rounded-full py-1"
+        >
           {{ tag }}
         </div>
       </div>
@@ -293,7 +311,10 @@ const amount = computed({
         </div>
       </div>
 
-      <div v-if="walletStore.delegations.length > 0" class="px-4 pb-4 overflow-auto">
+      <div
+        v-if="walletStore.delegations.length > 0"
+        class="px-4 pb-4 overflow-auto"
+      >
         <table class="table table-compact w-full table-zebra">
           <thead>
             <tr>
@@ -319,10 +340,9 @@ const amount = computed({
                 {{
                   format.formatTokens(
                     walletStore?.rewards?.rewards?.find(
-                      (el) =>
-                        el?.validator_address ===
-                        item?.delegation?.validator_address
-                    )?.reward)
+                      (el) => el?.validator_address === item?.delegation?.validator_address
+                    )?.reward
+                  )
                 }}
               </td>
               <td>
@@ -350,8 +370,11 @@ const amount = computed({
         <RouterLink to="/wallet/receive" class="btn !bg-info !border-info text-white hidden">{{ $t('index.receive') }}</RouterLink>
       </div>
       <Teleport to="body">
-        <ping-token-convert :chain-name="blockchain?.current?.prettyName" :endpoint="blockchain?.endpoint?.address"
-          :hd-path="walletStore?.connectedWallet?.hdPath"></ping-token-convert>
+        <ping-token-convert
+          :chain-name="blockchain?.current?.prettyName"
+          :endpoint="blockchain?.endpoint?.address"
+          :hd-path="walletStore?.connectedWallet?.hdPath"
+        ></ping-token-convert>
       </Teleport>
     </div>
 
@@ -360,7 +383,10 @@ const amount = computed({
         {{ $t('index.app_versions') }}
       </div>
       <!-- Application Version -->
-      <ArrayObjectElement :value="paramStore.appVersion?.items" :thead="false" />
+      <ArrayObjectElement
+        :value="paramStore.appVersion?.items"
+        :thead="false"
+      />
       <div class="h-4"></div>
     </div>
 

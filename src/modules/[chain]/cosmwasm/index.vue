@@ -11,35 +11,33 @@ const props = defineProps(['chain']);
 
 const codes = ref({} as PaginabledCodeInfos);
 
-const pageRequest = ref(new PageRequest())
+const pageRequest = ref(new PageRequest());
 const wasmStore = useWasmStore();
-const dialog = useTxDialog()
-const creator = ref("")
-const field = ref("contract")
-const history = ref([])
+const dialog = useTxDialog();
+const creator = ref('');
+const field = ref('contract');
+const history = ref([]);
 
 function pageload(pageNum: number) {
-    pageRequest.value.setPage(pageNum)
-    wasmStore.wasmClient.getWasmCodeList(pageRequest.value).then((x) => {
-        codes.value = x;
-    });
+  pageRequest.value.setPage(pageNum);
+  wasmStore.wasmClient.getWasmCodeList(pageRequest.value).then((x) => {
+    codes.value = x;
+  });
 }
-pageload(1)
+pageload(1);
 
 onMounted(() => {
-    const historyStore = JSON.parse(localStorage.getItem("contract_history") || "{}")
-    history.value = historyStore[props.chain] || []
-})
+  const historyStore = JSON.parse(localStorage.getItem('contract_history') || '{}');
+  history.value = historyStore[props.chain] || [];
+});
 
 function myContracts() {
-    if(field.value === "contract")
-        router.push(`/${props.chain}/cosmwasm/0/transactions?contract=${creator.value}`)
-    else if(field.value === "creator")
-        router.push(`/${props.chain}/cosmwasm/${creator.value}/contracts`)
+  if (field.value === 'contract') router.push(`/${props.chain}/cosmwasm/0/transactions?contract=${creator.value}`);
+  else if (field.value === 'creator') router.push(`/${props.chain}/cosmwasm/${creator.value}/contracts`);
 }
-const togo = ref("")
+const togo = ref('');
 function gotoHistory() {
-    router.push(`/${props.chain}/cosmwasm/0/transactions?contract=${togo.value}`)
+  router.push(`/${props.chain}/cosmwasm/0/transactions?contract=${togo.value}`);
 }
 </script>
 <template>

@@ -21,7 +21,6 @@ import Countdown from '@/components/Countdown.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { fromBech32, toHex } from '@cosmjs/encoding';
 
-
 const props = defineProps(['proposal_id', 'chain']);
 const proposal = ref({
   final_tally_result: {
@@ -64,35 +63,35 @@ store.fetchProposal(props.proposal_id).then((res) => {
   });
 
   // load origin params if the proposal is param change
-  if(proposalDetail.content?.changes) {
+  if (proposalDetail.content?.changes) {
     proposalDetail.content?.changes.forEach((item) => {
-        chainStore.rpc.getParams(item.subspace, item.key).then((res) => {
-          if(proposal.value.content && res.param) {
-            if(proposal.value.content.current){
-              proposal.value.content.current.push(res.param);
-            } else {
-              proposal.value.content.current = [res.param];
-            };
+      chainStore.rpc.getParams(item.subspace, item.key).then((res) => {
+        if (proposal.value.content && res.param) {
+          if (proposal.value.content.current) {
+            proposal.value.content.current.push(res.param);
+          } else {
+            proposal.value.content.current = [res.param];
           }
-        })
-    })
+        }
+      });
+    });
   }
 
   const msgType = proposalDetail.content?.['@type'] || '';
-  if(msgType.endsWith('MsgUpdateParams')) {
-    if(msgType.indexOf('staking') > -1) {
+  if (msgType.endsWith('MsgUpdateParams')) {
+    if (msgType.indexOf('staking') > -1) {
       chainStore.rpc.getStakingParams().then((res) => {
         addCurrentParams(res);
       });
-    } else if(msgType.indexOf('gov') > -1) {
+    } else if (msgType.indexOf('gov') > -1) {
       chainStore.rpc.getGovParamsVoting().then((res) => {
         addCurrentParams(res);
       });
-    } else if(msgType.indexOf('distribution') > -1) {
+    } else if (msgType.indexOf('distribution') > -1) {
       chainStore.rpc.getDistributionParams().then((res) => {
         addCurrentParams(res);
       });
-    } else if(msgType.indexOf('slashing') > -1) {
+    } else if (msgType.indexOf('slashing') > -1) {
       chainStore.rpc.getSlashingParams().then((res) => {
         addCurrentParams(res);
       });
@@ -101,7 +100,7 @@ store.fetchProposal(props.proposal_id).then((res) => {
 });
 
 function addCurrentParams(res: any) {
-  if(proposal.value.content && res.params) {
+  if (proposal.value.content && res.params) {
     proposal.value.content.params = [proposal.value.content?.params];
     proposal.value.content.current = [res.params];
   }
@@ -153,7 +152,9 @@ const upgradeCountdown = computed((): number => {
   if (height > 0) {
     const base = useBaseStore();
     const current = Number(base.latest?.block?.header?.height || 0);
-    return (height - current) * Number((base.blocktime / 1000).toFixed()) * 1000;
+    return (
+      (height - current) * Number((base.blocktime / 1000).toFixed()) * 1000
+    );
   }
   const now = new Date();
   const end = new Date(proposal.value.content?.plan?.time || '');
@@ -236,14 +237,12 @@ watchEffect(() => {
 
 function showValidatorName(voter: string) {
   try {
-      const { data } = fromBech32(voter);
-      const hex = toHex(data);
-      const v = stakingStore.validators.find(
-        (x) => toHex(fromBech32(x.operator_address).data) === hex
-      );
-      return v ? v.description.moniker : voter;
-  } catch(e){
-      return voter;
+    const { data } = fromBech32(voter);
+    const hex = toHex(data);
+    const v = stakingStore.validators.find((x) => toHex(fromBech32(x.operator_address).data) === hex);
+    return v ? v.description.moniker : voter;
+  } catch (e) {
+    return voter;
   }
 }
 
@@ -255,13 +254,13 @@ function pageload(p: number) {
   });
 }
 
-function metaItem(metadata: string|undefined): { title: string; summary: string } {
+function metaItem(metadata: string | undefined): { title: string; summary: string } {
   if (!metadata) {
-    return { title: '', summary: '' }
+    return { title: '', summary: '' };
   } else if (metadata.startsWith('{') && metadata.endsWith('}')) {
-    return JSON.parse(metadata)
+    return JSON.parse(metadata);
   }
-  return { title: metadata, summary: '' }
+  return { title: metadata, summary: '' };
 }
 </script>
 
@@ -288,9 +287,13 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
       <div class="">
         <ObjectElement :value="proposal.content" />
       </div>
-      <div v-if="proposal.summary && !proposal.content?.description || metaItem(proposal?.metadata)?.summary ">
+      <div v-if="proposal.summary">
         <MdEditor
-          :model-value="format.multiLine(proposal.summary || metaItem(proposal?.metadata)?.summary)"
+          :model-value="
+            format.multiLine(
+              proposal.summary
+            )
+          "
           previewOnly
           class="md-editor-recover"
         ></MdEditor>
@@ -306,16 +309,11 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
         <div class="mb-1" v-for="(item, index) of processList" :key="index">
           <div class="block text-sm mb-1 text-gray-700 dark:text-gray-300">{{ item.name }}</div>
           <div class="h-5 w-full relative">
-            <div
-              class="absolute inset-x-0 inset-y-0 w-full opacity-10 rounded-sm"
-              :class="`${item.class}`"
-            ></div>
+            <div class="absolute inset-x-0 inset-y-0 w-full opacity-10 rounded-sm" :class="`${item.class}`"></div>
             <div
               class="absolute inset-x-0 inset-y-0 rounded-sm"
               :class="`${item.class}`"
-              :style="`width: ${
-                item.value === '-' || item.value === 'NaN%' ? '0%' : item.value
-              }`"
+              :style="`width: ${item.value === '-' || item.value === 'NaN%' ? '0%' : item.value}`"
             ></div>
             <p
               class="absolute inset-x-0 inset-y-0 text-center text-sm text-gray-700 dark:text-gray-200 flex items-center justify-center"
@@ -402,22 +400,13 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
             </div>
           </div>
 
-          <div
-            class="mt-4"
-            v-if="
-              proposal?.content?.['@type']?.endsWith('SoftwareUpgradeProposal')
-            "
-          >
+          <div class="mt-4" v-if="proposal?.content?.['@type']?.endsWith('SoftwareUpgradeProposal')">
             <div class="flex items-center">
               <div class="w-2 h-2 rounded-full bg-warning mr-3"></div>
               <div class="text-base flex-1 text-main">
                 {{ $t('gov.upgrade_plan') }}:
-                <span v-if="Number(proposal.content?.plan?.height || '0') > 0">
-                  (EST)</span
-                >
-                <span v-else>{{
-                  format.toDay(proposal.content?.plan?.time)
-                }}</span>
+                <span v-if="Number(proposal.content?.plan?.height || '0') > 0"> (EST)</span>
+                <span v-else>{{ format.toDay(proposal.content?.plan?.time) }}</span>
               </div>
               <div class="text-sm">
                 {{ shortTime(proposal.voting_end_time) }}
@@ -459,16 +448,12 @@ function metaItem(metadata: string|undefined): { title: string; summary: string 
                 v-if="item.options"
                 class="py-2 text-sm text-gray-900 dark:text-white"
               >
-                {{ item.options.map(x => `${x.option.replace('VOTE_OPTION_', '')}:${format.percent(x.weight)}`).join(', ') }}
+                {{ item.options.map((x) => `${x.option.replace('VOTE_OPTION_', '')}:${format.percent(x.weight)}`).join(', ') }}
               </td>
             </tr>
           </tbody>
         </table>
-        <PaginationBar
-          :limit="pageRequest.limit"
-          :total="pageResponse.total"
-          :callback="pageload"
-        />
+        <PaginationBar :limit="pageRequest.limit" :total="pageResponse.total" :callback="pageload" />
       </div>
     </div>
   </div>

@@ -10,7 +10,7 @@ import {
 import { computed, onMounted, ref, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { Key, SlashingParam, Validator } from '@/types';
-import { formatSeconds}  from '@/libs/utils'
+import { formatSeconds } from '@/libs/utils';
 import { diff } from 'semver';
 
 const staking = useStakingStore();
@@ -18,7 +18,7 @@ const base = useBaseStore();
 const format = useFormatter();
 const dialog = useTxDialog();
 const chainStore = useBlockchain();
-const mintStore = useMintStore()
+const mintStore = useMintStore();
 
 const cache = JSON.parse(localStorage.getItem('avatars') || '{}');
 const avatars = ref(cache || {});
@@ -26,7 +26,7 @@ const latest = ref({} as Record<string, number>);
 const yesterday = ref({} as Record<string, number>);
 const tab = ref('active');
 const unbondList = ref([] as Validator[]);
-const slashing = ref({} as SlashingParam)
+const slashing = ref({} as SlashingParam);
 
 // Loading and error states
 const loading = ref(true);
@@ -101,77 +101,77 @@ watch(avatars, () => {
 }, { deep: true });
 
 async function fetchChange(blockWindow: number = 14400) {
-    let page = 0;
+  let page = 0;
 
-    let height = Number(base.latest?.block?.header?.height || 0);
-    if (height > blockWindow) {
-        height -= blockWindow;
-    } else {
-        height = 1;
-    }
-    // voting power in 24h ago
-    while (page < staking.validators.length && height > 0) {
-        await base.fetchValidatorByHeight(height, page).then((x) => {
-            x.validators.forEach((v) => {
-                yesterday.value[v.pub_key.key] = Number(v.voting_power);
-            });
-        });
-        page += 100;
-    }
+  let height = Number(base.latest?.block?.header?.height || 0);
+  if (height > blockWindow) {
+    height -= blockWindow;
+  } else {
+    height = 1;
+  }
+  // voting power in 24h ago
+  while (page < staking.validators.length && height > 0) {
+    await base.fetchValidatorByHeight(height, page).then((x) => {
+      x.validators.forEach((v) => {
+        yesterday.value[v.pub_key.key] = Number(v.voting_power);
+      });
+    });
+    page += 100;
+  }
 
-    page = 0;
-    // voting power for now
-    while (page < staking.validators.length) {
-        await base.fetchLatestValidators(page).then((x) => {
-            x.validators.forEach((v) => {
-                latest.value[v.pub_key.key] = Number(v.voting_power);
-            });
-        });
-        page += 100;
-    }
+  page = 0;
+  // voting power for now
+  while (page < staking.validators.length) {
+    await base.fetchLatestValidators(page).then((x) => {
+      x.validators.forEach((v) => {
+        latest.value[v.pub_key.key] = Number(v.voting_power);
+      });
+    });
+    page += 100;
+  }
 }
 
 const changes = computed(() => {
-    const changes = {} as Record<string, number>;
-    Object.keys(latest.value).forEach((k) => {
-        const l = latest.value[k] || 0;
-        const y = yesterday.value[k] || 0;
-        changes[k] = l - y;
-    });
-    return changes;
+  const changes = {} as Record<string, number>;
+  Object.keys(latest.value).forEach((k) => {
+    const l = latest.value[k] || 0;
+    const y = yesterday.value[k] || 0;
+    changes[k] = l - y;
+  });
+  return changes;
 });
 
 const change24 = (entry: { consensus_pubkey: Key; tokens: string }) => {
-    const txt = entry.consensus_pubkey.key;
-    // const n: number = latest.value[txt];
-    // const o: number = yesterday.value[txt];
-    // // console.log( txt, n, o)
-    // return n > 0 && o > 0 ? n - o : 0;
+  const txt = entry.consensus_pubkey.key;
+  // const n: number = latest.value[txt];
+  // const o: number = yesterday.value[txt];
+  // // console.log( txt, n, o)
+  // return n > 0 && o > 0 ? n - o : 0;
 
-    const latestValue = latest.value[txt];
-    if (!latestValue) {
-        return 0;
-    }
+  const latestValue = latest.value[txt];
+  if (!latestValue) {
+    return 0;
+  }
 
-    const displayTokens = format.tokenAmountNumber({
-        amount: parseInt(entry.tokens, 10).toString(),
-        denom: staking.params.bond_denom,
-    });
-    const coefficient = displayTokens / latestValue;
-    return changes.value[txt] * coefficient;
+  const displayTokens = format.tokenAmountNumber({
+    amount: parseInt(entry.tokens, 10).toString(),
+    denom: staking.params.bond_denom,
+  });
+  const coefficient = displayTokens / latestValue;
+  return changes.value[txt] * coefficient;
 };
 
 const change24Text = (entry: { consensus_pubkey: Key; tokens: string }) => {
-    if (!entry) return '';
-    const v = change24(entry);
-    return v && v !== 0 ? format.showChanges(v) : '';
+  if (!entry) return '';
+  const v = change24(entry);
+  return v && v !== 0 ? format.showChanges(v) : '';
 };
 
 const change24Color = (entry: { consensus_pubkey: Key; tokens: string }) => {
-    if (!entry) return '';
-    const v = change24(entry);
-    if (v > 0) return 'text-success';
-    if (v < 0) return 'text-error';
+  if (!entry) return '';
+  const v = change24(entry);
+  if (v > 0) return 'text-success';
+  if (v < 0) return 'text-error';
 };
 
 const calculateRank = function (position: number) {
@@ -182,19 +182,25 @@ const calculateRank = function (position: number) {
     const totalPower = localValidators.value.reduce((s, e) => s + parseInt(e.delegator_shares), 0);
     const percent = sum / totalPower;
 
-    switch (true) {
-        case tab.value === 'active' && percent < 0.33:
-            return 'error';
-        case tab.value === 'active' && percent < 0.67:
-            return 'warning';
-        default:
-            return 'primary';
-    }
+  switch (true) {
+    case tab.value === 'active' && percent < 0.33:
+      return 'error';
+    case tab.value === 'active' && percent < 0.67:
+      return 'warning';
+    default:
+      return 'primary';
+  }
 };
 
-function isFeatured(endpoints: string[], who?: {website?: string, moniker: string }) {
-    if(!endpoints || !who) return false
-    return endpoints.findIndex(x => who.website && who.website?.substring(0, who.website?.lastIndexOf('.')).endsWith(x) || who?.moniker?.toLowerCase().search(x.toLowerCase()) > -1) > -1
+function isFeatured(endpoints: string[], who?: { website?: string; moniker: string }) {
+  if (!endpoints || !who) return false;
+  return (
+    endpoints.findIndex(
+      (x) =>
+        (who.website && who.website?.substring(0, who.website?.lastIndexOf('.')).endsWith(x)) ||
+        who?.moniker?.toLowerCase().search(x.toLowerCase()) > -1
+    ) > -1
+  );
 }
 
 // Function to update the list based on current tab and validators
@@ -268,22 +274,20 @@ const loadAvatars = () => {
 };
 
 const logo = (identity?: string) => {
-    if (!identity || !avatars.value[identity]) return '';
-    const url = avatars.value[identity] || '';
-    return url.startsWith('http')
-        ? url
-        : `https://s3.amazonaws.com/keybase_processed_uploads/${url}`;
+  if (!identity || !avatars.value[identity]) return '';
+  const url = avatars.value[identity] || '';
+  return url.startsWith('http') ? url : `https://s3.amazonaws.com/keybase_processed_uploads/${url}`;
 };
 
 const loaded = ref(false);
 base.$subscribe((_, s) => {
-    if (s.recents.length >= 2 && loaded.value === false) {
-        loaded.value = true;
-        const diff_time = Date.parse(s.recents[1].block.header.time) - Date.parse(s.recents[0].block.header.time)
-        const diff_height = Number(s.recents[1].block.header.height) - Number(s.recents[0].block.header.height)
-        const block_window = Number(Number(86400 * 1000 * diff_height / diff_time).toFixed(0))
-        fetchChange(block_window);
-    }
+  if (s.recents.length >= 2 && loaded.value === false) {
+    loaded.value = true;
+    const diff_time = Date.parse(s.recents[1].block.header.time) - Date.parse(s.recents[0].block.header.time);
+    const diff_height = Number(s.recents[1].block.header.height) - Number(s.recents[0].block.header.height);
+    const block_window = Number(Number((86400 * 1000 * diff_height) / diff_time).toFixed(0));
+    fetchChange(block_window);
+  }
 });
 
 loadAvatars();
@@ -471,7 +475,7 @@ loadAvatars();
                             :key="v.operator_address"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                         >
-                            <!-- 👉 rank -->
+                            <!-- rank -->
                             <td>
                                 <div
                                     class="text-xs truncate relative px-2 py-1 rounded-full w-fit"
@@ -484,7 +488,7 @@ loadAvatars();
                                     {{ i + 1 }}
                                 </div>
                             </td>
-                            <!-- 👉 Validator -->
+                            <!-- Validator -->
                             <td>
                                 <div
                                     class="flex items-center overflow-hidden"
@@ -547,7 +551,7 @@ loadAvatars();
                                 </div>
                             </td>
 
-                            <!-- 👉 Voting Power -->
+                            <!-- Voting Power -->
                             <td class="text-right">
                                 <div class="flex flex-col">
                                     <h6 class="text-sm font-weight-medium whitespace-nowrap text-gray-900 dark:text-white">
@@ -573,14 +577,14 @@ loadAvatars();
                                     }}</span>
                                 </div>
                             </td>
-                            <!-- 👉 24h Changes -->
+                            <!-- 24h Changes -->
                             <td
                                 class="text-right text-xs"
                                 :class="change24Color(v)"
                             >
                                 {{ change24Text(v) }}
                             </td>
-                            <!-- 👉 commission -->
+                            <!-- commission -->
                             <td class="text-right text-xs text-gray-900 dark:text-white">
                                 {{
                                     format.formatCommissionRate(
@@ -588,7 +592,7 @@ loadAvatars();
                                     )
                                 }}
                             </td>
-                            <!-- 👉 Action -->
+                            <!-- Action -->
                             <td class="text-center">
                                 <div
                                     v-if="v.jailed"
@@ -647,7 +651,7 @@ loadAvatars();
 
 <style>
 .staking-table.table :where(th, td) {
-    padding: 8px 5px;
-    background: transparent;
+  padding: 8px 5px;
+  background: transparent;
 }
 </style>

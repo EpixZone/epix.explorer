@@ -10,3 +10,6 @@ dist
 .yarn/install-state.gz
 .pnp.cjs
 .pnp.loader.mjs
+
+.env*
+!.env.example

@@ -11,3 +11,4 @@ export * from './useDistributionStore';
 export * from './useParamsStore';
 export * from './useWalletStore';
 export * from './useTxDialog';
+export { NetworkType } from '@/types/chaindata';

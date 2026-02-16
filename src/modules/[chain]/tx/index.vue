@@ -6,8 +6,8 @@ const props = defineProps(['chain']);
 const vueRouters = useRouter();
 const tab = ref('recent');
 
-const base = useBaseStore()
-const chainStore = useBlockchain()
+const base = useBaseStore();
+const chainStore = useBlockchain();
 
 const format = useFormatter();
 const hashReg = /^[A-Z\d]{64}$/;
@@ -46,9 +46,9 @@ onMounted(() => {
 });
 
 function search() {
-    if (hashReg.test(hash.value)) {
-      vueRouters.push({ path: `/${current}/tx/${hash.value}` });
-    }
+  if (hashReg.test(hash.value)) {
+    vueRouters.push({ path: `/${current}/tx/${hash.value}` });
+  }
 }
 </script>
 <template>

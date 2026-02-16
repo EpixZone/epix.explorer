@@ -1,7 +1,4 @@
-import {
-  type RequestRegistry,
-  adapter,
-} from './registry';
+import { type RequestRegistry, adapter } from './registry';
 
 export const DEFAULT: RequestRegistry = {
   auth_params: { url: '/cosmos/auth/v1beta1/params', adapter },
@@ -10,7 +7,10 @@ export const DEFAULT: RequestRegistry = {
     url: '/cosmos/auth/v1beta1/accounts/{address}',
     adapter,
   },
-  params: { url: '/cosmos/params/v1beta1/params?subspace={subspace}&key={key}', adapter },
+  params: {
+    url: '/cosmos/params/v1beta1/params?subspace={subspace}&key={key}',
+    adapter,
+  },
   bank_params: { url: '/cosmos/bank/v1beta1/params', adapter },
   bank_balances_address: {
     url: '/cosmos/bank/v1beta1/balances/{address}',
@@ -232,5 +232,4 @@ export const DEFAULT: RequestRegistry = {
   // Top Holders API (placeholder - will be overridden by EPIX customization)
   topholders_top_holders: { url: '/topholders/v1/top_holders', adapter },
   topholders_cache_status: { url: '/topholders/v1/cache_status', adapter },
-
 };

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router';
 import { useBaseStore, useBlockchain, useWalletStore } from '@/stores';
 import { Icon } from '@iconify/vue';
 import { ref, computed } from 'vue';
@@ -39,11 +39,10 @@ const params = computed(() => {
   if (chainStore.chainName == 'side') {
     return JSON.stringify({
       wallet: ['okex', 'unisat'],
-   });
+    });
   }
-  return "";
+  return '';
 });
-
 </script>
 
 <template>
@@ -118,8 +117,8 @@ const params = computed(() => {
       :addr-prefix="chainStore.current?.bech32Prefix || 'cosmos'"
       @connect="walletStateChange"
       @keplr-config="walletStore.suggestChain()"
-      :params="params">
-    </ping-connect-wallet>
+      :params="params"
+    />
   </Teleport>
 </template>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
-import { controlledComputed } from '@vueuse/core'
+import { controlledComputed } from '@vueuse/core';
 
 interface Props {
   title: string;
@@ -43,7 +43,7 @@ const isPositive = controlledComputed(
 
     <div class="space-y-2">
       <h6 class="text-2xl font-bold text-gray-900 dark:text-white group-hover:gradient-text transition-all duration-300">
-        {{ props.stats || '-'}}
+        {{ props.stats || '-' }}
       </h6>
       <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">
         {{ props.title }}

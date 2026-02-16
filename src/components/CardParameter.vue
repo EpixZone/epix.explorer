@@ -17,8 +17,8 @@ function calculateValue(value: any) {
     }
     return (value[0] && value[0].amount) || '-';
   }
-  if(String(value).search(/^\d+s$/g) > -1) {
-    return formatSeconds(value)
+  if (String(value).search(/^\d+s$/g) > -1) {
+    return formatSeconds(value);
   }
   const newValue = Number(value);
   if (`${newValue}` === 'NaN' || typeof value === 'boolean') {
@@ -32,8 +32,8 @@ function calculateValue(value: any) {
 }
 
 function formatTitle(v: string) {
-  if(!v) return ""
-  return v.replace(/_/g, " ")
+  if (!v) return '';
+  return v.replace(/_/g, ' ');
 }
 </script>
 <template>
