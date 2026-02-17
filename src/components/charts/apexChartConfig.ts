@@ -235,8 +235,9 @@ export const getMarketPriceChartConfig = (theme: string, categories: string[]) =
       labels: {
         style: { colors: themeDisabledTextColor },
         formatter: function (value: string) {
-          const pattern = Number(value) > 0.01 ? '0.0[0]a' : '0.00[000]';
-          return numeral(value).format(pattern);
+          const num = Number(value);
+          if (num > 0.01) return numeral(value).format('0.0[0]a');
+          return formatSmallPrice(num);
         },
       },
     },
