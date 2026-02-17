@@ -58,9 +58,7 @@ function metaItem(metadata: string | undefined): { title: string; summary: strin
                 :to="`/${chain.chainName}/gov/${item?.proposal_id}`"
                 class="text-gray-900 dark:text-white text-base mb-1 block hover:text-epix-primary truncate transition-colors duration-200"
               >
-                {{
-                  item.title
-                }} {{ item.content?.title  }}
+                {{ item?.content?.title || item?.title || metaItem(item?.metadata)?.title }}
               </RouterLink>
               <div
                 v-if="item.content"
