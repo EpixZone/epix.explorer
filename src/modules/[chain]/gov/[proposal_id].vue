@@ -254,6 +254,13 @@ function pageload(p: number) {
   });
 }
 
+const contentWithoutDescription = computed(() => {
+  if (!proposal.value.content) return undefined;
+  if (!proposal.value.summary && !proposal.value.content.description) return proposal.value.content;
+  const { description, ...rest } = proposal.value.content;
+  return rest;
+});
+
 function metaItem(metadata: string | undefined): { title: string; summary: string } {
   if (!metadata) {
     return { title: '', summary: '' };
@@ -285,13 +292,13 @@ function metaItem(metadata: string | undefined): { title: string; summary: strin
         </div>
       </h2>
       <div class="">
-        <ObjectElement :value="proposal.content" />
+        <ObjectElement :value="contentWithoutDescription" />
       </div>
-      <div v-if="proposal.summary">
+      <div v-if="proposal.summary || proposal.content?.description" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <MdEditor
           :model-value="
             format.multiLine(
-              proposal.summary
+              proposal.summary || proposal.content?.description
             )
           "
           previewOnly
