@@ -340,10 +340,10 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
 
     <!-- Assets -->
     <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <h2 class="text-lg font-semibold text-white">{{ $t('account.assets') }}</h2>
         <!-- button -->
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-2">
             <label
               for="send"
               class="modern-button px-4 py-2"
@@ -491,108 +491,71 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
 
     <!-- Delegations -->
     <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <h2 class="text-lg font-semibold text-white">{{ $t('account.delegations') }}</h2>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-2">
           <label
             for="delegate"
-            class="modern-button px-4 py-2"
+            class="modern-button px-4 py-2 text-sm"
             @click="dialog.open('delegate', {}, updateEvent)"
             >{{ $t('account.btn_delegate') }}</label
           >
           <label
             for="withdraw"
-            class="modern-button px-4 py-2"
+            class="modern-button px-4 py-2 text-sm"
             @click="dialog.open('withdraw', {}, updateEvent)"
-            >{{ $t('account.btn_withdraw') }}</label
+            >Claim All</label
           >
         </div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-gray-800">
-              <th class="py-3 text-left text-gray-400 font-medium">{{ $t('account.validator') }}</th>
-              <th class="py-3 text-left text-gray-400 font-medium">{{ $t('account.delegation') }}</th>
-              <th class="py-3 text-left text-gray-400 font-medium">{{ $t('account.rewards') }}</th>
-              <th class="py-3 text-right text-gray-400 font-medium">{{ $t('account.action') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="delegations.length === 0">
-              <td colspan="4" class="py-8">
-                <div class="text-center text-gray-500">{{ $t('account.no_delegations') }}</div>
-              </td>
-            </tr>
-            <tr v-for="(v, index) in delegations" :key="index" class="border-b border-gray-800/50 hover:bg-gray-900/30">
-              <td class="py-4">
-                <RouterLink
-                  :to="`/${chain}/staking/${v.delegation.validator_address}`"
-                  class="text-epix-teal hover:text-epix-accent transition-colors"
-                  >{{
-                    format.validatorFromBech32(v.delegation.validator_address) || v.delegation.validator_address
-                  }}</RouterLink
-                >
-              </td>
-              <td class="py-4 text-white font-mono">
-                {{ format.formatToken(v.balance, true, '0,0.[000000]') }}
-              </td>
-              <td class="py-4 text-white font-mono">
-                {{
-                  format.formatTokens(
-                    rewards?.rewards?.find((x) => x.validator_address === v.delegation.validator_address)?.reward
-                  )
-                }}
-              </td>
-              <td class="py-4">
-                <div v-if="v.balance" class="flex justify-end gap-2">
-                  <label
-                    for="delegate"
-                    class="modern-button text-xs px-3 py-1"
-                    @click="
-                      dialog.open(
-                        'delegate',
-                        {
-                          validator_address: v.delegation.validator_address,
-                        },
-                        updateEvent
-                      )
-                    "
-                    >{{ $t('account.btn_delegate') }}</label
-                  >
-                  <label
-                    for="redelegate"
-                    class="modern-button text-xs px-3 py-1"
-                    @click="
-                      dialog.open(
-                        'redelegate',
-                        {
-                          validator_address: v.delegation.validator_address,
-                        },
-                        updateEvent
-                      )
-                    "
-                    >{{ $t('account.btn_redelegate') }}</label
-                  >
-                  <label
-                    for="unbond"
-                    class="modern-button text-xs px-3 py-1"
-                    @click="
-                      dialog.open(
-                        'unbond',
-                        {
-                          validator_address: v.delegation.validator_address,
-                        },
-                        updateEvent
-                      )
-                    "
-                    >{{ $t('account.btn_unbond') }}</label
-                  >
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-if="delegations.length === 0" class="py-8">
+        <div class="text-center text-gray-500">{{ $t('account.no_delegations') }}</div>
+      </div>
+      <div v-else class="space-y-3">
+        <div v-for="(v, index) in delegations" :key="index"
+          class="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
+          <div class="mb-2">
+            <RouterLink
+              :to="`/${chain}/staking/${v.delegation.validator_address}`"
+              class="text-epix-teal hover:text-epix-accent transition-colors font-medium text-sm"
+              >{{
+                format.validatorFromBech32(v.delegation.validator_address) || v.delegation.validator_address
+              }}</RouterLink
+            >
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+            <div>
+              <span class="text-gray-400 text-xs">{{ $t('account.delegation') }}</span>
+              <div class="text-white font-mono">{{ format.formatToken(v.balance, true, '0,0.[000000]') }}</div>
+            </div>
+            <div>
+              <span class="text-gray-400 text-xs">{{ $t('account.rewards') }}</span>
+              <div class="text-white font-mono">
+                {{ format.formatTokens(rewards?.rewards?.find((x) => x.validator_address === v.delegation.validator_address)?.reward) }}
+              </div>
+            </div>
+          </div>
+          <div v-if="v.balance" class="flex gap-1.5">
+            <label
+              for="delegate"
+              class="modern-button text-[11px] px-2 py-1 whitespace-nowrap"
+              @click="dialog.open('delegate', { validator_address: v.delegation.validator_address }, updateEvent)"
+              >{{ $t('account.btn_delegate') }}</label
+            >
+            <label
+              for="redelegate"
+              class="modern-button text-[11px] px-2 py-1 whitespace-nowrap"
+              @click="dialog.open('redelegate', { validator_address: v.delegation.validator_address }, updateEvent)"
+              >{{ $t('account.btn_redelegate') }}</label
+            >
+            <label
+              for="unbond"
+              class="modern-button text-[11px] px-2 py-1 whitespace-nowrap"
+              @click="dialog.open('unbond', { validator_address: v.delegation.validator_address }, updateEvent)"
+              >{{ $t('account.btn_unbond') }}</label
+            >
+          </div>
+        </div>
       </div>
     </div>
 

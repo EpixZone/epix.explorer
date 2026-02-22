@@ -8,6 +8,14 @@ import { Icon } from '@iconify/vue';
 const blockchain = useBlockchain();
 const formatter = useFormatter();
 
+// Known special addresses (e.g. IBC escrow accounts, module accounts)
+const knownAddresses: Record<string, { label: string; link: string }> = {
+  'epix1a53udazy8ayufvy0s434pfwjcedzqv34r8vsv4': {
+    label: 'IBC Escrow (Osmosis)',
+    link: '/epix/ibc/connection/connection-1',
+  },
+};
+
 // State
 const holders = ref<TopHolder[]>([]);
 const loading = ref(true);
@@ -153,12 +161,22 @@ onMounted(() => {
                 </div>
               </td>
               <td class="px-6 py-4">
-                <RouterLink
-                  :to="`/${blockchain.chainName}/account/${holder.address}`"
-                  class="text-sm font-mono text-epix-teal hover:text-epix-accent transition-colors duration-200 hover:underline break-all"
-                >
-                  {{ formatAddress(holder.address) }}
-                </RouterLink>
+                <div>
+                  <RouterLink
+                    :to="`/${blockchain.chainName}/account/${holder.address}`"
+                    class="text-sm font-mono text-epix-teal hover:text-epix-accent transition-colors duration-200 hover:underline break-all"
+                  >
+                    {{ formatAddress(holder.address) }}
+                  </RouterLink>
+                  <div v-if="knownAddresses[holder.address]" class="mt-1">
+                    <RouterLink
+                      :to="knownAddresses[holder.address].link"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 whitespace-nowrap hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors duration-200">
+                      <Icon icon="mdi:link-variant" class="w-3 h-3" />
+                      {{ knownAddresses[holder.address].label }}
+                    </RouterLink>
+                  </div>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="text-sm font-semibold text-gray-900 dark:text-white">

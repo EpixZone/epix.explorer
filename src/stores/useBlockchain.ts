@@ -28,6 +28,9 @@ export const useBlockchain = defineStore('blockchain', {
       endpoint: {} as Endpoint,
       connErr: '',
       rpc: null as any,
+      customEndpoints: JSON.parse(
+        localStorage.getItem('custom-endpoints') || '{}'
+      ) as Record<string, Endpoint[]>,
     };
   },
   getters: {
@@ -183,6 +186,47 @@ export const useBlockchain = defineStore('blockchain', {
     },
     supportModule(mod: string) {
       return !this.current?.features || this.current.features.includes(mod);
+    },
+
+    addCustomEndpoint(endpoint: Endpoint): boolean {
+      const chainName = this.chainName;
+      if (!this.customEndpoints[chainName]) {
+        this.customEndpoints[chainName] = [];
+      }
+      const normalized = endpoint.address.replace(/\/+$/, '');
+      const allExisting = [
+        ...(this.current?.endpoints?.rest || []),
+        ...this.customEndpoints[chainName],
+      ];
+      if (allExisting.some(e => e.address.replace(/\/+$/, '') === normalized)) {
+        return false;
+      }
+      this.customEndpoints[chainName].push({
+        address: normalized,
+        provider: endpoint.provider || 'Custom',
+      });
+      localStorage.setItem('custom-endpoints', JSON.stringify(this.customEndpoints));
+      return true;
+    },
+
+    removeCustomEndpoint(address: string) {
+      const chainName = this.chainName;
+      if (!this.customEndpoints[chainName]) return;
+      const normalized = address.replace(/\/+$/, '');
+      this.customEndpoints[chainName] = this.customEndpoints[chainName].filter(
+        e => e.address.replace(/\/+$/, '') !== normalized
+      );
+      localStorage.setItem('custom-endpoints', JSON.stringify(this.customEndpoints));
+      if (this.endpoint.address?.replace(/\/+$/, '') === normalized) {
+        const fallback = this.current?.endpoints?.rest?.[0];
+        if (fallback) this.setRestEndpoint(fallback);
+      }
+    },
+
+    isCustomEndpoint(address: string): boolean {
+      const custom = this.customEndpoints[this.chainName] || [];
+      const normalized = address.replace(/\/+$/, '');
+      return custom.some(e => e.address.replace(/\/+$/, '') === normalized);
     },
   },
 });

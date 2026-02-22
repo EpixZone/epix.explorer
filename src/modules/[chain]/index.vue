@@ -323,53 +323,38 @@ const amount = computed({
 
       <div
         v-if="walletStore.delegations.length > 0"
-        class="px-4 pb-4 overflow-auto"
+        class="px-4 pb-4 space-y-3"
       >
-        <table class="table table-compact w-full table-zebra">
-          <thead>
-            <tr>
-              <th>{{ $t('account.validator') }}</th>
-              <th>{{ $t('account.delegations') }}</th>
-              <th>{{ $t('account.rewards') }}</th>
-              <th>{{ $t('staking.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in walletStore.delegations" :key="index">
-              <td>
-                <RouterLink class="text-epix-teal hover:text-epix-accent hover:underline transition-colors duration-200 no-underline" :to="`/${chain}/staking/${item?.delegation?.validator_address}`">
-                {{
-                  format.validatorFromBech32(
-                    item?.delegation?.validator_address
-                  )
-                }}
-                </RouterLink>
-              </td>
-              <td>{{ format.formatToken(item?.balance) }}</td>
-              <td>
-                {{
-                  format.formatTokens(
-                    walletStore?.rewards?.rewards?.find(
-                      (el) => el?.validator_address === item?.delegation?.validator_address
-                    )?.reward
-                  )
-                }}
-              </td>
-              <td>
-                <div>
-                  <label for="delegate" class="modern-button !text-xs px-3 py-1 rounded-sm mr-2"
-                    @click="dialog.open('delegate', { validator_address: item.delegation.validator_address }, updateState)">
-                    {{ $t('account.btn_delegate') }}
-                  </label>
-                  <label for="withdraw" class="modern-button !text-xs px-3 py-1 rounded-sm"
-                    @click="dialog.open('withdraw', { validator_address: item.delegation.validator_address }, updateState)">
-                    {{ $t('index.btn_withdraw_reward') }}
-                  </label>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-for="(item, index) in walletStore.delegations" :key="index"
+          class="bg-gray-50 dark:bg-epix-gray rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <RouterLink class="text-epix-teal hover:text-epix-accent hover:underline transition-colors duration-200 no-underline font-medium text-sm" :to="`/${chain}/staking/${item?.delegation?.validator_address}`">
+              {{ format.validatorFromBech32(item?.delegation?.validator_address) }}
+            </RouterLink>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+            <div>
+              <span class="text-gray-500 dark:text-gray-400 text-xs">{{ $t('account.delegations') }}</span>
+              <div class="text-gray-900 dark:text-white font-mono">{{ format.formatToken(item?.balance) }}</div>
+            </div>
+            <div>
+              <span class="text-gray-500 dark:text-gray-400 text-xs">{{ $t('account.rewards') }}</span>
+              <div class="text-gray-900 dark:text-white font-mono">
+                {{ format.formatTokens(walletStore?.rewards?.rewards?.find((el) => el?.validator_address === item?.delegation?.validator_address)?.reward) }}
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <label for="delegate" class="modern-button !text-xs px-3 py-1.5 rounded-sm whitespace-nowrap"
+              @click="dialog.open('delegate', { validator_address: item.delegation.validator_address }, updateState)">
+              {{ $t('account.btn_delegate') }}
+            </label>
+            <label for="withdraw" class="modern-button !text-xs px-3 py-1.5 rounded-sm whitespace-nowrap"
+              @click="dialog.open('withdraw', { validator_address: item.delegation.validator_address }, updateState)">
+              {{ $t('index.btn_withdraw_reward') }}
+            </label>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-3 gap-4 px-4 pb-6 mt-4">
