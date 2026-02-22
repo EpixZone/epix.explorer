@@ -18,7 +18,7 @@ const dashboard = useDashboard();
 const chainStore = useBlockchain();
 const format = useFormatter();
 const sourceAddress = ref(''); //
-const sourceHdPath = ref("m/44/118/0'/0/0"); //
+const sourceHdPath = ref(chainStore.defaultHDPath); //
 const selectedSource = ref({} as LocalKey); //
 const importStep = ref('step1');
 
@@ -341,7 +341,7 @@ async function loadBalances(chainName: string, endpoint: string, address: string
             <input
               v-model="sourceHdPath"
               class="modern-input w-full p-3"
-              placeholder="m/44/118/0'/0/0"
+              :placeholder="chainStore.defaultHDPath"
             />
           </div>
         </div>
