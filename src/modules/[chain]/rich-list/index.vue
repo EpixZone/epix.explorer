@@ -139,7 +139,7 @@ onMounted(() => {
                 Bonded Balance
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Unbonding Balance
+                Undelegating Balance
               </th>
             </tr>
           </thead>

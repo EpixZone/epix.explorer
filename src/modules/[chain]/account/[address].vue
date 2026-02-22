@@ -122,7 +122,7 @@ const customChartConfig = computed(() => {
   };
 });
 
-const labels = ['Balance', 'Delegation', 'Reward', 'Unbonding'];
+const labels = ['Balance', 'Delegation', 'Reward', 'Undelegating'];
 
 const totalAmount = computed(() => {
   return totalAmountByCategory.value.reduce((p, c) => c + p, 0);
@@ -450,7 +450,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
             </div>
             <!-- unbonding -->
             <div class="flex items-center p-4 bg-gray-900/50 border border-gray-800 rounded-lg">
-              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mr-4" title="Unbonding (Unstaking)">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mr-4" title="Undelegating">
                 <Icon
                   icon="mdi-account-arrow-right"
                   class="text-blue-500"

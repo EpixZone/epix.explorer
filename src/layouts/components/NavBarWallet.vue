@@ -2,18 +2,53 @@
 import { useRoute } from 'vue-router';
 import { useBaseStore, useBlockchain, useWalletStore } from '@/stores';
 import { Icon } from '@iconify/vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const route = useRoute();
 const walletStore = useWalletStore();
 const chainStore = useBlockchain();
 const baseStore = useBaseStore();
-// walletStore.$subscribe((m, s) => {
-//   console.log(m, s);
-// });
+
 function walletStateChange(res: any) {
   walletStore.setConnectedWallet(res.detail?.value);
 }
+
+// Listen for Keplr account/wallet changes
+async function onKeplrKeystoreChange() {
+  // Only act if a wallet is currently connected
+  if (!walletStore.currentAddress) return;
+  const chainId = baseStore.currentChainId;
+  if (!chainId) return;
+
+  try {
+    // @ts-ignore
+    await window.keplr.enable(chainId);
+    // @ts-ignore
+    const signer = window.getOfflineSigner(chainId);
+    const accounts = await signer.getAccounts();
+    if (accounts.length > 0) {
+      const hdPath = chainStore.defaultHDPath;
+      const connected = {
+        wallet: walletStore.connectedWallet?.wallet || 'Keplr',
+        cosmosAddress: accounts[0].address,
+        hdPath,
+      };
+      localStorage.setItem(hdPath, JSON.stringify(connected));
+      walletStore.setConnectedWallet(connected);
+      walletStore.loadMyAsset();
+    }
+  } catch (e) {
+    // ignore errors (e.g. chain not available in new wallet)
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keplr_keystorechange', onKeplrKeystoreChange);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keplr_keystorechange', onKeplrKeystoreChange);
+});
 let showCopyToast = ref(0);
 async function copyAdress(address: string) {
   try {
