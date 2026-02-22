@@ -357,11 +357,13 @@ const amount = computed({
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-4 px-4 pb-6 mt-4">
-        <label for="PingTokenConvert" class="modern-button text-white px-4 py-2 text-center">{{ $t('index.btn_swap') }}</label>
-        <label for="send" class="modern-button text-white px-4 py-2 text-center" @click="dialog.open('send', {}, updateState)">{{ $t('account.btn_send') }}</label>
-        <label for="delegate" class="modern-button text-white px-4 py-2 text-center"
+      <div class="grid gap-2 md:gap-4 px-4 pb-6 mt-4" :class="walletStore.delegations.length > 1 ? 'grid-cols-4' : 'grid-cols-3'">
+        <label for="PingTokenConvert" class="modern-button text-white px-2 py-1.5 md:px-4 md:py-2 text-center text-xs md:text-sm">{{ $t('index.btn_swap') }}</label>
+        <label for="send" class="modern-button text-white px-2 py-1.5 md:px-4 md:py-2 text-center text-xs md:text-sm" @click="dialog.open('send', {}, updateState)">{{ $t('account.btn_send') }}</label>
+        <label for="delegate" class="modern-button text-white px-2 py-1.5 md:px-4 md:py-2 text-center text-xs md:text-sm"
           @click="dialog.open('delegate', {}, updateState)">{{ $t('account.btn_delegate') }}</label>
+        <label v-if="walletStore.delegations.length > 1" for="withdraw" class="modern-button text-white px-2 py-1.5 md:px-4 md:py-2 text-center text-xs md:text-sm"
+          @click="dialog.open('withdraw', {}, updateState)">Claim All</label>
         <RouterLink to="/wallet/receive" class="btn !bg-info !border-info text-white hidden">{{ $t('index.receive') }}</RouterLink>
       </div>
       <Teleport to="body">
