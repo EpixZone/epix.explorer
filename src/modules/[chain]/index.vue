@@ -83,6 +83,15 @@ function updateState() {
   walletStore.loadMyAsset();
 }
 
+const copyTooltip = ref('Copy');
+async function copyAddress(address: string) {
+  try {
+    await navigator.clipboard.writeText(address);
+    copyTooltip.value = 'Copied!';
+    setTimeout(() => { copyTooltip.value = 'Copy'; }, 1500);
+  } catch {}
+}
+
 function trustColor(v: string) {
   return `text-${colorMap(v)}`;
 }
@@ -276,11 +285,20 @@ const amount = computed({
     </div>
 
     <div class="modern-card mt-4 shadow-modern">
-      <div class="flex justify-between px-4 pt-4 pb-2 text-lg font-semibold text-gray-900 dark:text-white">
-        <span class="truncate" >{{ walletStore.currentAddress || 'Not Connected' }}</span>
+      <div class="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <Icon icon="mdi:wallet" class="w-5 h-5 text-epix-teal flex-shrink-0" />
+          <span class="truncate text-sm md:text-base font-mono text-gray-900 dark:text-white">{{ walletStore.currentAddress || 'Not Connected' }}</span>
+          <button v-if="walletStore.currentAddress" class="flex-shrink-0 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200" @click="copyAddress(walletStore.currentAddress)" :title="copyTooltip">
+            <Icon :icon="copyTooltip === 'Copied!' ? 'mdi:check' : 'mdi:content-copy'" class="w-4 h-4" :class="copyTooltip === 'Copied!' ? 'text-green-500' : 'text-gray-400'" />
+          </button>
+        </div>
         <RouterLink v-if="walletStore.currentAddress"
-          class="float-right text-sm cursor-pointert text-epix-teal hover:text-epix-accent no-underline font-medium transition-colors duration-200"
-          :to="`/${chain}/account/${walletStore.currentAddress}`">{{ $t('index.more') }}</RouterLink>
+          class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm font-medium text-white bg-epix-primary hover:bg-epix-secondary rounded-lg transition-colors duration-200 no-underline whitespace-nowrap"
+          :to="`/${chain}/account/${walletStore.currentAddress}`">
+          View Account
+          <Icon icon="mdi:arrow-right" class="w-4 h-4" />
+        </RouterLink>
       </div>
       <div class="grid grid-cols-1 md:!grid-cols-4 auto-cols-auto gap-4 px-4 pb-6">
         <div class="bg-gray-50 dark:bg-epix-gray rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700">
