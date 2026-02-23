@@ -24,9 +24,11 @@ import dayjs from 'dayjs';
 import AdBanner from '@/components/ad/AdBanner.vue';
 
 const dashboard = useDashboard();
-dashboard.initial();
 const blockchain = useBlockchain();
-blockchain.randomSetupEndpoint();
+// Ensure chains are loaded before setting up endpoint so computedChainMenu has data
+dashboard.initial().then(() => {
+  blockchain.randomSetupEndpoint();
+});
 const baseStore = useBaseStore();
 
 const current = ref(''); // the current chain

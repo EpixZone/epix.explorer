@@ -149,6 +149,8 @@ export enum LoadingStatus {
   Loaded,
 }
 
+let _initPromise: Promise<void> | null = null;
+
 export const useDashboard = defineStore('dashboard', {
   state: () => {
     const favMap = JSON.parse(
@@ -172,7 +174,10 @@ export const useDashboard = defineStore('dashboard', {
   },
   actions: {
     async initial() {
-      await this.loadingFromLocal();
+      if (this.status === LoadingStatus.Loaded) return;
+      if (_initPromise) return _initPromise;
+      _initPromise = this.loadingFromLocal();
+      await _initPromise;
       //await this.loadingFromRegistry()
     },
     loadingPrices() {
