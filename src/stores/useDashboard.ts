@@ -258,7 +258,7 @@ export const useDashboard = defineStore('dashboard', {
           this.chains[x.chain_name].networkType = this.networkType.toString().toLowerCase();
         }
       });
-      this.setupDefault();
+      await this.setupDefault();
       this.status = LoadingStatus.Loaded;
 
       // Fetch community endpoints from Cosmos Directory and merge them in
@@ -310,7 +310,7 @@ export const useDashboard = defineStore('dashboard', {
       });
       return config;
     },
-    setupDefault() {
+    async setupDefault() {
       if (this.length > 0) {
         const blockchain = useBlockchain();
         const keys = Object.keys(this.favoriteMap);
@@ -324,6 +324,8 @@ export const useDashboard = defineStore('dashboard', {
           const [first] = Object.keys(this.chains);
           blockchain.setCurrent(first);
         }
+        // Set up RPC endpoint so it's ready before any page component mounts
+        await blockchain.randomSetupEndpoint();
         this.loadingPrices();
       }
     },

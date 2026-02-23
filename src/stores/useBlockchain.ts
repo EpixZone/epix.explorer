@@ -19,6 +19,21 @@ import { useBlockModule } from '@/modules/[chain]/block/block';
 import { DEFAULT } from '@/libs';
 import { hexToRgb, rgbToHsl } from '@/libs/utils';
 
+// Promise that resolves when the blockchain RPC client is ready
+let _rpcReadyResolve: (() => void) | null = null;
+let _rpcReady: Promise<void> = new Promise((resolve) => { _rpcReadyResolve = resolve; });
+
+export function waitForRpc(): Promise<void> {
+  return _rpcReady;
+}
+
+export function resolveRpcReady(): void {
+  if (_rpcReadyResolve) {
+    _rpcReadyResolve();
+    _rpcReadyResolve = null;
+  }
+}
+
 export const useBlockchain = defineStore('blockchain', {
   state: () => {
     return {

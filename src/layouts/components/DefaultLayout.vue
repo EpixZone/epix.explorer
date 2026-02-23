@@ -11,6 +11,7 @@ import ChainProfile from '@/layouts/components/ChainProfile.vue';
 import { useDashboard } from '@/stores/useDashboard';
 import { NetworkType } from '@/types/chaindata';
 import { useBaseStore, useBlockchain } from '@/stores';
+import { resolveRpcReady } from '@/stores/useBlockchain';
 
 import NavBarI18n from './NavBarI18n.vue';
 import NavBarWallet from './NavBarWallet.vue';
@@ -25,9 +26,9 @@ import AdBanner from '@/components/ad/AdBanner.vue';
 
 const dashboard = useDashboard();
 const blockchain = useBlockchain();
-// Ensure chains are loaded before setting up endpoint so computedChainMenu has data
+// Ensure chains are loaded and RPC endpoint is ready before page components mount
 dashboard.initial().then(() => {
-  blockchain.randomSetupEndpoint();
+  resolveRpcReady();
 });
 const baseStore = useBaseStore();
 

@@ -7,6 +7,7 @@ import {
     useStakingStore,
     useTxDialog,
 } from '@/stores';
+import { waitForRpc } from '@/stores/useBlockchain';
 import { computed, onMounted, ref, watch, nextTick } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { Key, SlashingParam, Validator } from '@/types';
@@ -42,6 +43,9 @@ onMounted(async () => {
     try {
         loading.value = true;
         error.value = '';
+
+        // Wait for RPC client to be ready (handles direct URL load)
+        await waitForRpc();
 
         // Initialize local validators with current store data (for menu navigation)
         localValidators.value = [...staking.validators];
