@@ -48,9 +48,9 @@
         "ibc-go"
     ],
     "keplr_price_step": {
-        "low": 0.01,
-        "average": 0.025,
-        "high": 0.04
+        "low": 20000000000,
+        "average": 25000000000,
+        "high": 40000000000
     },
     "chain_id": "epix_1916-1"
 }
