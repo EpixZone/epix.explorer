@@ -11,7 +11,7 @@
     "cosmwasm": "코스모왓솜",
     "widget": "위젯",
     "tx": "트랜잭션",
-    "ibc": "IBC",
+    "ibc": "Bridge",
     "nft": "NFT",
     "consensus": "컨센서스",
     "supply": "공급량",
@@ -174,8 +174,8 @@
     "votes": "투표"
   },
   "ibc": {
-    "title": "IBC 연결",
-    "title_2": "IBC 클라이언트",
+    "title": "Bridge 연결",
+    "title_2": "Bridge 클라이언트",
     "registry": "레지스트리",
     "connection_id": "연결 ID",
     "btn_apply": "적용",

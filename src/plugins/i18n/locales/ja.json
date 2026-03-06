@@ -11,7 +11,7 @@
     "cosmwasm": "Cosmwasm",
     "widget": "ウィジェット",
     "tx": "取引",
-    "ibc": "IBC",
+    "ibc": "Bridge",
     "nft": "NFT",
     "consensus": "コンセンサス",
     "supply": "供給",
@@ -174,8 +174,8 @@
     "votes": "票"
   },
   "ibc": {
-    "title": "IBC接続",
-    "title_2": "IBCクライアント",
+    "title": "Bridge接続",
+    "title_2": "Bridgeクライアント",
     "registry": "レジストリ",
     "connection_id": "接続ID",
     "btn_apply": "申請",

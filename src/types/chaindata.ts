@@ -60,6 +60,7 @@ export interface LocalChainConfig {
     high: number;
   };
   keplr_features: string[];
+  burn_address?: string;
   faucet?: {
     amount: string;
     ip_limit: number;
@@ -139,6 +140,7 @@ export interface ChainConfig {
     average: number;
     high: number;
   };
+  burnAddress?: string;
   faucet?: {
     amount: string;
     ip_limit: number;

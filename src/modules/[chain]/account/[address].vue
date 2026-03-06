@@ -33,7 +33,13 @@ const balances = ref([] as Coin[]);
 const recentReceived = ref([] as TxResponse[]);
 const unbonding = ref([] as UnbondingResponses[]);
 const unbondingTotal = ref(0);
+const totalBurned = ref(0);
 const chart = {};
+
+const isBurnAddress = computed(() => {
+  const burnAddr = blockchain.current?.burnAddress;
+  return burnAddr ? props.address === burnAddr : false;
+});
 onMounted(() => {
   // Wait for blockchain to be properly initialized
   if (blockchain.chainName === props.chain && blockchain.rpc) {
@@ -159,6 +165,7 @@ function loadAccount(address: string) {
   rewards.value = { total: [], rewards: [] };
   unbonding.value = [];
   unbondingTotal.value = 0;
+  totalBurned.value = 0;
 
   blockchain.rpc.getAuthAccount(address).then((x) => {
     account.value = x.account;
@@ -167,34 +174,53 @@ function loadAccount(address: string) {
     account.value = { address: address } as AuthAccount;
   });
 
-  blockchain.rpc.getTxsBySender(address).then((x) => {
-    txs.value = x.tx_responses;
-  });
+  if (!isBurnAddress.value) {
+    // Normal account: fetch all data
+    blockchain.rpc.getTxsBySender(address).then((x) => {
+      txs.value = x.tx_responses;
+    });
 
-  blockchain.rpc.getDistributionDelegatorRewards(address).then((x) => {
-    rewards.value = x;
-  });
+    blockchain.rpc.getDistributionDelegatorRewards(address).then((x) => {
+      rewards.value = x;
+    });
 
-  blockchain.rpc.getStakingDelegations(address).then((x) => {
-    delegations.value = x.delegation_responses;
-  });
+    blockchain.rpc.getStakingDelegations(address).then((x) => {
+      delegations.value = x.delegation_responses;
+    });
 
-  blockchain.rpc.getBankBalances(address).then((x) => {
-    balances.value = x.balances || [];
-  });
+    blockchain.rpc.getBankBalances(address).then((x) => {
+      balances.value = x.balances || [];
+    });
 
-  blockchain.rpc.getStakingDelegatorUnbonding(address).then((x) => {
-    unbonding.value = x.unbonding_responses;
-    x.unbonding_responses?.forEach((y) => {
-      y.entries.forEach((z) => {
-        unbondingTotal.value += Number(z.balance);
+    blockchain.rpc.getStakingDelegatorUnbonding(address).then((x) => {
+      unbonding.value = x.unbonding_responses;
+      x.unbonding_responses?.forEach((y) => {
+        y.entries.forEach((z) => {
+          unbondingTotal.value += Number(z.balance);
+        });
       });
     });
-  });
+  }
 
-  const receivedQuery = `?&pagination.reverse=true&events=coin_received.receiver='${address}'&pagination.limit=5`;
+  // For burn addresses, fetch more received txs to show burn history
+  const limit = isBurnAddress.value ? 25 : 5;
+  const receivedQuery = `?&pagination.reverse=true&events=coin_received.receiver='${address}'&pagination.limit=${limit}`;
   blockchain.rpc.getTxs(receivedQuery, {}).then((x) => {
     recentReceived.value = x.tx_responses;
+    if (isBurnAddress.value) {
+      // Calculate total burned from all received events
+      let burned = 0;
+      x.tx_responses?.forEach((tx: TxResponse) => {
+        const amounts = mapAmount(tx.events);
+        amounts?.forEach((amtStr: string) => {
+          const match = amtStr.match(/([\d,.]+)\s+EPIX/);
+          if (match) {
+            burned += parseFloat(match[1].replace(/,/g, ''));
+          }
+        });
+      });
+      totalBurned.value = burned;
+    }
   });
 }
 
@@ -317,8 +343,36 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
 </script>
 <template>
   <div v-if="props.address">
-    <!-- address -->
-    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
+    <!-- Burn Address Banner -->
+    <div v-if="isBurnAddress" class="bg-black border border-orange-500/30 px-6 py-4 rounded-lg mb-6">
+      <div class="flex items-center mb-3">
+        <div class="inline-flex relative w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/20">
+          <div class="w-full inline-flex items-center align-middle flex-none justify-center">
+            <Icon
+              icon="mdi-fire"
+              class="text-orange-500"
+              style="width: 28px; height: 28px"
+            />
+          </div>
+        </div>
+        <div class="flex flex-1 flex-col truncate pl-4">
+          <h2 class="text-sm font-semibold text-orange-400 mb-1">{{ $t('account.burn_address') }}</h2>
+          <span class="text-xs text-gray-400 truncate font-mono">{{ props.address }}</span>
+        </div>
+      </div>
+      <p class="text-sm text-gray-400 mt-2">{{ $t('account.burn_description') }}</p>
+      <div v-if="totalBurned > 0" class="mt-4 p-3 bg-orange-500/5 border border-orange-500/20 rounded-lg">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-400">{{ $t('account.total_burned') }}</span>
+          <span class="text-lg font-bold text-orange-400 font-mono">
+            {{ new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(totalBurned) }} EPIX
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- address (normal accounts) -->
+    <div v-else class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
       <div class="flex items-center">
         <!-- img -->
         <div class="inline-flex relative w-12 h-12 rounded-lg bg-epix-primary/10 border border-epix-primary/20">
@@ -338,8 +392,8 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
     </div>
 
-    <!-- Assets -->
-    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
+    <!-- Assets (hidden for burn address) -->
+    <div v-if="!isBurnAddress" class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
       <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <h2 class="text-lg font-semibold text-white">{{ $t('account.assets') }}</h2>
         <!-- button -->
@@ -489,8 +543,8 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
     </div>
 
-    <!-- Delegations -->
-    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
+    <!-- Delegations (hidden for burn address) -->
+    <div v-if="!isBurnAddress" class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
       <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <h2 class="text-lg font-semibold text-white">{{ $t('account.delegations') }}</h2>
         <div class="flex flex-wrap gap-2">
@@ -559,10 +613,10 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
     </div>
 
-    <!-- Unbonding Delegations -->
+    <!-- Unbonding Delegations (hidden for burn address) -->
     <div
       class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6"
-      v-if="unbonding && unbonding.length > 0"
+      v-if="!isBurnAddress && unbonding && unbonding.length > 0"
     >
       <h2 class="text-lg font-semibold text-white mb-6">{{ $t('account.unbonding_delegations') }}</h2>
       <div class="overflow-x-auto">
@@ -642,8 +696,8 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
     </div>
 
-    <!-- Transactions -->
-    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
+    <!-- Transactions (hidden for burn address) -->
+    <div v-if="!isBurnAddress" class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
       <h2 class="text-lg font-semibold text-white mb-6">{{ $t('account.transactions') }}</h2>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -695,9 +749,12 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
     </div>
 
-    <!-- Received -->
-    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
-      <h2 class="text-lg font-semibold text-white mb-6">{{ $t('account.received') }}</h2>
+    <!-- Received / Recent Burns -->
+    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6" :class="{ 'border-orange-500/20': isBurnAddress }">
+      <h2 class="text-lg font-semibold mb-6" :class="isBurnAddress ? 'text-orange-400' : 'text-white'">
+        <Icon v-if="isBurnAddress" icon="mdi-fire" class="inline-block mr-2 text-orange-500" style="width: 20px; height: 20px; vertical-align: text-bottom;" />
+        {{ isBurnAddress ? $t('account.recent_burns') : $t('account.received') }}
+      </h2>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -748,8 +805,8 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
       </div>
     </div>
 
-    <!-- Account -->
-    <div class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
+    <!-- Account (hidden for burn address) -->
+    <div v-if="!isBurnAddress" class="bg-black border border-gray-800 px-6 py-4 rounded-lg mb-6">
       <h2 class="text-lg font-semibold text-white mb-6">{{ $t('account.acc') }}</h2>
       <DynamicComponent :value="account" />
     </div>

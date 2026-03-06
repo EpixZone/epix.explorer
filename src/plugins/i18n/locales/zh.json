@@ -14,7 +14,7 @@
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
     "tx": "交易",
-    "ibc": "IBC",
+    "ibc": "Bridge",
     "ecosystem": "生态系统",
     "favorite": "收藏夹",
     "add_to_favorite": "加入收藏夹",
@@ -165,8 +165,8 @@
     "votes": "投票"
   },
   "ibc": {
-    "title": "IBC 连接",
-    "title_2": "IBC 客户端",
+    "title": "Bridge 连接",
+    "title_2": "Bridge 客户端",
     "registry": "注册表",
     "connection_id": "连接 Id",
     "btn_apply": "应用",

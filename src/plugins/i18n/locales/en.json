@@ -11,7 +11,7 @@
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
     "tx": "Transactions",
-    "ibc": "IBC",
+    "ibc": "Bridge",
     "nft": "NFT",
     "consensus": "Consensus",
     "supply": "Supply",
@@ -87,7 +87,11 @@
     "hash": "Hash",
     "messages": "Messages",
     "time": "Time",
-    "error": "Account does not exists on chain"
+    "error": "Account does not exists on chain",
+    "burn_address": "Burn Address",
+    "burn_description": "This is the xID module burn address. EPIX sent here from xID name registrations is permanently burned and removed from circulation.",
+    "total_burned": "Total Burned",
+    "recent_burns": "Recent Burns"
   },
   "block": {
     "estimated_time": "Estimated Time",
@@ -176,8 +180,8 @@
     "votes": "Votes"
   },
   "ibc": {
-    "title": "IBC Connections",
-    "title_2": "IBC Client",
+    "title": "Bridge Connections",
+    "title_2": "Bridge Client",
     "registry": "Registry",
     "connection_id": "Connection Id",
     "btn_apply": "Apply",

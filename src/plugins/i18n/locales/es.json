@@ -11,7 +11,7 @@
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
     "tx": "Transacciones",
-    "ibc": "IBC",
+    "ibc": "Bridge",
     "nft": "NFT",
     "consensus": "Consenso",
     "supply": "Suministro",
@@ -172,8 +172,8 @@
     "votes": "Votos"
   },
   "ibc": {
-    "title": "Conexiones IBC",
-    "title_2": "Cliente IBC",
+    "title": "Conexiones Bridge",
+    "title_2": "Cliente Bridge",
     "registry": "Registro",
     "connection_id": "ID de conexión",
     "btn_apply": "Aplicar",

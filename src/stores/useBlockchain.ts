@@ -99,7 +99,7 @@ export const useBlockchain = defineStore('blockchain', {
           'cosmwasm': 'mdi:code-braces',
           'widget': 'mdi:widgets',
           'tx': 'mdi:swap-horizontal',
-          'ibc': 'mdi:link-variant',
+          'ibc': 'mdi:bridge',
           'nft': 'mdi:image-multiple',
           'supply': 'mdi:currency-usd',
           'account': 'mdi:account-multiple',

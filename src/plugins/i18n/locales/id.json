@@ -10,7 +10,7 @@
     "rich-list": "Daftar Kaya",
     "cosmwasm": "Cosmwasm",
     "widget": "Widgets",
-    "ibc": "IBC",
+    "ibc": "Bridge",
     "consensus": "Konsensus",
     "supply": "Pasokan",
     "account": "Akun",
@@ -161,8 +161,8 @@
     "votes": "Suara"
   },
   "ibc": {
-    "title": "Koneksi IBC",
-    "title_2": "Klien IBC",
+    "title": "Koneksi Bridge",
+    "title_2": "Klien Bridge",
     "registry": "Registri",
     "connection_id": "ID Koneksi",
     "btn_apply": "Ajukan",

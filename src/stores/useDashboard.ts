@@ -74,6 +74,7 @@ export function convertFromLocal(lc: LocalChainConfig): ChainConfig {
   conf.keplrFeatures = lc.keplr_features;
   conf.keplrPriceStep = lc.keplr_price_step;
   conf.themeColor = lc.theme_color;
+  conf.burnAddress = lc.burn_address;
   conf.faucet = lc.faucet;
   return conf;
 }
