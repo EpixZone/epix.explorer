@@ -243,7 +243,7 @@ const show_ad = computed(() => {
 
         <div class="flex-1 w-0"></div>
 
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 mr-12">
           <NavBarI18n class="hidden md:!inline-block" />
           <NavbarThemeSwitcher class="!inline-block" />
           <NavbarSearch class="!inline-block" />
