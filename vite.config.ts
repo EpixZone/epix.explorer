@@ -11,6 +11,7 @@ import Pages from 'vite-plugin-pages';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 
 export default defineConfig({
+  base: './',
   define: {
     'process.env': {},
   },
