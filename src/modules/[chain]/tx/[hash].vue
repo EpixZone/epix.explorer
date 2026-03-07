@@ -8,7 +8,7 @@ import { JsonViewer } from 'vue3-json-viewer';
 // if you used v1.0.5 or latster ,you should add import "vue3-json-viewer/dist/index.css"
 import 'vue3-json-viewer/dist/vue3-json-viewer.css';
 
-const props = defineProps(['hash', 'chain']);
+const props = defineProps(['hash']);
 
 const blockchain = useBlockchain();
 const baseStore = useBaseStore();
@@ -103,11 +103,11 @@ const feeTooltip = computed(() => {
     <div>
         <div class="modern-card shadow-modern p-1 mb-6 flex space-x-1">
             <RouterLink class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                :to="`/${chain}/tx/?tab=recent`">
+                :to="'/tx/?tab=recent'">
                 {{ $t('block.recent') }}
             </RouterLink>
             <RouterLink class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                :to="`/${chain}/tx/?tab=search`">
+                :to="'/tx/?tab=search'">
                 Search
             </RouterLink>
             <div class="px-4 py-2 rounded-lg text-sm font-medium bg-epix-primary text-white">
@@ -147,7 +147,7 @@ const feeTooltip = computed(() => {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('account.height') }}</label>
-                        <RouterLink :to="`/${props.chain}/block/${tx.tx_response.height}`"
+                        <RouterLink :to="`/block/${tx.tx_response.height}`"
                                     class="modern-input px-4 py-3 block text-epix-teal hover:text-epix-primary transition-colors duration-200">
                             {{ tx.tx_response.height }}
                         </RouterLink>

@@ -165,7 +165,7 @@ const show_ad = computed(() => {
               class="menu w-full !p-0">
               <RouterLink
                 class="hover:bg-gray-800/20 rounded-md cursor-pointer px-3 py-2.5 flex items-center mb-1 transition-colors duration-200"
-                :to="`/${blockchain.chainName}/faucet`">
+                :to="'/faucet'">
                 <Icon icon="mdi:water" class="mr-2 ml-3 text-sm text-gray-500"></Icon>
                 <div class="text-xs capitalize text-gray-300 font-medium tracking-wide">
                   Faucet
@@ -267,7 +267,7 @@ const show_ad = computed(() => {
         </div>
         <RouterView v-slot="{ Component }">
           <Transition mode="out-in">
-            <div>
+            <div :key="$route.fullPath">
               <AdBanner v-if="show_ad" />
               <Component :is="Component" />
             </div>

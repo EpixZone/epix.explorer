@@ -163,7 +163,7 @@ onMounted(() => {
               <td class="px-6 py-4">
                 <div>
                   <RouterLink
-                    :to="`/${blockchain.chainName}/account/${holder.address}`"
+                    :to="`/account/${holder.address}`"
                     class="text-sm font-mono text-epix-teal hover:text-epix-accent transition-colors duration-200 hover:underline break-all"
                   >
                     {{ formatAddress(holder.address) }}

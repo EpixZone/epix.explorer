@@ -7,7 +7,7 @@ import { PageRequest } from '@/types';
 import PaginationBar from '@/components/PaginationBar.vue';
 import router from '@/router';
 
-const props = defineProps(['chain']);
+defineProps([]);
 
 const codes = ref({} as PaginabledCodeInfos);
 
@@ -28,16 +28,16 @@ pageload(1);
 
 onMounted(() => {
   const historyStore = JSON.parse(localStorage.getItem('contract_history') || '{}');
-  history.value = historyStore[props.chain] || [];
+  history.value = historyStore['epix'] || [];
 });
 
 function myContracts() {
-  if (field.value === 'contract') router.push(`/${props.chain}/cosmwasm/0/transactions?contract=${creator.value}`);
-  else if (field.value === 'creator') router.push(`/${props.chain}/cosmwasm/${creator.value}/contracts`);
+  if (field.value === 'contract') router.push(`/cosmwasm/0/transactions?contract=${creator.value}`);
+  else if (field.value === 'creator') router.push(`/cosmwasm/${creator.value}/contracts`);
 }
 const togo = ref('');
 function gotoHistory() {
-  router.push(`/${props.chain}/cosmwasm/0/transactions?contract=${togo.value}`);
+  router.push(`/cosmwasm/0/transactions?contract=${togo.value}`);
 }
 </script>
 <template>
@@ -71,7 +71,7 @@ function gotoHistory() {
                     <tr v-for="(v, index) in codes.code_infos" :key="index">
                         <td>{{ v.code_id }}</td>
                         <td>
-                            <RouterLink :to="`/${props.chain}/cosmwasm/${v.code_id}/contracts`"
+                            <RouterLink :to="`/cosmwasm/${v.code_id}/contracts`"
                                 class="truncate max-w-[200px] block text-epix-teal hover:text-epix-accent transition-colors duration-200" :title="v.data_hash">
                                 {{ v.data_hash }}
                             </RouterLink>

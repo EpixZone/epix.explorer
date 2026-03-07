@@ -239,7 +239,7 @@ const tab = ref('detail');
                         <td>{{ resp.height }}</td>
                         <td>
                             <div class="text-xs truncate text-epix-teal hover:text-epix-accent transition-colors duration-200">
-                                <RouterLink :to="`/${chainStore.chainName}/tx/${resp.txhash}`">{{ resp.txhash }}
+                                <RouterLink :to="`/tx/${resp.txhash}`">{{ resp.txhash }}
                                 </RouterLink>
                             </div>
                         </td>

@@ -22,7 +22,7 @@ const addFavor = (e: Event) => {
 </script>
 <template>
   <RouterLink
-    :to="`/${name}`"
+    :to="'/'"
     class="modern-card hover-lift group flex items-center px-5 py-4 cursor-pointer transition-all duration-300"
   >
     <div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-epix-primary transition-all duration-300">

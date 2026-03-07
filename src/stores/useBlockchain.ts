@@ -117,7 +117,7 @@ export const useBlockchain = defineStore('blockchain', {
           ) // filter none-custom module
           .map((x) => ({
             title: `module.${x.meta.i18n}`,
-            to: { path: x.path.replace(':chain', this.chainName) },
+            to: { path: x.path },
             icon: { icon: moduleIcons[String(x.meta.i18n)] || 'mdi:circle', size: '22' },
             i18n: true,
             order: Number(x.meta.order || 100),

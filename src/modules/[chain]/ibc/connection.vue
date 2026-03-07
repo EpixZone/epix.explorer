@@ -6,7 +6,7 @@ import { ref } from 'vue';
 
 import { useIBCModule } from './connStore';
 
-const props = defineProps(['chain']);
+defineProps([]);
 const chainStore = useBlockchain();
 const ibcStore = useIBCModule();
 const list = ref([] as Connection[]);

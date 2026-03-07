@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { useBaseStore, useFormatter } from '@/stores';
 import TxsInBlocksChart from '@/components/charts/TxsInBlocksChart.vue';
 
-const props = defineProps(['chain']);
+defineProps([]);
 
 const tab = ref('blocks');
 
@@ -23,7 +23,7 @@ const list = computed(() => {
             <a class="tab text-gray-400 uppercase" :class="{ 'tab-active': tab === 'blocks' }"
                 @click="tab = 'blocks'">{{ $t('block.recent') }}</a>
             <RouterLink class="tab text-gray-400 uppercase"
-                :to="`/${chain}/block/${Number(base.latest?.block?.header.height||0) + 10000}`"
+                :to="`/block/${Number(base.latest?.block?.header.height||0) + 10000}`"
                 >{{ $t('block.future') }}</RouterLink>
         </div>
 
@@ -34,7 +34,7 @@ const list = computed(() => {
             <div class="grid xl:!grid-cols-6 md:!grid-cols-4 grid-cols-1 gap-3">
             <RouterLink v-for="item in list"
                 class="flex flex-col justify-between rounded-lg p-4 shadow-modern modern-card hover-lift transition-all duration-200"
-                :to="`/${chain}/block/${item.block.header.height}`">
+                :to="`/block/${item.block.header.height}`">
                 <div class="flex justify-between">
                     <h3 class="text-md font-bold sm:!text-lg text-gray-900 dark:text-white">
                         {{ item.block.header.height }}

@@ -9,7 +9,7 @@ import { consensusPubkeyToHexAddress, valconsToBase64 } from '@/libs';
 import type { SigningInfo } from '@/types/slashing';
 import { CosmosRestClient } from '@/libs/client';
 
-const props = defineProps(['chain']);
+defineProps([]);
 
 const stakingStore = useStakingStore();
 const format = useFormatter();
@@ -172,7 +172,7 @@ function color(v: string) {
             </td>
             <td class="py-3 px-4 capitalize text-gray-900 dark:text-white">{{ v.sigingInfo?.tombstoned }}</td>
             <td class="py-3 px-4"><span v-if="v.sigingInfo" class="px-2 py-1 text-xs rounded-full" :class="color( v.sigingInfo?.missed_blocks_counter)">{{ v.sigingInfo?.missed_blocks_counter }}</span></td>
-            <td class="py-3 px-4"><RouterLink :to="`/${v.chainName}/uptime/#blocks`" class="modern-button px-3 py-1 text-xs">{{ $t('module.blocks') }}</RouterLink></td>
+            <td class="py-3 px-4"><RouterLink :to="'/uptime/#blocks'" class="modern-button px-3 py-1 text-xs">{{ $t('module.blocks') }}</RouterLink></td>
           </tr>
         </tbody>
       </table>

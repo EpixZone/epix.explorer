@@ -5,7 +5,7 @@ import { computed } from 'vue';
 import { onMounted } from 'vue';
 import { ref } from 'vue';
 
-const props = defineProps(['chain']);
+defineProps([]);
 const chainStore = useBlockchain();
 const baseStore = useBaseStore();
 const endpoint = ref(chainStore.current?.endpoints?.rest?.at(0)?.address);

@@ -7,7 +7,7 @@ import PaginationBar from '@/components/PaginationBar.vue';
 import { PageRequest } from '@/types';
 import { useTxDialog } from '@/stores';
 
-const props = defineProps(['code_id', 'chain']);
+const props = defineProps(['code_id']);
 
 const pageRequest = ref(new PageRequest());
 const response = ref({} as PaginabledContracts);

@@ -8,7 +8,7 @@ import { useBaseStore, useFormatter } from '@/stores';
 import type { Block } from '@/types';
 import Countdown from '@/components/Countdown.vue';
 
-const props = defineProps(['height', 'chain']);
+const props = defineProps(['height']);
 
 const store = useBaseStore();
 const format = useFormatter();
@@ -165,11 +165,11 @@ onBeforeRouteUpdate(async (to, from, next) => {
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex flex-row justify-between">
           <p class="">#{{ current.block?.header?.height }}</p>
           <div class="flex" v-if="props.height">
-            <RouterLink :to="`/${store.blockchain.chainName}/block/${height - 1}`"
+            <RouterLink :to="`/block/${height - 1}`"
               class="modern-button p-2 text-xl mr-2">
               <Icon icon="mdi-arrow-left" class="w-6 h-6" />
             </RouterLink>
-            <RouterLink :to="`/${store.blockchain.chainName}/block/${height + 1}`"
+            <RouterLink :to="`/block/${height + 1}`"
               class="modern-button p-2 text-xl">
               <Icon icon="mdi-arrow-right" class="w-6 h-6" />
             </RouterLink>

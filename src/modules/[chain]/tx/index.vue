@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useBaseStore, useBlockchain, useFormatter } from '@/stores';
 import { useRouter } from 'vue-router';
-const props = defineProps(['chain']);
+defineProps([]);
 const vueRouters = useRouter();
 const tab = ref('recent');
 
@@ -47,7 +47,7 @@ onMounted(() => {
 
 function search() {
   if (hashReg.test(hash.value)) {
-    vueRouters.push({ path: `/${current}/tx/${hash.value}` });
+    vueRouters.push({ path: `/tx/${hash.value}` });
   }
 }
 </script>
@@ -94,10 +94,10 @@ function search() {
                     <tbody>
                         <tr v-for="(item, index) in recentTxs" :key="`${item.height}-${item.hash}`" :index="index" class="hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200">
                             <td class="py-3 px-4 text-sm">
-                                <RouterLink :to="`/${props.chain}/block/${item.height}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">{{ item.height }}</RouterLink>
+                                <RouterLink :to="`/block/${item.height}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">{{ item.height }}</RouterLink>
                             </td>
                             <td class="py-3 px-4 truncate w-1/2">
-                                <RouterLink :to="`/${props.chain}/tx/${item.hash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">{{
+                                <RouterLink :to="`/tx/${item.hash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">{{
                     item.hash
                 }}</RouterLink>
                             </td>

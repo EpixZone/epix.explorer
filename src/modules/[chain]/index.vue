@@ -19,7 +19,7 @@ import CardStatisticsVertical from '@/components/CardStatisticsVertical.vue';
 import ProposalListItem from '@/components/ProposalListItem.vue';
 import ArrayObjectElement from '@/components/dynamic/ArrayObjectElement.vue';
 
-const props = defineProps(['chain']);
+defineProps([]);
 
 const blockchain = useBlockchain();
 const store = useIndexModule();
@@ -295,7 +295,7 @@ const amount = computed({
         </div>
         <RouterLink v-if="walletStore.currentAddress"
           class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm font-medium text-white bg-epix-primary hover:bg-epix-secondary rounded-lg transition-colors duration-200 no-underline whitespace-nowrap"
-          :to="`/${chain}/account/${walletStore.currentAddress}`">
+          :to="`/account/${walletStore.currentAddress}`">
           View Account
           <Icon icon="mdi:arrow-right" class="w-4 h-4" />
         </RouterLink>
@@ -346,7 +346,7 @@ const amount = computed({
         <div v-for="(item, index) in walletStore.delegations" :key="index"
           class="bg-gray-50 dark:bg-epix-gray rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between mb-2">
-            <RouterLink class="text-epix-teal hover:text-epix-accent hover:underline transition-colors duration-200 no-underline font-medium text-sm" :to="`/${chain}/staking/${item?.delegation?.validator_address}`">
+            <RouterLink class="text-epix-teal hover:text-epix-accent hover:underline transition-colors duration-200 no-underline font-medium text-sm" :to="`/staking/${item?.delegation?.validator_address}`">
               {{ format.validatorFromBech32(item?.delegation?.validator_address) }}
             </RouterLink>
           </div>

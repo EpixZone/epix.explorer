@@ -7,10 +7,7 @@ import routes from '~pages';
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: [
-    { path: '/', redirect: '/epix' },
-    ...setupLayouts(routes),
-  ],
+  routes: setupLayouts(routes),
 });
 
 // Handle stale chunk errors after deployments by reloading the page
@@ -23,19 +20,36 @@ router.onError((error, to) => {
   }
 });
 
-//update current blockchain
+// Clean stale ?wallet= query param from the URL.
+// The wallet/suggest page uses ?wallet=evm|consensus for tab deep-linking,
+// but vue-router hash history only changes the hash portion, so ?wallet=
+// persists in window.location.search when navigating to other pages.
+function cleanWalletParam(targetPath: string) {
+  if (!targetPath.includes('/wallet/suggest') && window.location.search.includes('wallet=')) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('wallet');
+    // Bypass any monkey-patches on replaceState
+    History.prototype.replaceState.call(history, history.state, '', url.pathname + url.search + url.hash);
+  }
+}
+
+// Single-chain app: always set to epix
 router.beforeEach((to) => {
-  const { chain } = to.params;
-  if (chain) {
-    const blockchain = useBlockchain();
-    if (chain !== blockchain.chainName) {
-      blockchain.setCurrent(chain.toString());
-    }
+  const blockchain = useBlockchain();
+  if (blockchain.chainName !== 'epix') {
+    blockchain.setCurrent('epix');
   }
 
+  // Clean ?wallet= before navigation so the URL is clean when new page renders
+  cleanWalletParam(to.path);
+
   // Close mobile menu on navigation
-  // Emit a custom event that the layout can listen to
   window.dispatchEvent(new CustomEvent('close-mobile-menu'));
+});
+
+// Also clean after navigation in case pushState re-introduced the param
+router.afterEach((to) => {
+  cleanWalletParam(to.path);
 });
 
 // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards

@@ -27,6 +27,24 @@ export default defineConfig({
     Pages({
       dirs: ['./src/modules', './src/pages'],
       exclude: ['**/*.ts'], // only load .vue as modules
+      onRoutesGenerated(routes) {
+        // Single-chain app: strip /:chain prefix from all routes
+        function stripChain(routes: any[]): any[] {
+          return routes.map((route) => {
+            let path = route.path;
+            if (path.startsWith('/:chain')) {
+              path = path.replace(/^\/:chain/, '') || '/';
+            }
+            return {
+              ...route,
+              path,
+              name: route.name?.replace(/^chain-/, ''),
+              children: route.children ? stripChain(route.children) : undefined,
+            };
+          });
+        }
+        return stripChain(routes);
+      },
     }),
     Layouts({
       layoutsDirs: './src/layouts/',

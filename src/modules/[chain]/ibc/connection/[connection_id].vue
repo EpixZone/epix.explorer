@@ -15,7 +15,7 @@ import { useIBCModule } from '../connStore';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { Icon } from '@iconify/vue';
 
-const props = defineProps(['chain', 'connection_id']);
+const props = defineProps(['connection_id']);
 const chainStore = useBlockchain();
 const baseStore = useBaseStore();
 const format = useFormatter();
@@ -350,7 +350,7 @@ function color(v: string) {
             <td>
               <div class="text-xs truncate" style="color: var(--epix-teal)">
                 <RouterLink
-                  :to="`/${chainStore.chainName}/tx/${resp.txhash}`"
+                  :to="`/tx/${resp.txhash}`"
                   >{{ resp.txhash }}</RouterLink
                 >
               </div>

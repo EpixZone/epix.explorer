@@ -6,7 +6,7 @@ import UptimeBar from '@/components/UptimeBar.vue';
 import type { SlashingParam, SigningInfo, Block } from '@/types';
 import { consensusPubkeyToHexAddress, valconsToBase64 } from '@/libs';
 
-const props = defineProps(['chain']);
+defineProps([]);
 
 const stakingStore = useStakingStore();
 const format = useFormatter();
@@ -274,7 +274,7 @@ const getValidatorIdentity = (moniker: string) => {
       <a class="tab text-gray-400 capitalize" :class="{ 'tab-active': tab === '2' }" @click="changeTab('2')">{{
         $t('module.blocks')
       }}</a>
-      <RouterLink :to="`/${chain}/uptime/customize`">
+      <RouterLink :to="'/uptime/customize'">
         <a class="tab text-gray-400 capitalize">{{ $t('uptime.customize') }}</a>
       </RouterLink>
     </div>

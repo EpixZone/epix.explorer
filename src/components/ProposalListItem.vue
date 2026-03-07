@@ -55,7 +55,7 @@ function metaItem(metadata: string | undefined): { title: string; summary: strin
           <td class="w-full">
             <div>
               <RouterLink
-                :to="`/${chain.chainName}/gov/${item?.proposal_id}`"
+                :to="`/gov/${item?.proposal_id}`"
                 class="text-gray-900 dark:text-white text-base mb-1 block hover:text-epix-primary truncate transition-colors duration-200"
               >
                 {{ item?.content?.title || item?.title || metaItem(item?.metadata)?.title }}
@@ -138,7 +138,7 @@ function metaItem(metadata: string | undefined): { title: string; summary: strin
           class="text-gray-900 dark:text-white text-base mb-1 flex justify-between hover:text-epix-primary transition-colors duration-200"
         >
           <RouterLink
-            :to="`/${chain.chainName}/gov/${item?.proposal_id}`"
+            :to="`/gov/${item?.proposal_id}`"
             class="flex-1 w-0 truncate mr-4"
             >{{ item?.content?.title || item?.title || metaItem(item?.metadata)?.title }}</RouterLink
           >

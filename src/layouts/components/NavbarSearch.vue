@@ -56,23 +56,22 @@ function confirm() {
   const txhash = /^[A-Z\d]{64}$/;
   const addr = /^[a-z\d]+1[a-z\d]{38,58}$/;
 
-  const current = blockStore?.current?.chainName || '';
-
   // Check if input matches any of the patterns and navigate
   if (height.test(key)) {
-    vueRouters.push({ path: `/${current}/block/${key}` });
+    vueRouters.push({ path: `/block/${key}` });
     // Always close modal after navigation attempt
     setTimeout(() => {
       closeSearchModal();
     }, 200);
   } else if (txhash.test(key)) {
-    vueRouters.push({ path: `/${current}/tx/${key}` });
+    vueRouters.push({ path: `/tx/${key}` });
     // Always close modal after navigation attempt
     setTimeout(() => {
       closeSearchModal();
     }, 200);
   } else if (addr.test(key)) {
-    vueRouters.push({ path: `/${current}/account/${key}` });
+    const route = key.includes('valoper') ? 'staking' : 'account';
+    vueRouters.push({ path: `/${route}/${key}` });
     // Always close modal after navigation attempt
     setTimeout(() => {
       closeSearchModal();

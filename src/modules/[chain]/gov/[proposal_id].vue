@@ -21,7 +21,7 @@ import Countdown from '@/components/Countdown.vue';
 import PaginationBar from '@/components/PaginationBar.vue';
 import { fromBech32, toHex } from '@cosmjs/encoding';
 
-const props = defineProps(['proposal_id', 'chain']);
+const props = defineProps(['proposal_id']);
 const proposal = ref({
   final_tally_result: {
     yes: '0',

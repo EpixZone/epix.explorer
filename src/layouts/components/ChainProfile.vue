@@ -50,7 +50,7 @@ const healthStatus = ref<'idle' | 'success' | 'warning'>('idle');
 function changeEndpoint(item: Endpoint) {
   chainStore.setRestEndpoint(item);
   closeDropdown();
-  if (chainStore.current) router.push(`/${chainStore.current.chainName}`);
+  if (chainStore.current) router.push('/');
 }
 
 function validateUrl(url: string): boolean {
@@ -108,7 +108,7 @@ async function addCustomEndpoint() {
     provider: customLabel.value.trim() || 'Custom',
   };
   chainStore.setRestEndpoint(newEndpoint);
-  if (chainStore.current) router.push(`/${chainStore.current.chainName}`);
+  if (chainStore.current) router.push('/');
 
   // Reset form
   customUrl.value = '';

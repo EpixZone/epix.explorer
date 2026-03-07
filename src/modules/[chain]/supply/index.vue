@@ -4,7 +4,7 @@ import { useBlockchain, useFormatter } from '@/stores';
 import { PageRequest, type Pagination, type Coin, type DenomMetadata } from '@/types';
 import type { Asset } from '@ping-pub/chain-registry-client/dist/types'
 import PaginationBar from '@/components/PaginationBar.vue';
-const props = defineProps(['chain']);
+defineProps([]);
 
 const format = useFormatter();
 const chainStore = useBlockchain();

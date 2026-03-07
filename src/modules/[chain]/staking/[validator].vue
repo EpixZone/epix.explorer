@@ -25,7 +25,7 @@ import PaginationBar from '@/components/PaginationBar.vue';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { stringToUint8Array, uint8ArrayToString } from '@/libs/utils';
 
-const props = defineProps(['validator', 'chain']);
+const props = defineProps(['validator']);
 
 const staking = useStakingStore();
 const blockchain = useBlockchain();
@@ -518,7 +518,7 @@ function mapDelegators(messages: any[]) {
               </div>
             <RouterLink
               class="text-xs text-epix-teal hover:text-epix-accent transition-colors duration-200"
-              :to="`/${chain}/account/${addresses.account}`"
+              :to="`/account/${addresses.account}`"
             >
               {{ addresses.account }}
             </RouterLink>
@@ -579,10 +579,12 @@ function mapDelegators(messages: any[]) {
       <div class="rounded overflow-auto">
         <table class="table validatore-table w-full">
           <thead class="bg-gray-50 dark:bg-gray-800">
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold" style="position: relative; z-index: 2">
-              {{ $t('account.delegator') }}
-            </th>
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.delegation') }}</th>
+            <tr>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold" style="position: relative; z-index: 2">
+                {{ $t('account.delegator') }}
+              </th>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.delegation') }}</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="{balance, delegation} in delegations.delegation_responses" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
@@ -605,22 +607,24 @@ function mapDelegators(messages: any[]) {
       <div class="rounded overflow-auto">
         <table class="table validatore-table w-full">
           <thead class="bg-gray-50 dark:bg-gray-800">
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold" style="position: relative; z-index: 2">
-              {{ $t('account.height') }}
-            </th>
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.hash') }}</th>
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold w-2/5">{{ $t('account.messages') }}</th>
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.time') }}</th>
+            <tr>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold" style="position: relative; z-index: 2">
+                {{ $t('account.height') }}
+              </th>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.hash') }}</th>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold w-2/5">{{ $t('account.messages') }}</th>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.time') }}</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="(item, i) in txs.tx_responses" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
               <td class="text-sm">
-                <RouterLink :to="`/${props.chain}/block/${item.height}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">{{
+                <RouterLink :to="`/block/${item.height}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">{{
                   item.height
                 }}</RouterLink>
               </td>
               <td class="truncate max-w-xs">
-                <RouterLink :to="`/${props.chain}/tx/${item.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
+                <RouterLink :to="`/tx/${item.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
                   {{ item.txhash }}
                 </RouterLink>
               </td>
@@ -666,14 +670,16 @@ function mapDelegators(messages: any[]) {
       <div class="rounded overflow-auto">
         <table class="table validatore-table w-full">
           <thead class="bg-gray-50 dark:bg-gray-800">
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.delegator') }}</th>
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.amount') }}</th>
-            <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.height') }} / {{ $t('account.time') }}</th>
+            <tr>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.delegator') }}</th>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.amount') }}</th>
+              <th class="text-left pl-4 text-gray-700 dark:text-gray-300 font-semibold">{{ $t('account.height') }} / {{ $t('account.time') }}</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="(item, i) in events.tx_responses" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
               <td class="pr-2 truncate max-w-xs">
-                <RouterLink v-for="d in mapDelegators(item.tx?.body?.messages)" :to="`/${props.chain}/account/${d}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
+                <RouterLink v-for="d in mapDelegators(item.tx?.body?.messages)" :to="`/account/${d}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
                   {{ d }}
                 </RouterLink>
               </td>
@@ -682,7 +688,7 @@ function mapDelegators(messages: any[]) {
                   'text-green-500' : selectedEventType === EventType.Delegate,
                   'text-red-500' : selectedEventType ===  EventType.Unbond,
                 }">
-                  <RouterLink :to="`/${props.chain}/tx/${item.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
+                  <RouterLink :to="`/tx/${item.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors duration-200">
                     <span class="mr-2">
                       {{ selectedEventType === EventType.Delegate ? '+' : '-' }} {{ mapEvents(item.events) }}</span
                     >
@@ -696,7 +702,7 @@ function mapDelegators(messages: any[]) {
                 </div>
               </td>
               <td class="w-36">
-                <RouterLink class="text-epix-teal hover:text-epix-accent transition-colors duration-200 mb-0" :to="`/${props.chain}/block/${item.height}`">{{
+                <RouterLink class="text-epix-teal hover:text-epix-accent transition-colors duration-200 mb-0" :to="`/block/${item.height}`">{{
                   item.height
                 }}</RouterLink><br>
                 <span class="text-xs pt-0 mt-0 text-gray-600 dark:text-gray-400">{{ format.toDay(item.timestamp, 'from') }}</span>

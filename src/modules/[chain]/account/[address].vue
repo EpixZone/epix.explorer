@@ -18,7 +18,7 @@ import type { Coin } from '@cosmjs/amino';
 import Countdown from '@/components/Countdown.vue';
 import { fromBase64 } from '@cosmjs/encoding';
 
-const props = defineProps(['address', 'chain']);
+const props = defineProps(['address']);
 
 const blockchain = useBlockchain();
 const stakingStore = useStakingStore();
@@ -42,14 +42,14 @@ const isBurnAddress = computed(() => {
 });
 onMounted(() => {
   // Wait for blockchain to be properly initialized
-  if (blockchain.chainName === props.chain && blockchain.rpc) {
+  if (blockchain.chainName && blockchain.rpc) {
     loadAccount(props.address);
   }
 });
 
 // Watch for blockchain changes
 blockchain.$subscribe((mutation, state) => {
-  if (state.chainName === props.chain && state.rpc) {
+  if (state.chainName && state.rpc) {
     loadAccount(props.address);
   }
 });
@@ -570,7 +570,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
           class="bg-gray-900/50 border border-gray-800 rounded-lg p-4">
           <div class="mb-2">
             <RouterLink
-              :to="`/${chain}/staking/${v.delegation.validator_address}`"
+              :to="`/staking/${v.delegation.validator_address}`"
               class="text-epix-teal hover:text-epix-accent transition-colors font-medium text-sm"
               >{{
                 format.validatorFromBech32(v.delegation.validator_address) || v.delegation.validator_address
@@ -634,7 +634,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
               <tr>
                 <td class="py-3 bg-gray-900/50 border border-gray-800 rounded-lg" colspan="5">
                   <RouterLink
-                    :to="`/${chain}/staking/${v.validator_address}`"
+                    :to="`/staking/${v.validator_address}`"
                     class="text-epix-teal hover:text-epix-accent transition-colors font-mono text-sm"
                     >{{
                       v.validator_address
@@ -717,12 +717,12 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
             </tr>
             <tr v-for="(v, index) in txs" :key="index" class="border-b border-gray-800/50 hover:bg-gray-900/30">
               <td class="py-3">
-                <RouterLink :to="`/${chain}/block/${v.height}`" class="text-epix-teal hover:text-epix-accent transition-colors">{{
+                <RouterLink :to="`/block/${v.height}`" class="text-epix-teal hover:text-epix-accent transition-colors">{{
                   v.height
                 }}</RouterLink>
               </td>
               <td class="py-3 max-w-[200px]">
-                <RouterLink :to="`/${chain}/tx/${v.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors font-mono text-xs truncate block">
+                <RouterLink :to="`/tx/${v.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors font-mono text-xs truncate block">
                   {{ v.txhash }}
                 </RouterLink>
               </td>
@@ -773,12 +773,12 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
             </tr>
             <tr v-for="(v, index) in recentReceived" :key="index" class="border-b border-gray-800/50 hover:bg-gray-900/30">
               <td class="py-3">
-                <RouterLink :to="`/${chain}/block/${v.height}`" class="text-epix-teal hover:text-epix-accent transition-colors">{{
+                <RouterLink :to="`/block/${v.height}`" class="text-epix-teal hover:text-epix-accent transition-colors">{{
                   v.height
                 }}</RouterLink>
               </td>
               <td class="py-3 max-w-[200px]">
-                <RouterLink :to="`/${chain}/tx/${v.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors font-mono text-xs truncate block">
+                <RouterLink :to="`/tx/${v.txhash}`" class="text-epix-teal hover:text-epix-accent transition-colors font-mono text-xs truncate block">
                   {{ v.txhash }}
                 </RouterLink>
               </td>

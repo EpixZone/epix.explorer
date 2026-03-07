@@ -255,7 +255,7 @@ async function loadBalances(chainName: string, endpoint: string, address: string
             <div v-for="x in subaccounts" :key="x.account.address">
               <RouterLink
                 v-if="x.delegation.amount"
-                :to="`/${x.account.chainName}/account/${x.account.address}`"
+                :to="`/account/${x.account.address}`"
                 class="flex items-center justify-between p-4 bg-white dark:bg-epix-gray rounded-lg hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200 border border-gray-200 dark:border-gray-700"
               >
                 <div class="flex items-center gap-3">
@@ -289,7 +289,7 @@ async function loadBalances(chainName: string, endpoint: string, address: string
               <RouterLink
                 v-for="x in s.balances"
                 :key="`${s.account.address}-${x.denom}`"
-                :to="`/${s.account.chainName}/account/${s.account.address}`"
+                :to="`/account/${s.account.address}`"
                 class="flex items-center justify-between p-4 bg-white dark:bg-epix-gray rounded-lg hover:bg-gray-50 dark:hover:bg-epix-gray-light transition-colors duration-200 border border-gray-200 dark:border-gray-700"
               >
                 <div class="flex items-center gap-3">

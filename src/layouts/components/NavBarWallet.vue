@@ -9,8 +9,50 @@ const walletStore = useWalletStore();
 const chainStore = useBlockchain();
 const baseStore = useBaseStore();
 
+// Intercept URL changes from ping-connect-wallet that add ?wallet= before the hash.
+// Preserve ?wallet= on the wallet/suggest page where it's used for tab deep-linking.
+function isOnWalletSuggestPage(url?: string | URL | null): boolean {
+  const hash = typeof url === 'string'
+    ? new URL(url, window.location.origin).hash
+    : window.location.hash;
+  return hash.includes('/wallet/suggest');
+}
+
+function patchHistoryToStripWalletParam() {
+  const origPushState = history.pushState.bind(history);
+  const origReplaceState = history.replaceState.bind(history);
+
+  function stripWallet(url?: string | URL | null): string | URL | null | undefined {
+    if (typeof url === 'string' && url.includes('wallet=') && !isOnWalletSuggestPage(url)) {
+      try {
+        const u = new URL(url, window.location.origin);
+        u.searchParams.delete('wallet');
+        return u.pathname + u.search + u.hash;
+      } catch { return url; }
+    }
+    return url;
+  }
+
+  history.pushState = function(data: any, unused: string, url?: string | URL | null) {
+    return origPushState(data, unused, stripWallet(url));
+  };
+  history.replaceState = function(data: any, unused: string, url?: string | URL | null) {
+    return origReplaceState(data, unused, stripWallet(url));
+  };
+}
+
+// Also clean on-demand if it's already in the URL (but not on wallet/suggest page)
+function cleanWalletQueryParam() {
+  if (window.location.search.includes('wallet=') && !isOnWalletSuggestPage()) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('wallet');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+  }
+}
+
 function walletStateChange(res: any) {
   walletStore.setConnectedWallet(res.detail?.value);
+  cleanWalletQueryParam();
 }
 
 // Listen for Keplr account/wallet changes
@@ -44,6 +86,8 @@ async function onKeplrKeystoreChange() {
 
 onMounted(() => {
   window.addEventListener('keplr_keystorechange', onKeplrKeystoreChange);
+  patchHistoryToStripWalletParam();
+  cleanWalletQueryParam();
 });
 
 onUnmounted(() => {

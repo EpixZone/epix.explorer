@@ -57,7 +57,7 @@ const isConvertable = computed(() => {
 <template>
   <MdEditor v-if="isMD()" :model-value="format.multiLine(value)" previewOnly class="md-editor-recover"></MdEditor>
   <span v-else-if="isAddress()" class="flex">
-    <RouterLink :to="`/${chainStore.chainName}/account/${text}`" class="text-epix-teal hover:text-epix-accent hover:underline transition-colors duration-200">{{ text }}</RouterLink>
+    <RouterLink :to="`/account/${text}`" class="text-epix-teal hover:text-epix-accent hover:underline transition-colors duration-200">{{ text }}</RouterLink>
     <div v-for="{ name, provider } in names">
       <span
         class="text-xs truncate relative py-1 px-2 p2-4 w-fit ml-2 rounded text-success tooltip"
