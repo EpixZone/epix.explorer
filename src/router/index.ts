@@ -5,6 +5,17 @@ import { setupLayouts } from 'virtual:generated-layouts';
 // @ts-ignore
 import routes from '~pages';
 
+// Convert query-param deep links (?tx=HASH or ?account=ADDR) to hash routes.
+// EpixNet's wrapper passes query strings through to the iframe but not hash fragments,
+// so external links use ?tx= / ?account= and this converts them for Vue Router.
+(function () {
+  const p = new URLSearchParams(window.location.search);
+  const tx = p.get('tx');
+  const account = p.get('account');
+  if (tx) { window.location.replace('#/tx/' + tx); }
+  else if (account) { window.location.replace('#/account/' + account); }
+})();
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: setupLayouts(routes),
