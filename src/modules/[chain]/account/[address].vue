@@ -207,21 +207,20 @@ function loadAccount(address: string) {
   const receivedQuery = `?&pagination.reverse=true&events=coin_received.receiver='${address}'&pagination.limit=${limit}`;
   blockchain.rpc.getTxs(receivedQuery, {}).then((x) => {
     recentReceived.value = x.tx_responses;
-    if (isBurnAddress.value) {
-      // Calculate total burned from all received events
-      let burned = 0;
-      x.tx_responses?.forEach((tx: TxResponse) => {
-        const amounts = mapAmount(tx.events);
-        amounts?.forEach((amtStr: string) => {
-          const match = amtStr.match(/([\d,.]+)\s+EPIX/);
-          if (match) {
-            burned += parseFloat(match[1].replace(/,/g, ''));
-          }
-        });
-      });
-      totalBurned.value = burned;
-    }
   });
+
+  // For burn addresses, fetch the accurate total from the xID stats endpoint
+  if (isBurnAddress.value) {
+    fetch(`${blockchain.endpoint.address}/xid/v1/stats`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.total_fees_burned) {
+          // Convert from aepix (10^18) to EPIX
+          totalBurned.value = Number(BigInt(data.total_fees_burned) / BigInt(10 ** 12)) / 1e6;
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 function updateEvent() {
