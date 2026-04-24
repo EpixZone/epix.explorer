@@ -52,8 +52,8 @@ export const useCoingecko = defineStore('coingecko', {
     },
     getOsmosisTokenInfo(symbol: string) {
       return get(`https://data.app.osmosis.zone/tokens/v2/${symbol}`).then((data: any[]) => {
-        if (data && data.length > 0) return data[0];
-        return null;
+        if (!data || data.length === 0) return null;
+        return data.find(d => d && d.price != null) || data[0];
       });
     },
     getOsmosisMarketChart(symbol: string, tf = 60) {

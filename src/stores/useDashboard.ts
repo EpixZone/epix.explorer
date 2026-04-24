@@ -222,7 +222,8 @@ export const useDashboard = defineStore('dashboard', {
       osmosisSymbols.forEach((symbol) => {
         get(`https://data.app.osmosis.zone/tokens/v2/${symbol}`).then((data: any[]) => {
           if (data && data.length > 0) {
-            const token = data[0];
+            const token = data.find(d => d && d.price != null) || data[0];
+            if (token.price == null) return;
             this.prices = {
               ...this.prices,
               [`osmosis-${symbol.toLowerCase()}`]: {
