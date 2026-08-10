@@ -61,15 +61,13 @@ export function convertFromLocal(lc: LocalChainConfig): ChainConfig {
     };
   }
   conf.features = lc.features;
-  // Handle logo path resolution for local development
+  // Resolve relative logo paths against the page base URL so they work when
+  // served from a domain root (explorer.epix.zone, *.epix) and from the local
+  // EpixNet gateway subpath (/epix1.../) alike.
   if (lc.logo.startsWith('http')) {
     conf.logo = lc.logo;
-  } else if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
-    // For local development, use relative path from public directory
-    conf.logo = `/${lc.logo}`;
   } else {
-    // For production, use the full URL
-    conf.logo = `https://explorer.epix.zone/${lc.logo}`;
+    conf.logo = new URL(lc.logo, document.baseURI).href;
   }
   conf.keplrFeatures = lc.keplr_features;
   conf.keplrPriceStep = lc.keplr_price_step;

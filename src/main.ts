@@ -1,6 +1,7 @@
 // import 'ping-widget';
 import App from '@/App.vue';
 import i18n from '@/plugins/i18n';
+import '@/plugins/icons';
 import '@/style.css';
 import { createApp, ref } from 'vue';
 import { createPinia } from 'pinia';
