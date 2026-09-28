@@ -680,7 +680,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
                         {
                           validator_address: v.validator_address,
                           creation_height: entry.creation_height,
-                          initial_balance: entry.initial_balance,
+                          balance: entry.balance,
                           bond_denom: stakingStore.params.bond_denom,
                         },
                         updateEvent
