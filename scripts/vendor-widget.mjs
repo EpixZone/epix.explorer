@@ -13,12 +13,15 @@
 //     ?icons=... query, so the full local collection is served instead.
 //
 // Re-run to pick up a new widget version:  node scripts/vendor-widget.mjs
+// Or use a local build: node scripts/vendor-widget.mjs ../widget/dist
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const BASE = 'https://unpkg.com/@muddydev/epixzone-widget@latest/dist';
+// Pass a built widget dist directory to test/vendor changes before publishing.
+const localDist = process.argv[2];
 const pub = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
 // remote images the widget shows (wallet/token logos) -> local files.
@@ -61,7 +64,7 @@ const seen = new Set();
 async function vendor(name) {
   if (seen.has(name)) return;
   seen.add(name);
-  let code = await fetchText(`${BASE}/${name}`);
+  let code = localDist ? readFileSync(join(localDist, name), 'utf8') : await fetchText(`${BASE}/${name}`);
 
   // 1. no external font loading — Inter is self-hosted by the app
   code = code.replace(/@import"https:\/\/fonts\.googleapis\.com[^"]*";/g, '');
@@ -94,7 +97,6 @@ async function vendor(name) {
 await vendor('widget.js');
 
 // download images that aren't already shipped in public/logos/
-const { existsSync } = await import('node:fs');
 mkdirSync(join(pub, 'logos', 'vendor'), { recursive: true });
 for (const [url, local] of Object.entries(IMAGE_REWRITES)) {
   const target = join(pub, local.replace('./', ''));
@@ -113,7 +115,9 @@ const REG_FILES = ['epix/chain.json', 'epix/assetlist.json', '_IBC/epix-osmosis.
 mkdirSync(join(pub, 'registry', 'epix'), { recursive: true });
 mkdirSync(join(pub, 'registry', '_IBC'), { recursive: true });
 for (const f of REG_FILES) {
-  const text = await fetchText(`${REG}/${f}`);
+  const text = localDist && existsSync(join(pub, 'registry', f))
+    ? readFileSync(join(pub, 'registry', f), 'utf8')
+    : await fetchText(`${REG}/${f}`);
   writeFileSync(join(pub, 'registry', f), text);
   console.log(`registry/${f}: ${text.length} bytes`);
   // vendor images referenced by this registry file (logo_URIs etc.) — the
@@ -122,6 +126,7 @@ for (const f of REG_FILES) {
   for (const [, imgPath] of text.matchAll(/raw\.githubusercontent\.com\/cosmos\/chain-registry\/master\/([a-zA-Z0-9/_.-]+\.(?:png|svg|jpe?g|webp))/g)) {
     const target = join(pub, 'registry', imgPath);
     mkdirSync(dirname(target), { recursive: true });
+    if (localDist && existsSync(target)) continue;
     const res = await fetch(`${REG}/${imgPath}`);
     if (!res.ok) { console.warn(`WARNING registry image ${imgPath}: HTTP ${res.status}`); continue; }
     writeFileSync(target, Buffer.from(await res.arrayBuffer()));
@@ -133,13 +138,18 @@ writeFileSync(join(pub, 'registry', '_IBC', 'index.json'),
 
 // icons the widget references (grep the downloaded chunks for "mdi:*" / "mdi-*")
 const iconNames = new Set();
-const { readFileSync } = await import('node:fs');
 for (const name of seen) {
   const code = readFileSync(join(pub, name), 'utf8');
   for (const m of code.matchAll(/["'`]mdi[:-]([a-z0-9-]+)["'`]/g)) iconNames.add(m[1]);
 }
 const list = [...iconNames].sort();
-const data = JSON.parse(await fetchText(`https://api.iconify.design/mdi.json?icons=${list.join(',')}`));
+const cachedIcons = join(pub, 'iconify', 'mdi.json');
+const data = localDist && existsSync(cachedIcons)
+  ? JSON.parse(readFileSync(cachedIcons, 'utf8'))
+  : JSON.parse(await fetchText(`https://api.iconify.design/mdi.json?icons=${list.join(',')}`));
+if (localDist && list.some(name => !data.icons[name] && !data.aliases?.[name])) {
+  throw new Error('Local icon collection is missing widget icons. Refresh it before vendoring.');
+}
 if (data.not_found?.length) console.warn('WARNING mdi icons not found:', data.not_found.join(', '));
 delete data.not_found;
 mkdirSync(join(pub, 'iconify'), { recursive: true });
