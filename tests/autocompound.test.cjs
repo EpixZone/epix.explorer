@@ -454,7 +454,7 @@ function componentFixture(overrides = {}) {
     if (name === '@/libs/autocompound') return api;
     if (name === '@/stores') return {
       useWalletStore: () => wallet, useBlockchain: () => chain,
-      useTxDialog: () => ({ open: (...args) => opened.push(args) }),
+      useTxDialog: () => ({ openAndShow: (...args) => opened.push(args) }),
     };
     return require(name);
   };

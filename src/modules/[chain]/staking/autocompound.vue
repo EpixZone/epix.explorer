@@ -207,7 +207,7 @@ function openGrant(event: Event) {
     event.preventDefault(); return;
   }
   const operator = selectedOperator.value;
-  dialog.open('autocompound', {
+  dialog.openAndShow('autocompound', {
     expected_chain_id: chainId.value, validator_address: operator.validator,
     operator_address: operator.grantee, operator_name: operator.name,
     existing_grant: !!selectedGrant.value,
@@ -216,7 +216,7 @@ function openGrant(event: Event) {
 
 function openRevoke(grant: CompoundGrant, event: Event) {
   if (!canManage.value || !account.value) { event.preventDefault(); return; }
-  dialog.open('autocompound_revoke', {
+  dialog.openAndShow('autocompound_revoke', {
     expected_chain_id: chainId.value, operator_address: grant.grantee,
     operator_name: operators.value.find(operator => operator.grantee === grant.grantee)?.name || '',
     message_type: grant.messageType,
@@ -311,9 +311,9 @@ onBeforeUnmount(() => {
           within that allowance to the selected validator. Reward-only execution is the validator's service policy.
         </p>
         <p v-if="grantBlocker" class="text-sm text-warning">{{ grantBlocker }}</p>
-        <label v-if="!grantBlocker" for="autocompound" class="btn btn-primary btn-sm" @click="openGrant">
+        <button v-if="!grantBlocker" type="button" class="btn btn-primary btn-sm" @click="openGrant">
           {{ selectedGrant ? 'Replace authorization' : 'Enable auto-compound' }}
-        </label>
+        </button>
         <button v-else type="button" class="btn btn-primary btn-sm" disabled>Enable auto-compound</button>
         <RouterLink v-if="selected" :to="'/staking/' + selected" class="btn btn-ghost btn-sm">Validator and manual staking</RouterLink>
       </div>
@@ -339,7 +339,7 @@ onBeforeUnmount(() => {
           <p v-if="grant.deniedValidators.length" class="break-all"><strong>Excluded validators:</strong> {{ grant.deniedValidators.join(', ') }}</p>
         </template>
         <p v-else>Current REStake services do not need this old withdrawal permission.</p>
-        <label v-if="canManage" for="autocompound_revoke" class="btn btn-error btn-outline btn-sm" @click="openRevoke(grant, $event)">Revoke this permission</label>
+        <button v-if="canManage" type="button" class="btn btn-error btn-outline btn-sm" @click="openRevoke(grant, $event)">Revoke this permission</button>
       </article>
       <details v-if="otherGrantCount" class="text-sm">
         <summary class="cursor-pointer">{{ otherGrantCount }} other authorizations (read only)</summary>
