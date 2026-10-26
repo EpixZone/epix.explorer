@@ -4,6 +4,7 @@
   "private": true,
   "target": "",
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "dev": "vite",
     "format": "prettier --write .",
     "serve": "vite",

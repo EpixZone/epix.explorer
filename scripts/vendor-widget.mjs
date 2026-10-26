@@ -18,6 +18,7 @@
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const BASE = 'https://unpkg.com/@muddydev/epixzone-widget@latest/dist';
 // Pass a built widget dist directory to test/vendor changes before publishing.
@@ -155,3 +156,12 @@ delete data.not_found;
 mkdirSync(join(pub, 'iconify'), { recursive: true });
 writeFileSync(join(pub, 'iconify', 'mdi.json'), JSON.stringify(data));
 console.log(`iconify/mdi.json: ${list.length} icons (${list.join(', ')})`);
+
+// Existing clients must load the entry that references this build's chunks.
+const entryHash = createHash('sha256').update(readFileSync(join(pub, 'widget.js'))).digest('hex');
+const indexPath = join(pub, '..', 'index.html');
+const index = readFileSync(indexPath, 'utf8');
+const entryPattern = /src="\/widget\.js(?:\?v=[a-f0-9]+)?"/g;
+if ([...index.matchAll(entryPattern)].length !== 1) throw new Error('Expected one widget entry in index.html');
+writeFileSync(indexPath, index.replace(entryPattern, `src="/widget.js?v=${entryHash}"`));
+console.log(`widget entry: ${entryHash}`);

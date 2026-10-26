@@ -1,0 +1,164 @@
+{
+  "repository": "https://github.com/eco-stake/validator-registry",
+  "revision": "87910f6de8a1c3e76e17bbf11750559b47f6c68b",
+  "archiveSha256": "d01a290f1637f93dbf9c00df17fe5f6b06988deec872da11fbfd020fad21aeac",
+  "createdAt": "2026-10-26T19:33:57.352936+00:00",
+  "entries": [
+    {
+      "name": "Indonode",
+      "path": "Indonode.dev/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1ev90uwdtfars9d989x250ul8xq77mvlpewfl6u",
+        "restake": {
+          "address": "epix1uza65au6wdkqyx83mzwhwl0x2jvhpq8zgj2ffg",
+          "run_time": "every 1 hour",
+          "minimum_reward": "100000"
+        }
+      }
+    },
+    {
+      "name": "KonsorTech",
+      "path": "KonsorTech/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper195f5gykfqx0fjf6vav4mnj336wx0qulkdrsqzl",
+        "restake": {
+          "address": "epix1zcvz6dg7uauxfchmylp4mm37rcv4esecc70s7d",
+          "run_time": "every 2 hours",
+          "minimum_reward": "100000000000000000"
+        }
+      }
+    },
+    {
+      "name": "MIPEnode",
+      "path": "MIPEnode/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper18xwkzrs3dtwqjyy5lcqekt9pn55a9jg3td0ymh",
+        "restake": {
+          "address": "epix1ddncw2fg5php7fml8ldeq8tzv83h6d3cgzxqrd",
+          "run_time": "every 1 hours",
+          "minimum_reward": "1000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "MaouamNodelab",
+      "path": "MaouamNodelab/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper18k0s65pp2hgdqa39qtf0g0dhrvhqug7z300kr4",
+        "restake": {
+          "address": "epix1d8y5cgkvxtxa99rnc0ufaeqlpm8qaqr53rtvc4",
+          "run_time": "every 1 hours",
+          "minimum_reward": "1000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "NodeSafe",
+      "path": "NodeSafe/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper19ctfr9gcmu36q05zp6jtqwzzvt2cvpm9wx77ck",
+        "restake": {
+          "address": "epix10dcrntf66hypmd439lswu7v9m8uzhrc92wk2qr",
+          "run_time": "every 2 hours",
+          "minimum_reward": "10000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "OneNov",
+      "path": "OneNov/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1qxt7awul3cyvgf2ku08k3n3nqn7lsqvsm7ryjw",
+        "restake": {
+          "address": "epix1dp3zdh2vnsnes9fmzxw9wgx7z2qy40g98wdp6y",
+          "run_time": "every 3 hour",
+          "minimum_reward": "10000000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "Tyrannical Taco",
+      "path": "TyrannicalTaco/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1lxn5tg46sude4e0y568mu6ek89ljqjz3m0he4x",
+        "restake": {
+          "address": "epix1tq80qgka5pe6eace7tyf8f7yk362vrahqdvje0",
+          "run_time": "every 5 minutes",
+          "minimum_reward": "1000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "Winnode",
+      "path": "Winnode/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1j4s5hgw5uq8x6p8afff8d94ap4y4r0rhjlrklv",
+        "restake": {
+          "address": "epix1h8a79xln9gam52c6wzkulz2txyr0rkcr5p9lvs",
+          "run_time": "every 6 hours",
+          "minimum_reward": "10000"
+        }
+      }
+    },
+    {
+      "name": "alfadzc",
+      "path": "alfadzc/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1sc4dsg6t5q8l4dp40fyxuly59va6kqw7sfav9f",
+        "restake": {
+          "address": "epix1xhevudn258hyuyfe07rpzxkt00hfs4eqjgclz5",
+          "run_time": "every 1 hours",
+          "minimum_reward": "1000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "dnsarz",
+      "path": "dnsarz/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1qjynz59x6c0y2l5cf7gtyl8arjpg0k0rejn0lk",
+        "restake": {
+          "address": "epix1tj5az59vpuh63em62zntpgd0kfl0u57juh9878",
+          "run_time": "every 2 hours",
+          "minimum_reward": "1000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "vietnnit",
+      "path": "vietnnit/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1j00vfq9eep6mqh2p32myv67k0p8ryet4t87tks",
+        "restake": {
+          "address": "epix1j00vfq9eep6mqh2p32myv67k0p8ryet4h4wnws",
+          "run_time": "every 1 hours",
+          "minimum_reward": "1000000000000000000"
+        }
+      }
+    },
+    {
+      "name": "Vinjan.Inc",
+      "path": "vinjan/chains.json",
+      "chain": {
+        "name": "epix",
+        "address": "epixvaloper1gvwnfhd3ngsevw35y43ftvm69empwxtsgmvwfw",
+        "restake": {
+          "address": "epix1wy59fpu5m6m5h7t7upeg59cp98z9dpxy6dz94u",
+          "run_time": "every 3 hours",
+          "minimum_reward": "100000000000000000"
+        }
+      }
+    }
+  ]
+}

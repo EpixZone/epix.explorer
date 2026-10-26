@@ -44,6 +44,7 @@ export interface LocalChainConfig {
     symbol: string;
   }[];
   chain_name: string;
+  chain_id?: string;
   pretty_name?: string;
   network_type?: string;
   coin_type: string;

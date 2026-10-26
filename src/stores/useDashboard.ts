@@ -47,6 +47,7 @@ export function convertFromLocal(lc: LocalChainConfig): ChainConfig {
   conf.bech32Prefix = lc.addr_prefix;
   conf.bech32ConsensusPrefix = lc.consensus_prefix ?? lc.addr_prefix + 'valcons';
   conf.chainName = lc.chain_name;
+  conf.chainId = lc.chain_id || '';
   conf.networkType = lc.network_type;
   conf.coinType = lc.coin_type;
   conf.prettyName = lc.pretty_name || lc.registry_name || lc.chain_name;

@@ -303,6 +303,8 @@ function mapDelegators(messages: any[]) {
                 "
                 >{{ $t('account.btn_delegate') }}</label
               >
+              <RouterLink :to="{ path: '/staking/autocompound', query: { validator } }"
+                class="modern-button block px-4 py-2 mt-2 text-center">Auto-compound</RouterLink>
             </div>
           </div>
           <div class="m-4 text-sm">

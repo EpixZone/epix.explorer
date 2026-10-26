@@ -1,0 +1,28 @@
+name: Explorer checks
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: --max-old-space-size=3072
+      YARN_ENABLE_GLOBAL_CACHE: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.22.1
+      - run: corepack enable
+      - run: corepack yarn install --immutable
+      - run: corepack yarn test
+      - name: Type-check auto-compound helpers
+        run: corepack yarn tsc --noEmit --target ES2022 --module commonjs --moduleResolution node --skipLibCheck src/libs/autocompound.ts
+      - run: corepack yarn build
