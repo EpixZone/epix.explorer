@@ -344,7 +344,7 @@ function mapAmount(events:{type: string, attributes: {key: string, value: string
   <div v-if="props.address">
     <div class="flex justify-end mb-4">
       <RouterLink :to="{ path: '/staking/autocompound', query: { account: props.address } }"
-        class="modern-button px-4 py-2">Auto-compound authorizations</RouterLink>
+        class="modern-button px-4 py-2">Auto-compound</RouterLink>
     </div>
     <!-- Burn Address Banner -->
     <div v-if="isBurnAddress" class="bg-black border border-orange-500/30 px-6 py-4 rounded-lg mb-6">
