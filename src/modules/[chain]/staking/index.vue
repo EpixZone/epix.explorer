@@ -298,6 +298,9 @@ loadAvatars();
 </script>
 <template>
 <div>
+    <div class="flex justify-end mb-4">
+        <RouterLink to="/staking/autocompound" class="modern-button px-4 py-2">Auto-compound</RouterLink>
+    </div>
     <!-- Loading State -->
     <div v-if="loading">
         <!-- Stats Cards Skeleton -->

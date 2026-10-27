@@ -4,6 +4,7 @@ import { useBlockchain } from './useBlockchain';
 import router from '@/router';
 
 let CALLBACK: any = null;
+let OPEN_REQUEST = 0;
 
 export const useTxDialog = defineStore('txDialogStore', {
   state: () => {
@@ -12,6 +13,7 @@ export const useTxDialog = defineStore('txDialogStore', {
       type: 'send',
       endpoint: '',
       params: '',
+      openRequest: 0,
     };
   },
   getters: {
@@ -38,12 +40,14 @@ export const useTxDialog = defineStore('txDialogStore', {
       endpoint: string,
       param: any
     ) {
+      this.openRequest = 0;
       this.type = type;
       this.sender = sender;
       this.endpoint = endpoint;
       this.params = JSON.stringify(param);
     },
     open(type: string, param: any, callback?: Function) {
+      this.openRequest = 0;
       this.type = type;
       this.sender = this.walletAddress;
       this.endpoint = this.currentEndpoint || '';
@@ -53,6 +57,11 @@ export const useTxDialog = defineStore('txDialogStore', {
       } else {
         CALLBACK = undefined;
       }
+    },
+    openAndShow(type: string, param: any, callback?: Function) {
+      this.open(type, param, callback);
+      // The widget opens after rendering these props, including its new type.
+      this.openRequest = ++OPEN_REQUEST;
     },
     view(tx: {
       detail: {
