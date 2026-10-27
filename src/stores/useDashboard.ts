@@ -3,6 +3,7 @@ import { get } from '@/libs/http';
 import type { ChainConfig, DirectoryChainConfig, Endpoint, LocalChainConfig } from '@/types/chaindata';
 import { ConfigSource, NetworkType } from '@/types/chaindata';
 import { useBlockchain } from './useBlockchain';
+import { coingeckoFallbackId, useCoingecko, validCoingeckoId } from './useCoinGecko';
 
 function apiConverter(api: any[]) {
   if (!api) return [];
@@ -164,6 +165,7 @@ export const useDashboard = defineStore('dashboard', {
       favoriteMap: favMap as Record<string, boolean>,
       chains: {} as Record<string, ChainConfig>,
       prices: {} as Record<string, any>,
+      priceSources: {} as Record<string, 'osmosis' | 'coingecko'>,
       coingecko: {} as Record<string, { coinId: string; exponent: number; symbol: string }>,
     };
   },
@@ -182,27 +184,30 @@ export const useDashboard = defineStore('dashboard', {
     },
     loadingPrices() {
       const coinIds = [] as string[];
-      const osmosisSymbols = [] as string[];
+      const osmosisTokens = [] as { symbol: string; fallbackId: string }[];
       const keys = Object.keys(this.chains); // load all blockchain
       // Object.keys(this.favoriteMap) //only load favorite once it has too many chains
       keys.forEach((k) => {
         if (Array.isArray(this.chains[k]?.assets))
           this.chains[k].assets.forEach((a: any) => {
-            if (a.coingecko_id && a.coingecko_id !== 'unknown' && a.coingecko_id.length > 0) {
-              coinIds.push(a.coingecko_id);
+            if (a.osmosis_symbol) {
+              // Osmosis is the primary price source. A coingecko_id in the chain
+              // config (or the id Osmosis reports for the token) is used only
+              // when Osmosis has no price for it.
+              const syntheticId = `osmosis-${a.osmosis_symbol.toLowerCase()}`;
+              osmosisTokens.push({ symbol: a.osmosis_symbol, fallbackId: validCoingeckoId(a.coingecko_id) });
               a.denom_units.forEach((u: any) => {
                 this.coingecko[u.denom] = {
-                  coinId: a.coingecko_id || '',
+                  coinId: syntheticId,
                   exponent: u.exponent,
                   symbol: a.symbol,
                 };
               });
-            } else if (a.osmosis_symbol) {
-              const syntheticId = `osmosis-${a.osmosis_symbol.toLowerCase()}`;
-              osmosisSymbols.push(a.osmosis_symbol);
+            } else if (validCoingeckoId(a.coingecko_id)) {
+              coinIds.push(a.coingecko_id);
               a.denom_units.forEach((u: any) => {
                 this.coingecko[u.denom] = {
-                  coinId: syntheticId,
+                  coinId: a.coingecko_id || '',
                   exponent: u.exponent,
                   symbol: a.symbol,
                 };
@@ -218,20 +223,29 @@ export const useDashboard = defineStore('dashboard', {
         });
       }
 
-      osmosisSymbols.forEach((symbol) => {
+      osmosisTokens.forEach(({ symbol, fallbackId }) => {
+        const key = `osmosis-${symbol.toLowerCase()}`;
+        const fromCoingecko = (id: string) => useCoingecko().getSimplePrice(id).then((quote) => {
+          if (!quote) return;
+          this.prices = { ...this.prices, [key]: quote };
+          this.priceSources = { ...this.priceSources, [key]: 'coingecko' };
+        }).catch(() => {});
         get(`https://data.app.osmosis.zone/tokens/v2/${symbol}`).then((data: any[]) => {
-          if (data && data.length > 0) {
-            const token = data.find(d => d && d.price != null) || data[0];
-            if (token.price == null) return;
+          const tokens = Array.isArray(data) ? data : [];
+          const token = tokens.find((d) => d && d.price != null);
+          if (token) {
             this.prices = {
               ...this.prices,
-              [`osmosis-${symbol.toLowerCase()}`]: {
-                usd: token.price,
-                usd_24h_change: token.price_24h_change,
-              },
+              [key]: { usd: token.price, usd_24h_change: token.price_24h_change },
             };
+            this.priceSources = { ...this.priceSources, [key]: 'osmosis' };
+            return;
           }
-        }).catch(() => {});
+          const id = coingeckoFallbackId(fallbackId, tokens);
+          if (id) return fromCoingecko(id);
+        }).catch(() => {
+          if (fallbackId) void fromCoingecko(fallbackId);
+        });
       });
     },
     async loadingFromRegistry() {

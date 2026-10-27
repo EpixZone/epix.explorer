@@ -12,6 +12,7 @@ import {
 import type { Coin, Tally } from '@/types';
 import numeral from 'numeral';
 import { defineStore } from 'pinia';
+import { coingeckoFallbackId, validCoingeckoId } from '@/stores/useCoinGecko';
 
 export function colorMap(color: string) {
   switch (color) {
@@ -269,68 +270,79 @@ export const useIndexModule = defineStore('module-index', {
     tickerColor(color: string) {
       return colorMap(color);
     },
-    initCoingecko() {
+    initCoingecko(): void {
       this.tickerIndex = 0;
       const [firstAsset] = this.blockchain?.assets || [];
       if (!firstAsset) return;
 
       const osmosisSymbol = (firstAsset as any).osmosis_symbol;
       const osmosisIbc = (firstAsset as any).osmosis_ibc;
+      const configId = validCoingeckoId(firstAsset.coingecko_id);
 
-      if (firstAsset.coingecko_id && firstAsset.coingecko_id !== 'unknown') {
-        this.coingecko.getCoinInfo(firstAsset.coingecko_id).then((x) => {
+      // Osmosis is the primary source whenever the asset is listed there;
+      // CoinGecko fills in only when Osmosis has no price or cannot be reached.
+      if (osmosisSymbol) {
+        const tradeUrl = `https://app.osmosis.zone/?from=USDC&to=${osmosisIbc || osmosisSymbol}`;
+        const info = (price: number, change: number, market: { name: string; identifier: string }, coinId: string) => ({
+          name: useBlockchain().current?.prettyName || firstAsset.display || firstAsset.symbol,
+          symbol: firstAsset.symbol,
+          description: { en: '' },
+          categories: [],
+          market_cap_rank: 0,
+          links: {
+            twitter_screen_name: '',
+            homepage: [],
+            repos_url: { github: [] },
+            telegram_channel_identifier: '',
+          },
+          market_data: {
+            price_change_percentage_24h: change || 0,
+          },
+          tickers: [{
+            market,
+            coin_id: coinId,
+            target_coin_id: 'usd',
+            trust_score: 'green',
+            trade_url: tradeUrl,
+            converted_last: { btc: 0, eth: 0, usd: price || 0 },
+            base: osmosisSymbol,
+            target: 'USD',
+          }],
+        });
+        const fromCoingecko = (id: string) => this.coingecko.getSimplePrice(id).then((quote) => {
+          if (quote) this.coinInfo = info(quote.usd, quote.usd_24h_change, { name: 'CoinGecko', identifier: 'coingecko' }, id);
+        }).catch(() => {});
+        this.coingecko.getOsmosisTokenInfo(osmosisSymbol).then((tokenData) => {
+          if (tokenData && tokenData.price != null) {
+            this.coinInfo = info(tokenData.price, tokenData.price_24h_change, { name: 'Osmosis DEX', identifier: 'osmosis' }, osmosisSymbol.toLowerCase());
+            return;
+          }
+          const id = coingeckoFallbackId(configId, tokenData ? [tokenData] : []);
+          if (id) return fromCoingecko(id);
+        }).catch(() => {
+          if (configId) void fromCoingecko(configId);
+        });
+        this.fetchChartData();
+      } else if (configId) {
+        this.coingecko.getCoinInfo(configId).then((x) => {
           this.coinInfo = x;
         });
         this.fetchChartData();
-      } else if (osmosisSymbol) {
-        this.coingecko.getOsmosisTokenInfo(osmosisSymbol).then((tokenData) => {
-          if (tokenData) {
-            this.coinInfo = {
-              name: useBlockchain().current?.prettyName || firstAsset.display || firstAsset.symbol,
-              symbol: firstAsset.symbol,
-              description: { en: '' },
-              categories: [],
-              market_cap_rank: 0,
-              links: {
-                twitter_screen_name: '',
-                homepage: [],
-                repos_url: { github: [] },
-                telegram_channel_identifier: '',
-              },
-              market_data: {
-                price_change_percentage_24h: tokenData.price_24h_change || 0,
-              },
-              tickers: [{
-                market: { name: 'Osmosis DEX', identifier: 'osmosis' },
-                coin_id: osmosisSymbol.toLowerCase(),
-                target_coin_id: 'usd',
-                trust_score: 'green',
-                trade_url: `https://app.osmosis.zone/?from=USDC&to=${osmosisIbc || osmosisSymbol}`,
-                converted_last: { btc: 0, eth: 0, usd: tokenData.price || 0 },
-                base: osmosisSymbol,
-                target: 'USD',
-              }],
-            };
-          }
-        });
-
-        this.fetchChartData();
       }
     },
-    fetchChartData() {
+    fetchChartData(): void {
       const [firstAsset] = this.blockchain?.assets || [];
       if (!firstAsset) return;
       const osmosisSymbol = (firstAsset as any).osmosis_symbol;
+      const configId = validCoingeckoId(firstAsset.coingecko_id);
       this.chartLoading = true;
 
-      if (firstAsset.coingecko_id && firstAsset.coingecko_id !== 'unknown') {
-        this.coingecko
-          .getMarketChart(this.days, firstAsset.coingecko_id)
-          .then((x) => {
-            this.marketData = x;
-          })
-          .finally(() => { this.chartLoading = false; });
-      } else if (osmosisSymbol) {
+      const fromCoingecko = (id: string) => this.coingecko
+        .getMarketChart(this.days, id)
+        .then((x) => { this.marketData = x; })
+        .catch(() => {});
+
+      if (osmosisSymbol) {
         // Map days to Osmosis tf (minutes): pick a resolution that gives a reasonable number of data points
         let tf = 60;
         if (this.days <= 1/24) tf = 5;        // 1H -> 5min candles
@@ -347,8 +359,14 @@ export const useIndexModule = defineStore('module-index', {
             x.prices = x.prices.filter((p: any) => p[0] >= cutoff);
             x.total_volumes = x.total_volumes.filter((p: any) => p[0] >= cutoff);
           }
+          // An empty Osmosis chart falls back to CoinGecko when an id is configured.
+          if (x.prices.length === 0 && configId) return fromCoingecko(configId);
           this.marketData = x;
+        }).catch(() => {
+          if (configId) return fromCoingecko(configId);
         }).finally(() => { this.chartLoading = false; });
+      } else if (configId) {
+        fromCoingecko(configId).finally(() => { this.chartLoading = false; });
       } else {
         this.chartLoading = false;
       }

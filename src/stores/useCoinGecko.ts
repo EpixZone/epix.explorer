@@ -15,6 +15,18 @@ const LocalStoreKey = 'currency';
 
 export const coingeckoUrl = import.meta.env.VITE_COINGECKO_URL || 'https://api.coingecko.com';
 
+// A usable CoinGecko id from the chain config ('unknown' and junk are ignored).
+export function validCoingeckoId(id: unknown): string {
+  return typeof id === 'string' && id !== 'unknown' && /^[a-z0-9-]{1,64}$/.test(id) ? id : '';
+}
+
+// The id to ask CoinGecko for when Osmosis has no price for a token: the chain
+// config's coingecko_id, or the id Osmosis itself reports for the token.
+export function coingeckoFallbackId(configId: unknown, tokens?: any[]): string {
+  const reported = Array.isArray(tokens) ? tokens.find((t) => t && t.coingecko_id)?.coingecko_id : '';
+  return validCoingeckoId(configId) || validCoingeckoId(reported);
+}
+
 export const useCoingecko = defineStore('coingecko', {
   state: () => {
     const currency = localStorage.getItem(LocalStoreKey);
@@ -43,6 +55,15 @@ export const useCoingecko = defineStore('coingecko', {
     },
     getCoinInfo(coinId: string) {
       return get(`${coingeckoUrl}/api/v3/coins/${coinId}`);
+    },
+    // Spot price with 24h change for one coin; the fallback when the Osmosis
+    // feed reports no price. Resolves to null when CoinGecko has no quote.
+    getSimplePrice(coinId: string): Promise<{ usd: number; usd_24h_change: number } | null> {
+      return get(`${coingeckoUrl}/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`).then((data: any) => {
+        const row = data?.[coinId];
+        if (!row || row.usd == null) return null;
+        return { usd: Number(row.usd), usd_24h_change: Number(row.usd_24h_change ?? 0) };
+      });
     },
     setSecondaryCurrency(currency: string) {
       if (currency !== 'usd') {
