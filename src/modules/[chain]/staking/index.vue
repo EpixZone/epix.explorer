@@ -4,6 +4,7 @@ import {
     useBlockchain,
     useFormatter,
     useMintStore,
+    useServiceHealthStore,
     useStakingStore,
     useTxDialog,
 } from '@/stores';
@@ -20,6 +21,30 @@ const format = useFormatter();
 const dialog = useTxDialog();
 const chainStore = useBlockchain();
 const mintStore = useMintStore();
+const serviceHealth = useServiceHealthStore();
+
+// Auto-compound service indicator per validator (see useServiceHealthStore):
+// green = service observed running, yellow = offered but not running, gray =
+// offered but not checked yet / could not be checked. Validators without a
+// service get no icon.
+const SERVICE_ICONS = {
+    running: { icon: 'mdi:autorenew', class: 'text-green-500' },
+    not_running: { icon: 'mdi:alert-circle', class: 'text-yellow-500' },
+    offered: { icon: 'mdi:autorenew', class: 'text-gray-400 dark:text-gray-500' },
+} as const;
+const serviceBadges = computed(() => {
+    const badges: Record<string, { icon: string; class: string; title: string; kind: string }> = {};
+    for (const validator of Object.keys(serviceHealth.operators)) {
+        const indicator = serviceHealth.indicator(validator);
+        if (indicator) badges[validator] = { ...SERVICE_ICONS[indicator.kind], title: indicator.title, kind: indicator.kind };
+    }
+    return badges;
+});
+function loadServiceHealth() {
+    const endpoint = chainStore.endpoint?.address;
+    if (endpoint) void serviceHealth.ensureLoaded(endpoint);
+}
+watch(() => chainStore.endpoint?.address, loadServiceHealth);
 
 const cache = JSON.parse(localStorage.getItem('avatars') || '{}');
 const avatars = ref(cache || {});
@@ -46,6 +71,7 @@ onMounted(async () => {
 
         // Wait for RPC client to be ready (handles direct URL load)
         await waitForRpc();
+        loadServiceHealth();
 
         // Initialize local validators with current store data (for menu navigation)
         localValidators.value = [...staking.validators];
@@ -452,8 +478,14 @@ loadAvatars();
                 >
             </div>
 
-            <div class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ list.length }}/{{ staking.params.max_validators }}
+            <div class="flex items-center gap-4">
+                <p v-if="serviceHealth.offeredCount" class="staking-service-legend items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+                    <span class="inline-flex items-center gap-1"><Icon icon="mdi:autorenew" class="text-green-500" width="16" height="16" aria-hidden="true" />Auto-compound running</span>
+                    <span class="inline-flex items-center gap-1"><Icon icon="mdi:alert-circle" class="text-yellow-500" width="16" height="16" aria-hidden="true" />Offered, not running</span>
+                </p>
+                <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ list.length }}/{{ staking.params.max_validators }}
+                </div>
             </div>
         </div>
 
@@ -547,6 +579,21 @@ loadAvatars();
                                                 class="font-weight-medium text-epix-teal hover:text-epix-accent transition-colors duration-200"
                                             >
                                                 {{ v.description?.moniker }}
+                                            </RouterLink>
+                                            <RouterLink
+                                                v-if="serviceBadges[v.operator_address]"
+                                                :to="{ path: '/staking/autocompound', query: { validator: v.operator_address } }"
+                                                class="ml-1.5 inline-flex items-center align-middle"
+                                                :title="serviceBadges[v.operator_address].title"
+                                                :aria-label="'Auto-compound: ' + serviceBadges[v.operator_address].title"
+                                            >
+                                                <Icon
+                                                    :icon="serviceBadges[v.operator_address].icon"
+                                                    :class="serviceBadges[v.operator_address].class"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-hidden="true"
+                                                />
                                             </RouterLink>
                                         </span>
                                         <span class="text-xs text-gray-600 dark:text-gray-400">{{
@@ -661,4 +708,11 @@ loadAvatars();
   padding: 8px 5px;
   background: transparent;
 }
+</style>
+
+<style>
+/* The vendored widget stylesheet defines .hidden after the app's CSS, so a
+   responsive `hidden sm:flex` pair loses; use a page-level rule instead. */
+.staking-service-legend { display: none; }
+@media (min-width: 640px) { .staking-service-legend { display: flex; } }
 </style>
