@@ -3,6 +3,103 @@
 
 <head>
   <meta charset="UTF-8">
+  <script>
+    // EpixNet host bridge. EpixNet serves a xite inside an opaque-origin
+    // sandbox: window.localStorage throws, and a fetch of the xite's own data
+    // files is only allowed with the xite's ajax_key. This script speaks the
+    // wrapper's postMessage protocol (the same one the EpixFrame library uses)
+    // to obtain that key and the xite's persisted storage, installs a Storage
+    // backed by the wrapper, appends the key to same-xite requests, and
+    // exposes window.__epixHostReady so the app and the wallet widget start
+    // only once the handshake is done. Outside a sandbox it does nothing.
+    (function () {
+      var sandboxed = false;
+      try { window.localStorage.getItem('__probe__'); } catch (e) { sandboxed = true; }
+      var nonceMatch = /[?&]wrapper_nonce=([A-Za-z0-9]+)/.exec(location.search);
+      var nonce = nonceMatch ? nonceMatch[1] : '';
+      var inWrapper = sandboxed && !!nonce && window.parent !== window;
+      if (!sandboxed) { window.__epixHostReady = Promise.resolve(); return; }
+
+      // --- wrapper RPC ---
+      var waiting = {}, nextId = 1;
+      function send(message, cb) {
+        message.wrapper_nonce = nonce; message.id = nextId++;
+        if (cb) waiting[message.id] = cb;
+        window.parent.postMessage(message, '*');
+      }
+      function cmd(name, params) {
+        return new Promise(function (resolve) {
+          if (!inWrapper) return resolve(undefined);
+          send({ cmd: name, params: params === undefined ? {} : params }, resolve);
+        });
+      }
+      if (inWrapper) {
+        window.addEventListener('message', function (e) {
+          var m = e.data;
+          if (!m || typeof m !== 'object' || !m.cmd) return;
+          if (m.cmd === 'response') { var cb = waiting[m.to]; if (cb) { delete waiting[m.to]; cb(m.result); } }
+          else if (m.cmd === 'ping') send({ cmd: 'response', to: m.id, result: 'pong' });
+          else if (m.cmd === 'wrapperReady') send({ cmd: 'innerReady', params: {} });
+        }, false);
+        send({ cmd: 'innerReady', params: {} });
+      }
+
+      // --- storage backed by the wrapper (per xite, persisted by the node UI) ---
+      var seeded = false, dirty = false, saveTimer = null;
+      function memoryStorage(persist) {
+        var data = Object.create(null);
+        function changed() { if (!persist) return; dirty = true; if (!seeded) return; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 300); }
+        function flush() { if (!dirty) return; dirty = false; var copy = {}; for (var k in data) copy[k] = data[k]; cmd('wrapperSetLocalStorage', copy); }
+        var api = {
+          key: function (i) { var k = Object.keys(data)[i]; return k === undefined ? null : k; },
+          getItem: function (k) { k = String(k); return k in data ? data[k] : null; },
+          setItem: function (k, v) { data[String(k)] = String(v); changed(); },
+          removeItem: function (k) { delete data[String(k)]; changed(); },
+          clear: function () { data = Object.create(null); changed(); }
+        };
+        Object.defineProperty(api, 'length', { get: function () { return Object.keys(data).length; } });
+        api.__seed = function (stored) {
+          if (stored && typeof stored === 'object') for (var k in stored) if (typeof stored[k] === 'string' && !(k in data)) data[k] = stored[k];
+          seeded = true; if (dirty) flush();
+        };
+        return api;
+      }
+      var local = memoryStorage(true);
+      try { Object.defineProperty(window, 'localStorage', { value: local, configurable: true }); } catch (e) {}
+      try { Object.defineProperty(window, 'sessionStorage', { value: memoryStorage(false), configurable: true }); } catch (e) {}
+
+      // --- same-xite requests carry the ajax key ---
+      var key = '';
+      var root = location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '');
+      function sameXite(url) {
+        try { var abs = new URL(url, location.href).href; return abs.indexOf(root) === 0 && !/[?&]ajax_key=/.test(abs); } catch (e) { return false; }
+      }
+      function withKey(url) { var u = new URL(url, location.href); u.searchParams.set('ajax_key', key); return u.href; }
+      var realFetch = window.fetch;
+      window.fetch = function (input, init) {
+        var url = typeof input === 'string' ? input : (input && typeof input.url === 'string') ? input.url : String(input);
+        if (!key || !sameXite(url)) return realFetch.call(window, input, init);
+        var keyed = withKey(url);
+        var next = (typeof Request !== 'undefined' && input instanceof Request) ? new Request(keyed, input) : keyed;
+        return realFetch.call(window, next, init);
+      };
+      var realOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url) {
+        var args = Array.prototype.slice.call(arguments);
+        if (key && sameXite(String(url))) args[1] = withKey(String(url));
+        return realOpen.apply(this, args);
+      };
+
+      // --- readiness: key + stored data, bounded so a silent host never blocks the app ---
+      var keyReady = cmd('wrapperGetAjaxKey').then(function (k) { if (typeof k === 'string') key = k; });
+      var storeReady = cmd('wrapperGetLocalStorage').then(function (stored) {
+        if (typeof stored === 'string') { try { stored = JSON.parse(stored); } catch (e) { stored = null; } }
+        local.__seed(stored);
+      });
+      var timeout = new Promise(function (resolve) { setTimeout(resolve, 4000); });
+      window.__epixHostReady = Promise.race([Promise.all([keyReady, storeReady]), timeout]).then(function () {});
+    })();
+  </script>
   <link rel="icon" href="./epix.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Epix Dashboard - Epix Blockchain Explorer And Web Wallet</title>
@@ -90,7 +187,15 @@
       document.head.appendChild(s);
     })();
   </script>
-  <script type="module" src="/widget.js?v=26102e04c07ebfa61006caecd671a8037857501564239a849d9800bce6f1bb7f"></script>
+  <script>
+    // The wallet widget starts after the host handshake so its own requests
+    // carry the ajax key when the page runs inside EpixNet.
+    (window.__epixHostReady || Promise.resolve()).then(function () {
+      var s = document.createElement('script'); s.type = 'module';
+      s.src="./widget.js?v=26102e04c07ebfa61006caecd671a8037857501564239a849d9800bce6f1bb7f";
+      document.body.appendChild(s);
+    });
+  </script>
 
 </body>
 

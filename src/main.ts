@@ -17,8 +17,10 @@ app.use(i18n);
 app.use(createPinia());
 app.use(router);
 app.use(LazyLoad, { component: true });
-// Mount vue app
-app.mount('#app');
+// Mount once the host bridge (index.html) has finished its handshake; it
+// resolves immediately outside a sandboxed host.
+const hostReady: Promise<void> = (window as any).__epixHostReady || Promise.resolve();
+void hostReady.then(() => app.mount('#app'));
 
 const REFRESH_INTERVAL = import.meta.env.VITE_REFRESH_INTERVAL || 6000; // 6 seconds
 
